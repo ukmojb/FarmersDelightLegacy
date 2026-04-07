@@ -1,0 +1,14 @@
+{
+  "ingredients": [
+    "minecraft:ink_sac"
+  ],
+  "tool": {
+    "tag": "forge:tools/knives"
+  },
+  "result": [
+    {
+      "item": "minecraft:black_dye",
+      "count": 2
+    }
+  ]
+}

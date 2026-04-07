@@ -1,0 +1,12 @@
+{
+  "ingredients": [
+    "minecraft:mangrove_trapdoor"
+  ],
+  "tool": "ore:toolAxe",
+  "result": [
+    {
+      "item": "minecraft:mangrove_planks",
+      "count": 1
+    }
+  ]
+}

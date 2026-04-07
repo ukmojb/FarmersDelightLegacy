@@ -1,0 +1,12 @@
+{
+  "ingredients": [
+    "minecraft:birch_door"
+  ],
+  "tool": "ore:toolAxe",
+  "result": [
+    {
+      "item": "minecraft:birch_planks",
+      "count": 1
+    }
+  ]
+}

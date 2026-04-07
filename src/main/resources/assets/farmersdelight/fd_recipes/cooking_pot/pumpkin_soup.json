@@ -1,0 +1,12 @@
+{
+  "ingredients": [
+    "ore:pumpkinOrSlice",
+    "ore:listAllveggie",
+    "ore:listAllporkraw",
+    "ore:listAllmilk"
+  ],
+  "result": {
+    "item": "farmersdelight:pumpkin_soup",
+    "count": 1
+  }
+}

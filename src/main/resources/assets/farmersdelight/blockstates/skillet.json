@@ -1,0 +1,34 @@
+{
+  "variants": {
+    "facing=north,support=false": {
+      "model": "farmersdelight:skillet"
+    },
+    "facing=south,support=false": {
+      "model": "farmersdelight:skillet",
+      "y": 180
+    },
+    "facing=west,support=false": {
+      "model": "farmersdelight:skillet",
+      "y": 270
+    },
+    "facing=east,support=false": {
+      "model": "farmersdelight:skillet",
+      "y": 90
+    },
+    "facing=north,support=true": {
+      "model": "farmersdelight:skillet_tray"
+    },
+    "facing=south,support=true": {
+      "model": "farmersdelight:skillet_tray",
+      "y": 180
+    },
+    "facing=west,support=true": {
+      "model": "farmersdelight:skillet_tray",
+      "y": 270
+    },
+    "facing=east,support=true": {
+      "model": "farmersdelight:skillet_tray",
+      "y": 90
+    }
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "ingredients": [
+    "minecraft:white_tulip"
+  ],
+  "tool": {
+    "tag": "forge:tools/knives"
+  },
+  "result": [
+    {
+      "item": "minecraft:light_gray_dye",
+      "count": 2
+    }
+  ]
+}

@@ -1,0 +1,12 @@
+{
+  "ingredients": [
+    "minecraft:dark_oak_hanging_sign"
+  ],
+  "tool": "ore:toolAxe",
+  "result": [
+    {
+      "item": "minecraft:dark_oak_planks",
+      "count": 1
+    }
+  ]
+}

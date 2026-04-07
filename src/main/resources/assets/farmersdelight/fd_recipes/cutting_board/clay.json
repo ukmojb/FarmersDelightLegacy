@@ -1,0 +1,12 @@
+{
+  "ingredients": [
+    "minecraft:clay"
+  ],
+  "tool": "ore:toolShovel",
+  "result": [
+    {
+      "item": "minecraft:clay_ball",
+      "count": 4
+    }
+  ]
+}

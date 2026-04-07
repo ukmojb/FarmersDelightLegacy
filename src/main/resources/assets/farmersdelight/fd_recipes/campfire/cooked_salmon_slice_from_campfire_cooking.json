@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:campfire_cooking",
+  "category": "food",
+  "cookingtime": 600,
+  "experience": 0.35,
+  "ingredient": [
+    {
+      "item": "minecraft:salmon"
+    },
+    {
+      "item": "farmersdelight:salmon_slice"
+    }
+  ],
+  "result": {
+    "item": "farmersdelight:cooked_salmon_slice",
+    "count": 1
+  }
+}

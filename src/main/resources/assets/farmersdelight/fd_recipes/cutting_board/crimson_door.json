@@ -1,0 +1,12 @@
+{
+  "ingredients": [
+    "minecraft:crimson_door"
+  ],
+  "tool": "ore:toolAxe",
+  "result": [
+    {
+      "item": "minecraft:crimson_planks",
+      "count": 1
+    }
+  ]
+}

@@ -1,0 +1,14 @@
+{
+  "ingredients": [
+    "minecraft:cooked_mutton"
+  ],
+  "tool": {
+    "tag": "forge:tools/knives"
+  },
+  "result": [
+    {
+      "item": "farmersdelight:cooked_mutton_chops",
+      "count": 2
+    }
+  ]
+}

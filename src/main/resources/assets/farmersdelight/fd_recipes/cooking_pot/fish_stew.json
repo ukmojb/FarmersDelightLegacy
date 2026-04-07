@@ -1,0 +1,11 @@
+{
+  "ingredients": [
+    "ore:listAllfishraw",
+    "ore:tomatoOrSauce",
+    "ore:cropOnion"
+  ],
+  "result": {
+    "item": "farmersdelight:fish_stew",
+    "count": 1
+  }
+}

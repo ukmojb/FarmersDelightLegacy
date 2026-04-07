@@ -1,0 +1,12 @@
+{
+  "ingredients": [
+    "minecraft:acacia_hanging_sign"
+  ],
+  "tool": "ore:toolAxe",
+  "result": [
+    {
+      "item": "minecraft:acacia_planks",
+      "count": 1
+    }
+  ]
+}

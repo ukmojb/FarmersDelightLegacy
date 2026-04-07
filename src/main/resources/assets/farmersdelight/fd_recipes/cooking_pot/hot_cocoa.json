@@ -1,0 +1,12 @@
+{
+  "ingredients": [
+    "ore:listAllmilk",
+    "minecraft:sugar",
+    "ore:dyeBrown",
+    "ore:dyeBrown"
+  ],
+  "result": {
+    "item": "farmersdelight:hot_cocoa",
+    "count": 1
+  }
+}

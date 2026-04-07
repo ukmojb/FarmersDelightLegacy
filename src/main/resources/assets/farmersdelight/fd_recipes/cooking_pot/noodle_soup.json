@@ -1,0 +1,12 @@
+{
+  "ingredients": [
+    "ore:pastaOrDough",
+    "ore:listAllEgg",
+    "minecraft:reeds",
+    "ore:listAllporkraw"
+  ],
+  "result": {
+    "item": "farmersdelight:noodle_soup",
+    "count": 1
+  }
+}

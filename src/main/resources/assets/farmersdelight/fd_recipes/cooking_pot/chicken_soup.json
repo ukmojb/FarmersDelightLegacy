@@ -1,0 +1,13 @@
+{
+  "ingredients": [
+    "ore:listAllchickenraw",
+    "minecraft:carrot",
+    "ore:listAllveggie",
+    "ore:listAllveggie"
+  ],
+  "cookingtime": 200,
+  "result": {
+    "item": "farmersdelight:chicken_soup",
+    "count": 1
+  }
+}

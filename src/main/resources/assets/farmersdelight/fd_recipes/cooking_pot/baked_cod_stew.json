@@ -1,0 +1,12 @@
+{
+  "ingredients": [
+    "ore:rawOrSlicedCod",
+    "minecraft:potato",
+    "ore:listAllEgg",
+    "ore:tomatoOrSauce"
+  ],
+  "result": {
+    "item": "farmersdelight:baked_cod_stew",
+    "count": 1
+  }
+}

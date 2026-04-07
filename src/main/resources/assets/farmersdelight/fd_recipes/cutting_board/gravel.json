@@ -1,0 +1,17 @@
+{
+  "ingredients": [
+    "minecraft:gravel"
+  ],
+  "tool": "ore:toolShovel",
+  "result": [
+    {
+      "item": "minecraft:gravel",
+      "count": 1
+    },
+    {
+      "item": "minecraft:flint",
+      "count": 1,
+      "chance": 0.1
+    }
+  ]
+}

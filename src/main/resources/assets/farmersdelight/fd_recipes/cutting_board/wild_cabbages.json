@@ -1,0 +1,19 @@
+{
+  "ingredients": [
+    "farmersdelight:wild_cabbages"
+  ],
+  "tool": {
+    "tag": "forge:tools/knives"
+  },
+  "result": [
+    {
+      "item": "farmersdelight:cabbage_seeds",
+      "count": 1
+    },
+    {
+      "item": "minecraft:yellow_dye",
+      "count": 2,
+      "chance": 0.5
+    }
+  ]
+}

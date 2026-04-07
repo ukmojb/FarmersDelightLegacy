@@ -1,0 +1,9 @@
+{
+  "ingredients": [
+    "ore:rawOrSlicedCod"
+  ],
+  "result": {
+    "item": "farmersdelight:cooked_cod_slice",
+    "count": 2
+  }
+}

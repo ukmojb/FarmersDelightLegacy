@@ -1,0 +1,13 @@
+{
+  "ingredients": [
+    "minecraft:carrot",
+    "minecraft:potato",
+    "minecraft:beetroot",
+    "ore:listAllveggie"
+  ],
+  "cookingtime": 200,
+  "result": {
+    "item": "farmersdelight:vegetable_soup",
+    "count": 1
+  }
+}

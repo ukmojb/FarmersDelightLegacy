@@ -1,0 +1,15 @@
+{
+  "type": "minecraft:campfire_cooking",
+  "category": "food",
+  "cookingtime": 600,
+  "experience": 0.35,
+  "ingredient": [
+    {
+      "item": "farmersdelight:minced_beef"
+    }
+  ],
+  "result": {
+    "item": "farmersdelight:beef_patty",
+    "count": 1
+  }
+}

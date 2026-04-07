@@ -1,0 +1,11 @@
+{
+  "ingredients": [
+    "ore:cropCabbage",
+    "ore:listAllveggie"
+  ],
+  "cookingtime": 100,
+  "result": {
+    "item": "farmersdelight:cabbage_rolls",
+    "count": 1
+  }
+}

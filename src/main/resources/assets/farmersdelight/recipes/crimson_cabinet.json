@@ -1,0 +1,22 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "group": "fd_cabinet",
+  "key": {
+    "D": {
+      "item": "minecraft:crimson_trapdoor"
+    },
+    "_": {
+      "item": "minecraft:crimson_slab"
+    }
+  },
+  "pattern": [
+    "___",
+    "D D",
+    "___"
+  ],
+  "result": {
+    "item": "farmersdelight:crimson_cabinet"
+  },
+  "show_notification": true
+}

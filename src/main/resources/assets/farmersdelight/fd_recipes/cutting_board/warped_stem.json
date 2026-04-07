@@ -1,0 +1,16 @@
+{
+  "ingredients": [
+    "minecraft:warped_stem"
+  ],
+  "tool": "ore:toolAxe",
+  "result": [
+    {
+      "item": "minecraft:stripped_warped_stem",
+      "count": 1
+    },
+    {
+      "item": "farmersdelight:tree_bark",
+      "count": 1
+    }
+  ]
+}

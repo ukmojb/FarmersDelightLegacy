@@ -1,0 +1,19 @@
+{
+  "ingredients": [
+    "ore:cropRice",
+    "ore:cropOnion",
+    "minecraft:brown_mushroom",
+    "minecraft:potato",
+    "ore:listAllberry",
+    "ore:listAllveggie"
+  ],
+  "cookingtime": 400,
+  "result": {
+    "item": "farmersdelight:stuffed_pumpkin_block",
+    "count": 1
+  },
+  "container": {
+    "item": "minecraft:pumpkin",
+    "count": 1
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "ingredients": [
+    "minecraft:apple",
+    "minecraft:apple",
+    "minecraft:sugar"
+  ],
+  "cookingtime": 200,
+  "result": {
+    "item": "farmersdelight:apple_cider",
+    "count": 1
+  }
+}

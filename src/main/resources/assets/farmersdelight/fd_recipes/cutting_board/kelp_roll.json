@@ -1,0 +1,14 @@
+{
+  "ingredients": [
+    "farmersdelight:kelp_roll"
+  ],
+  "tool": {
+    "tag": "forge:tools/knives"
+  },
+  "result": [
+    {
+      "item": "farmersdelight:kelp_roll_slice",
+      "count": 3
+    }
+  ]
+}

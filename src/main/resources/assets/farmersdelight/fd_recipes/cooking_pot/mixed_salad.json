@@ -1,0 +1,10 @@
+{
+  "ingredients": [
+    "ore:cropCabbage",
+    "ore:tomatoOrSauce"
+  ],
+  "result": {
+    "item": "farmersdelight:mixed_salad",
+    "count": 1
+  }
+}

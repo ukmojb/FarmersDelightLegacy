@@ -1,0 +1,9 @@
+{
+  "ingredients": [
+    "ore:rawOrSlicedSalmon"
+  ],
+  "result": {
+    "item": "farmersdelight:cooked_salmon_slice",
+    "count": 2
+  }
+}

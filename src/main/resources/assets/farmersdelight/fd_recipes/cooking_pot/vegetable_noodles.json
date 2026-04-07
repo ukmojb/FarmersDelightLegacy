@@ -1,0 +1,13 @@
+{
+  "ingredients": [
+    "minecraft:carrot",
+    "minecraft:brown_mushroom",
+    "ore:pastaOrDough",
+    "ore:listAllveggie",
+    "ore:listAllveggie"
+  ],
+  "result": {
+    "item": "farmersdelight:vegetable_noodles",
+    "count": 1
+  }
+}

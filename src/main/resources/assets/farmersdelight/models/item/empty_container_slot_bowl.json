@@ -1,0 +1,6 @@
+﻿{
+    "textures":  {
+                     "layer0":  "farmersdelight:item/empty_container_slot_bowl"
+                 },
+    "parent":  "item/generated"
+}

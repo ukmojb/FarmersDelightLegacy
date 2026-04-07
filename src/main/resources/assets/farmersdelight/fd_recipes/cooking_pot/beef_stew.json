@@ -1,0 +1,12 @@
+{
+  "ingredients": [
+    "ore:listAllbeefraw",
+    "minecraft:carrot",
+    "minecraft:potato"
+  ],
+  "cookingtime": 200,
+  "result": {
+    "item": "farmersdelight:beef_stew",
+    "count": 1
+  }
+}

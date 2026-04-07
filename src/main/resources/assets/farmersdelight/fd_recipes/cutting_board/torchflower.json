@@ -1,0 +1,14 @@
+{
+  "ingredients": [
+    "minecraft:torchflower"
+  ],
+  "tool": {
+    "tag": "forge:tools/knives"
+  },
+  "result": [
+    {
+      "item": "minecraft:orange_dye",
+      "count": 2
+    }
+  ]
+}

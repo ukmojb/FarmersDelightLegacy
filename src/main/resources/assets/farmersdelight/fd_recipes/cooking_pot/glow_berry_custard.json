@@ -1,0 +1,12 @@
+{
+  "ingredients": [
+    "ore:listAllberry",
+    "ore:listAllmilk",
+    "ore:listAllEgg",
+    "minecraft:sugar"
+  ],
+  "result": {
+    "item": "farmersdelight:glow_berry_custard",
+    "count": 1
+  }
+}

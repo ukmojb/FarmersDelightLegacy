@@ -1,0 +1,16 @@
+{
+  "ingredients": [
+    "minecraft:jungle_log"
+  ],
+  "tool": "ore:toolAxe",
+  "result": [
+    {
+      "item": "minecraft:stripped_jungle_log",
+      "count": 1
+    },
+    {
+      "item": "farmersdelight:tree_bark",
+      "count": 1
+    }
+  ]
+}

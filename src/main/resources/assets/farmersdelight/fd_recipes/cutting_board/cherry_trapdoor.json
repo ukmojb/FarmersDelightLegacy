@@ -1,0 +1,12 @@
+{
+  "ingredients": [
+    "minecraft:cherry_trapdoor"
+  ],
+  "tool": "ore:toolAxe",
+  "result": [
+    {
+      "item": "minecraft:cherry_planks",
+      "count": 1
+    }
+  ]
+}

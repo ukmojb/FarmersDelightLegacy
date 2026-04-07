@@ -1,0 +1,12 @@
+{
+  "ingredients": [
+    "ore:potatoOrBaked",
+    "minecraft:rabbit",
+    "minecraft:carrot",
+    "ore:listAllmushroom"
+  ],
+  "result": {
+    "item": "minecraft:rabbit_stew",
+    "count": 1
+  }
+}

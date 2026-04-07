@@ -1,0 +1,14 @@
+{
+  "ingredients": [
+    "minecraft:wither_rose"
+  ],
+  "tool": {
+    "tag": "forge:tools/knives"
+  },
+  "result": [
+    {
+      "item": "minecraft:black_dye",
+      "count": 2
+    }
+  ]
+}

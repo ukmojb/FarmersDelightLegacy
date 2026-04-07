@@ -1,0 +1,18 @@
+{
+  "ingredients": [
+    "farmersdelight:ham"
+  ],
+  "tool": {
+    "tag": "forge:tools/knives"
+  },
+  "result": [
+    {
+      "item": "minecraft:porkchop",
+      "count": 2
+    },
+    {
+      "item": "minecraft:bone",
+      "count": 1
+    }
+  ]
+}

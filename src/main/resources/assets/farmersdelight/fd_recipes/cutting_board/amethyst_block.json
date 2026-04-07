@@ -1,0 +1,12 @@
+{
+  "ingredients": [
+    "minecraft:amethyst_block"
+  ],
+  "tool": "ore:toolPickaxe",
+  "result": [
+    {
+      "item": "minecraft:amethyst_shard",
+      "count": 4
+    }
+  ]
+}

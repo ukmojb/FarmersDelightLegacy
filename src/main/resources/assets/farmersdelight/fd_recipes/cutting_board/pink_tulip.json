@@ -1,0 +1,14 @@
+{
+  "ingredients": [
+    "minecraft:pink_tulip"
+  ],
+  "tool": {
+    "tag": "forge:tools/knives"
+  },
+  "result": [
+    {
+      "item": "minecraft:pink_dye",
+      "count": 2
+    }
+  ]
+}

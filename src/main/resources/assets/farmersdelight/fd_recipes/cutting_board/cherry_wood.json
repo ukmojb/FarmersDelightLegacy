@@ -1,0 +1,16 @@
+{
+  "ingredients": [
+    "minecraft:cherry_wood"
+  ],
+  "tool": "ore:toolAxe",
+  "result": [
+    {
+      "item": "minecraft:stripped_cherry_wood",
+      "count": 1
+    },
+    {
+      "item": "farmersdelight:tree_bark",
+      "count": 1
+    }
+  ]
+}

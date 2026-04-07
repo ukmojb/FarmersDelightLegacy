@@ -1,0 +1,13 @@
+{
+  "ingredients": [
+    "ore:cropRice",
+    "ore:listAllEgg",
+    "minecraft:carrot",
+    "ore:cropOnion"
+  ],
+  "cookingtime": 200,
+  "result": {
+    "item": "farmersdelight:fried_rice",
+    "count": 1
+  }
+}

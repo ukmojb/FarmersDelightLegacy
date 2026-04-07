@@ -1,0 +1,14 @@
+{
+  "ingredients": [
+    "minecraft:dandelion"
+  ],
+  "tool": {
+    "tag": "forge:tools/knives"
+  },
+  "result": [
+    {
+      "item": "minecraft:yellow_dye",
+      "count": 2
+    }
+  ]
+}

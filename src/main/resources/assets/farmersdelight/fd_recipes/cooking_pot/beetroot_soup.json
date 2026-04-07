@@ -1,0 +1,16 @@
+{
+  "ingredients": [
+    "minecraft:beetroot",
+    "minecraft:beetroot",
+    "minecraft:beetroot"
+  ],
+  "cookingtime": 200,
+  "result": {
+    "item": "minecraft:beetroot_soup",
+    "count": 1
+  },
+  "container": {
+    "item": "minecraft:bowl",
+    "count": 1
+  }
+}

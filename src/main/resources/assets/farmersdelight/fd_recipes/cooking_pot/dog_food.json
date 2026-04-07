@@ -1,0 +1,12 @@
+{
+  "ingredients": [
+    "minecraft:rotten_flesh",
+    "ore:dyeWhite",
+    "ore:listAllmeatraw",
+    "ore:cropRice"
+  ],
+  "result": {
+    "item": "farmersdelight:dog_food",
+    "count": 1
+  }
+}

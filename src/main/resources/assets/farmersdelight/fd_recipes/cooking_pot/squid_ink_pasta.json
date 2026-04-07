@@ -1,0 +1,12 @@
+{
+  "ingredients": [
+    "ore:listAllfishraw",
+    "ore:pastaOrDough",
+    "ore:tomatoOrSauce",
+    "ore:dyeBlack"
+  ],
+  "result": {
+    "item": "farmersdelight:squid_ink_pasta",
+    "count": 1
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "ingredients": [
+    "minecraft:leather_helmet"
+  ],
+  "tool": {
+    "tag": "forge:shears"
+  },
+  "result": [
+    {
+      "item": "minecraft:leather",
+      "count": 1
+    }
+  ]
+}

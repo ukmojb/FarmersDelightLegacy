@@ -1,0 +1,18 @@
+{
+  "ingredients": [
+    "minecraft:cod"
+  ],
+  "tool": {
+    "tag": "forge:tools/knives"
+  },
+  "result": [
+    {
+      "item": "farmersdelight:cod_slice",
+      "count": 2
+    },
+    {
+      "item": "minecraft:bone_meal",
+      "count": 1
+    }
+  ]
+}

@@ -1,0 +1,11 @@
+{
+  "ingredients": [
+    "ore:tomatoOrSauce",
+    "ore:tomatoOrSauce"
+  ],
+  "cookingtime": 100,
+  "result": {
+    "item": "farmersdelight:tomato_sauce",
+    "count": 1
+  }
+}

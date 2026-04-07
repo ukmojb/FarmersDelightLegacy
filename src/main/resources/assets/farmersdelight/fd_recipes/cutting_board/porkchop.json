@@ -1,0 +1,14 @@
+{
+  "ingredients": [
+    "minecraft:porkchop"
+  ],
+  "tool": {
+    "tag": "forge:tools/knives"
+  },
+  "result": [
+    {
+      "item": "farmersdelight:bacon",
+      "count": 2
+    }
+  ]
+}

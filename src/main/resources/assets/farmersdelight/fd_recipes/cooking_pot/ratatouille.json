@@ -1,0 +1,12 @@
+{
+  "ingredients": [
+    "ore:tomatoOrSauce",
+    "ore:cropOnion",
+    "minecraft:beetroot",
+    "ore:listAllveggie"
+  ],
+  "result": {
+    "item": "farmersdelight:ratatouille",
+    "count": 1
+  }
+}

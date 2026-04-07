@@ -1,0 +1,15 @@
+{
+  "ingredients": [
+    "minecraft:brown_mushroom",
+    "minecraft:red_mushroom"
+  ],
+  "cookingtime": 200,
+  "result": {
+    "item": "minecraft:mushroom_stew",
+    "count": 1
+  },
+  "container": {
+    "item": "minecraft:bowl",
+    "count": 1
+  }
+}

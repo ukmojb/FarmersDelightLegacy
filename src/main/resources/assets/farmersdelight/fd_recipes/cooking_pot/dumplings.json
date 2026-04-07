@@ -1,0 +1,12 @@
+{
+  "ingredients": [
+    "ore:foodDough",
+    "ore:cropCabbage",
+    "ore:cropOnion",
+    "ore:dumplingFilling"
+  ],
+  "result": {
+    "item": "farmersdelight:dumplings",
+    "count": 2
+  }
+}

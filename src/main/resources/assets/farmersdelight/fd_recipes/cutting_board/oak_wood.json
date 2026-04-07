@@ -1,0 +1,16 @@
+{
+  "ingredients": [
+    "minecraft:oak_wood"
+  ],
+  "tool": "ore:toolAxe",
+  "result": [
+    {
+      "item": "minecraft:stripped_oak_wood",
+      "count": 1
+    },
+    {
+      "item": "farmersdelight:tree_bark",
+      "count": 1
+    }
+  ]
+}

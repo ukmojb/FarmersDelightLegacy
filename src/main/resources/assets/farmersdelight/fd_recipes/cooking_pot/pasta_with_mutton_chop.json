@@ -1,0 +1,11 @@
+{
+  "ingredients": [
+    "ore:listAllmuttonraw",
+    "ore:pastaOrDough",
+    "ore:tomatoOrSauce"
+  ],
+  "result": {
+    "item": "farmersdelight:pasta_with_mutton_chop",
+    "count": 1
+  }
+}

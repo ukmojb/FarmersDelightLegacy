@@ -1,0 +1,23 @@
+{
+  "ingredients": [
+    "farmersdelight:wild_onions"
+  ],
+  "tool": {
+    "tag": "forge:tools/knives"
+  },
+  "result": [
+    {
+      "item": "farmersdelight:onion",
+      "count": 1
+    },
+    {
+      "item": "minecraft:magenta_dye",
+      "count": 2
+    },
+    {
+      "item": "minecraft:lime_dye",
+      "count": 1,
+      "chance": 0.1
+    }
+  ]
+}

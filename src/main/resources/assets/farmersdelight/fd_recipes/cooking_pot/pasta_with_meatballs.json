@@ -1,0 +1,11 @@
+{
+  "ingredients": [
+    "ore:rawOrMincedBeef",
+    "ore:pastaOrDough",
+    "ore:tomatoOrSauce"
+  ],
+  "result": {
+    "item": "farmersdelight:pasta_with_meatballs",
+    "count": 1
+  }
+}

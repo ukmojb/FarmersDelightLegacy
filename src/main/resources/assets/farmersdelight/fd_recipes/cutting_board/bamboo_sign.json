@@ -1,0 +1,12 @@
+{
+  "ingredients": [
+    "minecraft:bamboo_sign"
+  ],
+  "tool": "ore:toolAxe",
+  "result": [
+    {
+      "item": "minecraft:bamboo_planks",
+      "count": 1
+    }
+  ]
+}

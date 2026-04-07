@@ -1,0 +1,14 @@
+{
+  "ingredients": [
+    "minecraft:pumpkin"
+  ],
+  "tool": {
+    "tag": "forge:tools/knives"
+  },
+  "result": [
+    {
+      "item": "farmersdelight:pumpkin_slice",
+      "count": 4
+    }
+  ]
+}

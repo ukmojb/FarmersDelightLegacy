@@ -1,0 +1,16 @@
+{
+  "ingredients": [
+    "minecraft:bamboo_block"
+  ],
+  "tool": "ore:toolAxe",
+  "result": [
+    {
+      "item": "minecraft:stripped_bamboo_block",
+      "count": 1
+    },
+    {
+      "item": "farmersdelight:straw",
+      "count": 1
+    }
+  ]
+}

@@ -1,0 +1,9 @@
+{
+  "ingredients": [
+    "ore:cropRice"
+  ],
+  "result": {
+    "item": "farmersdelight:cooked_rice",
+    "count": 1
+  }
+}

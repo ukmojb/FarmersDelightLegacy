@@ -1,0 +1,12 @@
+{
+  "ingredients": [
+    "minecraft:quartz_block"
+  ],
+  "tool": "ore:toolPickaxe",
+  "result": [
+    {
+      "item": "minecraft:quartz",
+      "count": 4
+    }
+  ]
+}

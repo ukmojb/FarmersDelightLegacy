@@ -1,0 +1,14 @@
+{
+  "ingredients": [
+    "minecraft:poppy"
+  ],
+  "tool": {
+    "tag": "forge:tools/knives"
+  },
+  "result": [
+    {
+      "item": "minecraft:red_dye",
+      "count": 2
+    }
+  ]
+}

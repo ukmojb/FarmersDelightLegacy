@@ -1,0 +1,14 @@
+{
+  "ingredients": [
+    "minecraft:leather_horse_armor"
+  ],
+  "tool": {
+    "tag": "forge:shears"
+  },
+  "result": [
+    {
+      "item": "minecraft:leather",
+      "count": 2
+    }
+  ]
+}

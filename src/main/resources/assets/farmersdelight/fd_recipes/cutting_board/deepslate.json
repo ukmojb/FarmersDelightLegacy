@@ -1,0 +1,12 @@
+{
+  "ingredients": [
+    "minecraft:deepslate"
+  ],
+  "tool": "ore:toolPickaxe",
+  "result": [
+    {
+      "item": "minecraft:cobbled_deepslate",
+      "count": 1
+    }
+  ]
+}

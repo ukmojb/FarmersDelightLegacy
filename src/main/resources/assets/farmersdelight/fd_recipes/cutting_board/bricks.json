@@ -1,0 +1,12 @@
+{
+  "ingredients": [
+    "minecraft:bricks"
+  ],
+  "tool": "ore:toolPickaxe",
+  "result": [
+    {
+      "item": "minecraft:brick",
+      "count": 4
+    }
+  ]
+}

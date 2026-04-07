@@ -1,0 +1,14 @@
+{
+  "ingredients": [
+    "minecraft:blue_orchid"
+  ],
+  "tool": {
+    "tag": "forge:tools/knives"
+  },
+  "result": [
+    {
+      "item": "minecraft:light_blue_dye",
+      "count": 2
+    }
+  ]
+}

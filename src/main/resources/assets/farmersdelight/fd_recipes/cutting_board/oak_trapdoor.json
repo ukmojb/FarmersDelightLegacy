@@ -1,0 +1,12 @@
+{
+  "ingredients": [
+    "minecraft:oak_trapdoor"
+  ],
+  "tool": "ore:toolAxe",
+  "result": [
+    {
+      "item": "minecraft:oak_planks",
+      "count": 1
+    }
+  ]
+}

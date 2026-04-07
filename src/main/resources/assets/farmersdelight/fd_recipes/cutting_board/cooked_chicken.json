@@ -1,0 +1,18 @@
+{
+  "ingredients": [
+    "minecraft:cooked_chicken"
+  ],
+  "tool": {
+    "tag": "forge:tools/knives"
+  },
+  "result": [
+    {
+      "item": "farmersdelight:cooked_chicken_cuts",
+      "count": 2
+    },
+    {
+      "item": "minecraft:bone_meal",
+      "count": 1
+    }
+  ]
+}

@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:campfire_cooking",
+  "category": "food",
+  "cookingtime": 600,
+  "experience": 0.35,
+  "ingredient": [
+    {
+      "item": "minecraft:cod"
+    },
+    {
+      "item": "farmersdelight:cod_slice"
+    }
+  ],
+  "result": {
+    "item": "farmersdelight:cooked_cod_slice",
+    "count": 1
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "ingredients": [
+    "minecraft:nether_bricks"
+  ],
+  "tool": "ore:toolPickaxe",
+  "result": [
+    {
+      "item": "minecraft:nether_brick",
+      "count": 4
+    }
+  ]
+}

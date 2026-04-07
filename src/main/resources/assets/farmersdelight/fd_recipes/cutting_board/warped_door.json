@@ -1,0 +1,12 @@
+{
+  "ingredients": [
+    "minecraft:warped_door"
+  ],
+  "tool": "ore:toolAxe",
+  "result": [
+    {
+      "item": "minecraft:warped_planks",
+      "count": 1
+    }
+  ]
+}
