@@ -281,7 +281,12 @@ public class TileEntityCookingPot extends TileEntity implements IInventory, ISid
 
         boolean support = HeatSourceHelper.hasVisualSupportForCookware(this.world, this.pos);
         if (state.getValue(BlockCookingPot.SUPPORT) != support) {
+            NBTTagCompound savedData = this.writeToNBT(new NBTTagCompound());
             this.world.setBlockState(this.pos, state.withProperty(BlockCookingPot.SUPPORT, support), 2);
+            TileEntity te = this.world.getTileEntity(this.pos);
+            if (te instanceof TileEntityCookingPot) {
+                te.readFromNBT(savedData);
+            }
         }
     }
 
