@@ -21,7 +21,8 @@ import org.apache.logging.log4j.Logger;
 
 @Mod(modid = FarmersDelightLegacy.MOD_ID,
         name = FarmersDelightLegacy.MOD_NAME,
-        version = FarmersDelightLegacy.VERSION)
+        version = FarmersDelightLegacy.VERSION,
+        dependencies = "after:oe")
 public class FarmersDelightLegacy {
 
     public static final String MOD_ID = "farmersdelight";

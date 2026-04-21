@@ -14,7 +14,7 @@ import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class PotionComfort extends Potion {
-    @SideOnly(Side.CLIENT)
+
     private static final ResourceLocation ICON_TEXTURE = new ResourceLocation(FarmersDelightLegacy.MOD_ID,
             "textures/mob_effect/comfort.png");
 

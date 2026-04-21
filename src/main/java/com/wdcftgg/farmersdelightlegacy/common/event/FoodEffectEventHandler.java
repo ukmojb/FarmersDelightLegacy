@@ -15,6 +15,8 @@ import net.minecraftforge.event.entity.player.ItemTooltipEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.registry.ForgeRegistries;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 import java.util.Collections;
 import java.util.LinkedHashMap;
@@ -45,6 +47,7 @@ public final class FoodEffectEventHandler {
         }
     }
 
+    @SideOnly(Side.CLIENT)
     @SubscribeEvent
     public static void onItemTooltip(ItemTooltipEvent event) {
         PotionEffect effect = getVanillaSoupEffects().get(event.getItemStack().getItem());
