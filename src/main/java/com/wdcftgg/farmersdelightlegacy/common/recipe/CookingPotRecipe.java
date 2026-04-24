@@ -62,18 +62,24 @@ public class CookingPotRecipe {
 
         private final Item item;
         private final String oreDictName;
+        private final int metadata;
 
-        private IngredientEntry(Item item, String oreDictName) {
+        private IngredientEntry(Item item, String oreDictName, int metadata) {
             this.item = item;
             this.oreDictName = oreDictName;
+            this.metadata = metadata;
         }
 
         public static IngredientEntry forItem(Item item) {
-            return new IngredientEntry(Objects.requireNonNull(item), null);
+            return new IngredientEntry(Objects.requireNonNull(item), null, OreDictionary.WILDCARD_VALUE);
+        }
+
+        public static IngredientEntry forItem(Item item, int metadata) {
+            return new IngredientEntry(Objects.requireNonNull(item), null, metadata);
         }
 
         public static IngredientEntry forOreDict(String oreDictName) {
-            return new IngredientEntry(null, Objects.requireNonNull(oreDictName));
+            return new IngredientEntry(null, Objects.requireNonNull(oreDictName), OreDictionary.WILDCARD_VALUE);
         }
 
         public Item getItem() {
@@ -84,12 +90,17 @@ public class CookingPotRecipe {
             return this.oreDictName;
         }
 
+        public int getMetadata() {
+            return this.metadata;
+        }
+
         public boolean matches(ItemStack stack) {
             if (stack.isEmpty()) {
                 return false;
             }
             if (this.item != null) {
-                return stack.getItem() == this.item;
+                return stack.getItem() == this.item
+                        && (this.metadata == OreDictionary.WILDCARD_VALUE || this.metadata == stack.getMetadata());
             }
             int[] oreIds = OreDictionary.getOreIDs(stack);
             int expectedId = OreDictionary.getOreID(this.oreDictName);

@@ -119,9 +119,14 @@ mods.farmersdelight.CookingPot.addRecipeWithoutContainer(
 
 // 字符串版模板。
 // String overload templates.
+// 字符串物品 token 使用 modid:item@meta 表示精确 metadata。
+// String item tokens use modid:item@meta for exact metadata matching.
+// 例如 / Example:
+// "minecraft:fish@1" 代表 metadata 为 1 的 minecraft:fish。
+// "minecraft:fish@1" represents minecraft:fish with metadata 1.
 // mods.farmersdelight.CookingPot.addRecipeWithContainer(
 //     "yourpack:pot_string_container",
-//     ["minecraft:carrot", "ore:listAllbeefraw"],
+//     ["minecraft:fish@1", "ore:listAllbeefraw"],
 //     "minecraft:rabbit_stew",
 //     1,
 //     "minecraft:bowl",
@@ -181,19 +186,21 @@ mods.farmersdelight.CuttingBoard.addRecipeWithoutTool(
 // Full template with result chances.
 // mods.farmersdelight.CuttingBoard.addRecipeAdvanced(
 //     "yourpack:board_full_control",
-//     [<minecraft:fish:0>] as IIngredient[],
+//     [<minecraft:fish:1>] as IIngredient[],
 //     [<ore:toolKnife>] as IIngredient[],
-//     [<minecraft:fish:0> * 2, <minecraft:dye:15>] as IItemStack[],
+//     [<minecraft:fish:1> * 2, <minecraft:dye:15>] as IItemStack[],
 //     [1.0, 0.25] as float[]
 // );
 //
 // 字符串版模板。
 // String overload templates.
+// 字符串物品 token 使用 modid:item@meta 表示精确 metadata。
+// String item tokens use modid:item@meta for exact metadata matching.
 // mods.farmersdelight.CuttingBoard.addRecipeWithTool(
 //     "yourpack:board_string_tool",
-//     ["minecraft:log"],
+//     ["minecraft:fish@1"],
 //     ["ore:toolAxe"],
-//     ["minecraft:planks", "farmersdelight:tree_bark"]
+//     ["minecraft:fish@1", "farmersdelight:tree_bark"]
 // );
 //
 // mods.farmersdelight.CuttingBoard.addRecipeWithoutTool(
@@ -223,4 +230,4 @@ mods.farmersdelight.CuttingBoard.addRecipeWithoutTool(
 // String overload templates for removal.
 // mods.farmersdelight.Campfire.removeRecipesByOutput("minecraft:cooked_beef");
 // mods.farmersdelight.CookingPot.removeRecipesByOutput("minecraft:beetroot_soup");
-// mods.farmersdelight.CuttingBoard.removeRecipesByOutput("minecraft:dye", 15);
+// mods.farmersdelight.CuttingBoard.removeRecipesByOutput("minecraft:fish@1");

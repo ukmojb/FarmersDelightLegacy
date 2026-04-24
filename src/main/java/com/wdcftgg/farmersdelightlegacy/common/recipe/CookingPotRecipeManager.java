@@ -8,6 +8,7 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fml.common.registry.ForgeRegistries;
+import net.minecraftforge.oredict.OreDictionary;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -173,12 +174,17 @@ public final class CookingPotRecipeManager {
 
                 JsonObject ingredientObject = ingredientElement.getAsJsonObject();
                 if (ingredientObject.has("item")) {
-                    ingredients.add(ingredientObject.get("item").getAsString());
+                    ingredients.add(composeItemToken(
+                            ingredientObject.get("item").getAsString(),
+                            readMetadata(ingredientObject),
+                            ingredientObject.has("data")));
                 }
             }
 
             String resultItem = resultJson.has("item") ? resultJson.get("item").getAsString() : "";
             int resultCount = resultJson.has("count") ? resultJson.get("count").getAsInt() : 1;
+            int resultMetadata = readMetadata(resultJson);
+            boolean hasResultMetadata = resultJson.has("data");
             int cookTime = recipeJson.has("cookingtime") ? Math.max(1, recipeJson.get("cookingtime").getAsInt()) : 200;
             float experience = recipeJson.has("experience") ? Math.max(0.0F, recipeJson.get("experience").getAsFloat()) : DEFAULT_RECIPE_EXPERIENCE;
             ItemStack outputContainer = ItemStack.EMPTY;
@@ -188,11 +194,14 @@ public final class CookingPotRecipeManager {
                 String containerItemPath = containerJson.has("item") ? containerJson.get("item").getAsString() : "";
                 int containerCount = containerJson.has("count") ? Math.max(1, containerJson.get("count").getAsInt()) : 1;
                 if (!containerItemPath.isEmpty()) {
-                    outputContainer = stackOf(containerItemPath, containerCount, sourceModId);
+                    outputContainer = stackOf(containerItemPath, containerCount, readMetadata(containerJson),
+                            containerJson.has("data"), sourceModId);
                 }
             }
             if (!resultItem.isEmpty()) {
-                addRecipe(ingredients.toArray(new String[0]), stackOf(resultItem, Math.max(1, resultCount), sourceModId), outputContainer,
+                addRecipe(ingredients.toArray(new String[0]),
+                        stackOf(resultItem, Math.max(1, resultCount), resultMetadata, hasResultMetadata, sourceModId),
+                        outputContainer,
                         cookTime, experience, hasContainerDefinition, recipeResource.getRecipeId(), sourceModId);
             }
         }
@@ -220,10 +229,15 @@ public final class CookingPotRecipeManager {
             }
 
             Item ingredientItem = itemOf(ingredientPath, defaultNamespace);
-            if (ingredientItem == null) {
+            if (ingredientItem == null && parseItemToken(ingredientPath, defaultNamespace) == null) {
                 return;
             }
-            ingredients.add(CookingPotRecipe.IngredientEntry.forItem(ingredientItem));
+
+            ParsedItemToken parsedItemToken = parseItemToken(ingredientPath, defaultNamespace);
+            if (parsedItemToken == null || parsedItemToken.item == null) {
+                return;
+            }
+            ingredients.add(CookingPotRecipe.IngredientEntry.forItem(parsedItemToken.item, parsedItemToken.metadata));
         }
         RECIPES.add(new CookingPotRecipe(recipeId, ingredients, resultStack, outputContainer, cookTime, experience, hasContainerDefinition));
     }
@@ -237,6 +251,10 @@ public final class CookingPotRecipeManager {
         if (path == null || path.isEmpty()) {
             return null;
         }
+        int separatorIndex = path.lastIndexOf('@');
+        if (separatorIndex > 0) {
+            path = path.substring(0, separatorIndex);
+        }
         ResourceLocation itemId;
         if (path.contains(":")) {
             itemId = new ResourceLocation(path);
@@ -247,11 +265,58 @@ public final class CookingPotRecipeManager {
     }
 
     private static ItemStack stackOf(String path, int count, String defaultNamespace) {
+        return stackOf(path, count, 0, false, defaultNamespace);
+    }
+
+    private static ItemStack stackOf(String path, int count, int metadata, boolean hasMetadata, String defaultNamespace) {
         Item item = itemOf(path, defaultNamespace);
         if (item == null) {
             return ItemStack.EMPTY;
         }
-        return new ItemStack(item, count);
+        return new ItemStack(item, count, hasMetadata ? metadata : 0);
+    }
+
+    private static int readMetadata(JsonObject jsonObject) {
+        if (jsonObject == null || !jsonObject.has("data")) {
+            return 0;
+        }
+        return Math.max(0, jsonObject.get("data").getAsInt());
+    }
+
+    private static String composeItemToken(String itemPath, int metadata, boolean hasMetadata) {
+        if (itemPath == null || itemPath.isEmpty()) {
+            return itemPath;
+        }
+        return hasMetadata ? itemPath + "@" + metadata : itemPath;
+    }
+
+    private static ParsedItemToken parseItemToken(String token, String defaultNamespace) {
+        if (token == null || token.isEmpty()) {
+            return null;
+        }
+
+        String itemPath = token;
+        int metadata = OreDictionary.WILDCARD_VALUE;
+        int separatorIndex = token.lastIndexOf('@');
+        if (separatorIndex >= 0 && separatorIndex + 1 < token.length()) {
+            itemPath = token.substring(0, separatorIndex);
+            String metadataToken = token.substring(separatorIndex + 1);
+            if ("*".equals(metadataToken)) {
+                metadata = OreDictionary.WILDCARD_VALUE;
+            } else {
+                try {
+                    metadata = Math.max(0, Integer.parseInt(metadataToken));
+                } catch (NumberFormatException ignored) {
+                    return null;
+                }
+            }
+        }
+
+        Item item = itemOf(itemPath, defaultNamespace);
+        if (item == null) {
+            return null;
+        }
+        return new ParsedItemToken(item, metadata);
     }
 
     private static List<CookingPotRecipe> getAllRecipes() {
@@ -261,6 +326,16 @@ public final class CookingPotRecipeManager {
         }
         result.addAll(RECIPES);
         return result;
+    }
+
+    private static final class ParsedItemToken {
+        private final Item item;
+        private final int metadata;
+
+        private ParsedItemToken(Item item, int metadata) {
+            this.item = item;
+            this.metadata = metadata;
+        }
     }
 }
 

@@ -53,18 +53,24 @@ public final class CampfireCookingRecipe {
     public static final class IngredientEntry {
         private final Item item;
         private final String oreDictName;
+        private final int metadata;
 
-        private IngredientEntry(Item item, String oreDictName) {
+        private IngredientEntry(Item item, String oreDictName, int metadata) {
             this.item = item;
             this.oreDictName = oreDictName;
+            this.metadata = metadata;
         }
 
         public static IngredientEntry forItem(Item item) {
-            return new IngredientEntry(item, null);
+            return new IngredientEntry(item, null, OreDictionary.WILDCARD_VALUE);
+        }
+
+        public static IngredientEntry forItem(Item item, int metadata) {
+            return new IngredientEntry(item, null, metadata);
         }
 
         public static IngredientEntry forOreDict(String oreDictName) {
-            return new IngredientEntry(null, oreDictName);
+            return new IngredientEntry(null, oreDictName, OreDictionary.WILDCARD_VALUE);
         }
 
         public Item getItem() {
@@ -75,12 +81,17 @@ public final class CampfireCookingRecipe {
             return oreDictName;
         }
 
+        public int getMetadata() {
+            return metadata;
+        }
+
         public boolean matches(ItemStack stack) {
             if (stack.isEmpty()) {
                 return false;
             }
             if (item != null) {
-                return stack.getItem() == item;
+                return stack.getItem() == item
+                        && (metadata == OreDictionary.WILDCARD_VALUE || metadata == stack.getMetadata());
             }
             if (oreDictName != null) {
                 int oreId = OreDictionary.getOreID(oreDictName);

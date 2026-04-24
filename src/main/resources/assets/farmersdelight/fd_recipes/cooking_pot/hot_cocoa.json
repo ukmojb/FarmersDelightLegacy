@@ -2,8 +2,8 @@
   "ingredients": [
     "ore:listAllmilk",
     "minecraft:sugar",
-    "ore:dyeBrown",
-    "ore:dyeBrown"
+    "minecraft:dye@3",
+    "minecraft:dye@3"
   ],
   "experience": 1.0,
   "result": {

@@ -42,6 +42,7 @@ import net.minecraft.world.gen.structure.StructureComponent;
 import net.minecraft.world.gen.structure.StructureVillagePieces;
 import net.minecraft.world.gen.structure.StructureVillagePieces.PieceWeight;
 import net.minecraft.world.gen.structure.StructureVillagePieces.Village;
+import net.minecraft.world.gen.structure.template.TemplateManager;
 import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.common.registry.ForgeRegistries;
 import net.minecraftforge.fml.common.registry.VillagerRegistry;
@@ -60,7 +61,8 @@ import java.util.Set;
 
 public final class VillageNamesVillageCompat {
 
-    private static final String STRUCTURE_ROOT = "/data/farmersdelight/structures/village/houses/";
+    private static final String STRUCTURE_ROOT = "/data/farmersdelightlegacy/structures/village/houses/";
+    private static final String OBSOLETE_GENERIC_COMPONENT_CLASS = "com.wdcftgg.farmersdelightlegacy.common.compat.VillageNamesVillageCompat$GenericCompostPiece";
     private static final TemplateDefinition PLAINS = new TemplateDefinition(
             "plains_compost_pile.nbt",
             VillageType.PLAINS,
@@ -132,6 +134,7 @@ public final class VillageNamesVillageCompat {
     }
 
     private static void registerStructureComponents() {
+        MapGenStructureIO.registerStructureComponent(EmptyCompostPiece.class, "FDVNEmptyCompost");
         MapGenStructureIO.registerStructureComponent(PlainsCompostPiece.class, "FDVNPlainsCompost");
         MapGenStructureIO.registerStructureComponent(DesertCompostPiece.class, "FDVNDesertCompost");
         MapGenStructureIO.registerStructureComponent(SavannaCompostPiece.class, "FDVNSavannaCompost");
@@ -181,7 +184,11 @@ public final class VillageNamesVillageCompat {
         }
 
         if (existingMappings != null) {
-            mappings.addAll(Arrays.asList(existingMappings));
+            for (String mapping : existingMappings) {
+                if (!isObsoleteVillageTypeMapping(mapping)) {
+                    mappings.add(mapping);
+                }
+            }
         }
 
         for (TemplateDefinition definition : DEFINITIONS) {
@@ -189,6 +196,10 @@ public final class VillageNamesVillageCompat {
         }
 
         VillageGeneratorConfigHandler.componentVillageTypes = mappings.toArray(new String[0]);
+    }
+
+    private static boolean isObsoleteVillageTypeMapping(String mapping) {
+        return mapping != null && mapping.startsWith(OBSOLETE_GENERIC_COMPONENT_CLASS + "|");
     }
 
     private interface PieceFactory {
@@ -217,21 +228,37 @@ public final class VillageNamesVillageCompat {
         @Override
         public Village buildComponent(PieceWeight villagePiece, StructureVillagePieces.Start startPiece, List<StructureComponent> pieces, java.util.Random random, int x, int y, int z, EnumFacing facing, int componentType) {
             if (!(startPiece instanceof StructureVillageVN.StartVN)) {
-                return null;
+                return new EmptyCompostPiece(startPiece, componentType, createEmptyBoundingBox(x, z), facing);
             }
 
-            return CompostPiece.createPiece((StructureVillageVN.StartVN) startPiece, pieces, x, y, z, facing, componentType, this.definition, this.pieceFactory);
+            StructureVillageVN.StartVN villageStart = (StructureVillageVN.StartVN) startPiece;
+            if (villageStart.villageType != this.definition.villageType) {
+                return new EmptyCompostPiece(startPiece, componentType, createEmptyBoundingBox(x, z), facing);
+            }
+
+            Village villagePieceInstance = CompostPiece.createPiece(villageStart, pieces, x, y, z, facing, componentType, this.definition, this.pieceFactory);
+            if (villagePieceInstance == null) {
+                return new EmptyCompostPiece(startPiece, componentType, createEmptyBoundingBox(x, z), facing);
+            }
+            return villagePieceInstance;
         }
+    }
+
+    private static StructureBoundingBox createEmptyBoundingBox(int x, int z) {
+        return new StructureBoundingBox(x, 1, z, x, 1, z);
     }
 
     private abstract static class CompostPiece extends StructureVillageVN.VNComponent {
         private TemplateDefinition definition;
 
+        protected CompostPiece() {
+            this(null);
+        }
+
         protected CompostPiece(TemplateDefinition definition) {
-            this.definition = definition;
             this.averageGroundLvl = -1;
             this.averageGroundLevel = -1;
-            applyDefinitionContext();
+            setDefinition(definition);
         }
 
         protected CompostPiece(StructureVillageVN.StartVN startPiece, int componentType, StructureBoundingBox boundingBox, EnumFacing facing, TemplateDefinition definition) {
@@ -241,6 +268,11 @@ public final class VillageNamesVillageCompat {
             this.startPiece = startPiece;
             this.setCoordBaseMode(facing);
             this.ascertainVillageStatsFromStartPiece(startPiece);
+        }
+
+        protected void setDefinition(TemplateDefinition definition) {
+            this.definition = definition;
+            applyDefinitionContext();
         }
 
         private void applyDefinitionContext() {
@@ -256,7 +288,10 @@ public final class VillageNamesVillageCompat {
         @Override
         public boolean addComponentParts(World worldIn, java.util.Random randomIn, StructureBoundingBox structureBoundingBoxIn) {
             if (this.definition == null) {
-                this.definition = findDefinition(this.getClass());
+                this.setDefinition(findDefinition(this.getClass()));
+            }
+            if (this.definition == null && this.startPiece instanceof StructureVillageVN.StartVN) {
+                this.setDefinition(resolveDefinition((StructureVillageVN.StartVN) this.startPiece));
             }
             if (this.definition == null) {
                 FarmersDelightLegacy.LOGGER.error("Village Names 村庄堆肥场缺少结构定义：{}", this.getClass().getName());
@@ -340,8 +375,25 @@ public final class VillageNamesVillageCompat {
                 placeTemplateBlock(worldIn, structureBoundingBoxIn, templateBlock);
                 placedTemplateBlocks.add(blockKey);
             }
-
             return true;
+        }
+
+        @Override
+        protected void writeStructureToNBT(NBTTagCompound tagCompound) {
+            super.writeStructureToNBT(tagCompound);
+            if (this.definition != null) {
+                tagCompound.setString("FdTemplate", this.definition.filename);
+            }
+        }
+
+        @Override
+        protected void readStructureFromNBT(NBTTagCompound tagCompound, TemplateManager templateManager) {
+            super.readStructureFromNBT(tagCompound, templateManager);
+            if (tagCompound.hasKey("FdTemplate", 8)) {
+                this.setDefinition(findDefinition(tagCompound.getString("FdTemplate")));
+            } else {
+                this.setDefinition(findDefinition(this.getClass()));
+            }
         }
 
         private void placeTemplateBlock(World worldIn, StructureBoundingBox structureBoundingBoxIn, TemplateBlock templateBlock) {
@@ -465,9 +517,46 @@ public final class VillageNamesVillageCompat {
         private static Village createPiece(StructureVillageVN.StartVN startPiece, List<StructureComponent> pieces, int x, int y, int z, EnumFacing facing, int componentType, TemplateDefinition definition, PieceFactory pieceFactory) {
             TemplateData templateData = definition.getTemplate();
             StructureBoundingBox boundingBox = createBoundingBox(x, y, z, facing, templateData);
-            return canVillageGoDeeper(boundingBox) && StructureComponent.findIntersecting(pieces, boundingBox) == null
-                    ? pieceFactory.create(startPiece, componentType, boundingBox, facing)
-                    : null;
+            boolean canGoDeeper = canVillageGoDeeper(boundingBox);
+            StructureComponent intersectingPiece = findBlockingIntersecting(pieces, boundingBox, definition);
+            if (!canGoDeeper || intersectingPiece != null) {
+                return null;
+            }
+
+            return pieceFactory.create(startPiece, componentType, boundingBox, facing);
+        }
+
+        private static StructureComponent findBlockingIntersecting(List<StructureComponent> pieces, StructureBoundingBox boundingBox, TemplateDefinition definition) {
+            for (StructureComponent piece : pieces) {
+                if (piece.getBoundingBox() != null && piece.getBoundingBox().intersectsWith(boundingBox)) {
+                    if (isVillageRoadPiece(piece)) {
+                        continue;
+                    }
+                    return piece;
+                }
+            }
+            return null;
+        }
+
+        private static boolean isVillageRoadPiece(StructureComponent piece) {
+            String className = piece.getClass().getName();
+            return piece instanceof StructureVillagePieces.Path || "astrotibs.villagenames.village.StructureVillageVN$PathVN".equals(className);
+        }
+    }
+
+    public static class EmptyCompostPiece extends Village {
+        public EmptyCompostPiece() {
+        }
+
+        public EmptyCompostPiece(StructureVillagePieces.Start startPiece, int componentType, StructureBoundingBox boundingBox, EnumFacing facing) {
+            super(startPiece, componentType);
+            this.boundingBox = boundingBox;
+            this.setCoordBaseMode(facing);
+        }
+
+        @Override
+        public boolean addComponentParts(World worldIn, java.util.Random randomIn, StructureBoundingBox structureBoundingBoxIn) {
+            return true;
         }
     }
 
@@ -543,6 +632,28 @@ public final class VillageNamesVillageCompat {
     private static TemplateDefinition findDefinition(Class<?> pieceClass) {
         for (TemplateDefinition definition : DEFINITIONS) {
             if (definition.pieceClass == pieceClass) {
+                return definition;
+            }
+        }
+        return null;
+    }
+
+    private static TemplateDefinition findDefinition(String filename) {
+        for (TemplateDefinition definition : DEFINITIONS) {
+            if (definition.filename.equals(filename)) {
+                return definition;
+            }
+        }
+        return null;
+    }
+
+    private static TemplateDefinition resolveDefinition(StructureVillageVN.StartVN startPiece) {
+        if (startPiece == null || startPiece.villageType == null) {
+            return null;
+        }
+
+        for (TemplateDefinition definition : DEFINITIONS) {
+            if (definition.villageType == startPiece.villageType) {
                 return definition;
             }
         }

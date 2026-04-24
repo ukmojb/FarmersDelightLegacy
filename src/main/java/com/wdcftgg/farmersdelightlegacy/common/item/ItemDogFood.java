@@ -93,9 +93,12 @@ public class ItemDogFood extends ItemFoodTooltip {
         super.addInformation(stack, worldIn, tooltip, flagIn);
         tooltip.add(TextFormatting.GRAY + new TextComponentTranslation("farmersdelight.tooltip.dog_food.when_feeding").getFormattedText());
         for (PotionEffect effect : FEEDING_EFFECTS) {
-            String name = new TextComponentTranslation(effect.getEffectName()).getFormattedText();
             String duration = Potion.getPotionDurationString(effect, 1.0F);
-            tooltip.add(TextFormatting.BLUE + new TextComponentTranslation("farmersdelight.tooltip.food.effect", name, duration).getFormattedText());
+            String effectName = new TextComponentTranslation(effect.getEffectName()).getFormattedText();
+            TextComponentTranslation effectTooltip = new TextComponentTranslation("farmersdelight.tooltip.food.effect",
+                    effectName, duration);
+            effectTooltip.getStyle().setColor(TextFormatting.BLUE);
+            tooltip.add(effectTooltip.getFormattedText());
         }
     }
 }

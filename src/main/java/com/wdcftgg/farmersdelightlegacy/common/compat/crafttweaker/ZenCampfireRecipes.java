@@ -22,7 +22,7 @@ public final class ZenCampfireRecipes {
 
     @ZenMethod
     public static boolean addRecipeAdvanced(String key, IIngredient[] ingredients, IItemStack result, int cookingTime) {
-        String[] ingredientTokens = CraftTweakerCompatHelper.toIngredientTokens(ingredients);
+        String[] ingredientTokens = CraftTweakerCompatHelper.toStrictIngredientTokens(ingredients);
         ItemStack resultStack = CraftTweakerCompatHelper.stackOf(result);
         if (ingredientTokens == null || resultStack.isEmpty()) {
             return false;
@@ -53,7 +53,7 @@ public final class ZenCampfireRecipes {
 
     @ZenMethod
     public static int removeRecipesByOutput(String outputItemId) {
-        return removeRecipesByOutput(outputItemId, 0);
+        return CampfireCookingRecipeManager.removeRecipesByOutput(CraftTweakerCompatHelper.stackOf(outputItemId, 1));
     }
 
     @ZenMethod

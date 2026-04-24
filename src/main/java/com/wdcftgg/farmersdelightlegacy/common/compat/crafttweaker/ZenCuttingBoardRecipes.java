@@ -18,29 +18,29 @@ public final class ZenCuttingBoardRecipes {
 
     @ZenMethod
     public static boolean addRecipe(String key, IIngredient[] inputIngredients, IItemStack[] resultStacks) {
-        return registerRecipe(key, CraftTweakerCompatHelper.toIngredientTokens(inputIngredients), DEFAULT_TOOL_TOKENS, resultStacks, null);
+        return registerRecipe(key, CraftTweakerCompatHelper.toStrictIngredientTokens(inputIngredients), DEFAULT_TOOL_TOKENS, resultStacks, null);
     }
 
     @ZenMethod
     public static boolean addRecipeWithTool(String key, IIngredient[] inputIngredients, IIngredient[] toolIngredients,
                                             IItemStack[] resultStacks) {
-        String[] toolTokens = CraftTweakerCompatHelper.toIngredientTokens(toolIngredients);
+        String[] toolTokens = CraftTweakerCompatHelper.toStrictIngredientTokens(toolIngredients);
         if (toolTokens == null || toolTokens.length == 0) {
             return false;
         }
-        return registerRecipe(key, CraftTweakerCompatHelper.toIngredientTokens(inputIngredients), toolTokens, resultStacks, null);
+        return registerRecipe(key, CraftTweakerCompatHelper.toStrictIngredientTokens(inputIngredients), toolTokens, resultStacks, null);
     }
 
     @ZenMethod
     public static boolean addRecipeWithoutTool(String key, IIngredient[] inputIngredients, IItemStack[] resultStacks) {
-        return registerRecipe(key, CraftTweakerCompatHelper.toIngredientTokens(inputIngredients), new String[0], resultStacks, null);
+        return registerRecipe(key, CraftTweakerCompatHelper.toStrictIngredientTokens(inputIngredients), new String[0], resultStacks, null);
     }
 
     @ZenMethod
     public static boolean addRecipeAdvanced(String key, IIngredient[] inputIngredients, IIngredient[] toolIngredients,
                                             IItemStack[] resultStacks, float[] resultChances) {
-        String[] inputTokens = CraftTweakerCompatHelper.toIngredientTokens(inputIngredients);
-        String[] toolTokens = CraftTweakerCompatHelper.toIngredientTokens(toolIngredients);
+        String[] inputTokens = CraftTweakerCompatHelper.toStrictIngredientTokens(inputIngredients);
+        String[] toolTokens = CraftTweakerCompatHelper.toStrictIngredientTokens(toolIngredients);
         if (toolIngredients == null) {
             toolTokens = DEFAULT_TOOL_TOKENS;
         }
@@ -81,7 +81,7 @@ public final class ZenCuttingBoardRecipes {
         int[] resultCounts = new int[resultStacks.length];
         for (int index = 0; index < resultStacks.length; index++) {
             IItemStack resultStack = resultStacks[index];
-            String itemId = CraftTweakerCompatHelper.itemIdOf(resultStack);
+            String itemId = CraftTweakerCompatHelper.itemTokenOf(resultStack);
             net.minecraft.item.ItemStack nativeResult = CraftTweakerCompatHelper.stackOf(resultStack);
             if (itemId == null || nativeResult.isEmpty()) {
                 return false;

@@ -1,7 +1,7 @@
 {
   "ingredients": [
     "minecraft:rotten_flesh",
-    "ore:dyeWhite",
+    "minecraft:dye@15",
     "ore:dogPrey",
     "farmersdelight:rice"
   ],

@@ -7,6 +7,7 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fml.common.registry.ForgeRegistries;
+import net.minecraftforge.oredict.OreDictionary;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -56,11 +57,11 @@ public final class CampfireCookingRecipeManager {
                 continue;
             }
 
-            Item ingredientItem = itemOf(token, FarmersDelightLegacy.MOD_ID);
-            if (ingredientItem == null) {
+            ParsedItemToken parsedItemToken = parseItemToken(token, FarmersDelightLegacy.MOD_ID);
+            if (parsedItemToken == null || parsedItemToken.item == null) {
                 return false;
             }
-            ingredients.add(CampfireCookingRecipe.IngredientEntry.forItem(ingredientItem));
+            ingredients.add(CampfireCookingRecipe.IngredientEntry.forItem(parsedItemToken.item, parsedItemToken.metadata));
         }
 
         if (ingredients.isEmpty()) {
@@ -172,7 +173,7 @@ public final class CampfireCookingRecipeManager {
 
     private static void addIngredientEntry(List<CampfireCookingRecipe.IngredientEntry> target, JsonObject ingredientObject, String defaultNamespace) {
         if (ingredientObject.has("item")) {
-            addItemIngredient(target, ingredientObject.get("item"), defaultNamespace);
+            addItemIngredient(target, ingredientObject.get("item"), readMetadata(ingredientObject), ingredientObject.has("data"), defaultNamespace);
             return;
         }
 
@@ -184,21 +185,24 @@ public final class CampfireCookingRecipeManager {
         }
     }
 
-    private static void addItemIngredient(List<CampfireCookingRecipe.IngredientEntry> target, JsonElement itemElement, String defaultNamespace) {
+    private static void addItemIngredient(List<CampfireCookingRecipe.IngredientEntry> target, JsonElement itemElement,
+                                          int metadata, boolean hasMetadata, String defaultNamespace) {
         if (itemElement == null || itemElement.isJsonNull()) {
             return;
         }
         if (itemElement.isJsonPrimitive()) {
-            Item item = itemOf(itemElement.getAsString(), defaultNamespace);
-            if (item != null) {
-                target.add(CampfireCookingRecipe.IngredientEntry.forItem(item));
+            ParsedItemToken parsedItemToken = parseItemToken(
+                    composeItemToken(itemElement.getAsString(), metadata, hasMetadata),
+                    defaultNamespace);
+            if (parsedItemToken != null && parsedItemToken.item != null) {
+                target.add(CampfireCookingRecipe.IngredientEntry.forItem(parsedItemToken.item, parsedItemToken.metadata));
             }
             return;
         }
         if (itemElement.isJsonObject()) {
             JsonObject nestedItemObject = itemElement.getAsJsonObject();
             if (nestedItemObject.has("item")) {
-                addItemIngredient(target, nestedItemObject.get("item"), defaultNamespace);
+                addItemIngredient(target, nestedItemObject.get("item"), readMetadata(nestedItemObject), nestedItemObject.has("data"), defaultNamespace);
             }
         }
     }
@@ -221,7 +225,7 @@ public final class CampfireCookingRecipeManager {
 
         String resultId = resultObject.get("item").getAsString();
         int resultCount = resultObject.has("count") ? Math.max(1, resultObject.get("count").getAsInt()) : 1;
-        return stackOf(resultId, resultCount, defaultNamespace);
+        return stackOf(resultId, resultCount, readMetadata(resultObject), resultObject.has("data"), defaultNamespace);
     }
 
     private static String convertTagToOreDict(String tagPath) {
@@ -250,15 +254,76 @@ public final class CampfireCookingRecipeManager {
         if (path == null || path.isEmpty()) {
             return null;
         }
+        int separatorIndex = path.lastIndexOf('@');
+        if (separatorIndex > 0) {
+            path = path.substring(0, separatorIndex);
+        }
         ResourceLocation itemId = path.contains(":") ? new ResourceLocation(path) : new ResourceLocation(defaultNamespace, path);
         return ForgeRegistries.ITEMS.getValue(itemId);
     }
 
     private static ItemStack stackOf(String path, int count, String defaultNamespace) {
+        return stackOf(path, count, 0, false, defaultNamespace);
+    }
+
+    private static ItemStack stackOf(String path, int count, int metadata, boolean hasMetadata, String defaultNamespace) {
         Item item = itemOf(path, defaultNamespace);
         if (item == null) {
             return ItemStack.EMPTY;
         }
-        return new ItemStack(item, count);
+        return new ItemStack(item, count, hasMetadata ? metadata : 0);
+    }
+
+    private static int readMetadata(JsonObject jsonObject) {
+        if (jsonObject == null || !jsonObject.has("data")) {
+            return 0;
+        }
+        return Math.max(0, jsonObject.get("data").getAsInt());
+    }
+
+    private static String composeItemToken(String itemPath, int metadata, boolean hasMetadata) {
+        if (itemPath == null || itemPath.isEmpty()) {
+            return itemPath;
+        }
+        return hasMetadata ? itemPath + "@" + metadata : itemPath;
+    }
+
+    private static ParsedItemToken parseItemToken(String token, String defaultNamespace) {
+        if (token == null || token.isEmpty()) {
+            return null;
+        }
+
+        String itemPath = token;
+        int metadata = OreDictionary.WILDCARD_VALUE;
+        int separatorIndex = token.lastIndexOf('@');
+        if (separatorIndex >= 0 && separatorIndex + 1 < token.length()) {
+            itemPath = token.substring(0, separatorIndex);
+            String metadataToken = token.substring(separatorIndex + 1);
+            if ("*".equals(metadataToken)) {
+                metadata = OreDictionary.WILDCARD_VALUE;
+            } else {
+                try {
+                    metadata = Math.max(0, Integer.parseInt(metadataToken));
+                } catch (NumberFormatException ignored) {
+                    return null;
+                }
+            }
+        }
+
+        Item item = itemOf(itemPath, defaultNamespace);
+        if (item == null) {
+            return null;
+        }
+        return new ParsedItemToken(item, metadata);
+    }
+
+    private static final class ParsedItemToken {
+        private final Item item;
+        private final int metadata;
+
+        private ParsedItemToken(Item item, int metadata) {
+            this.item = item;
+            this.metadata = metadata;
+        }
     }
 }

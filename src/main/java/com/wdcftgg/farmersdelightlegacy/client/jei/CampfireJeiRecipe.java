@@ -30,7 +30,8 @@ public final class CampfireJeiRecipe implements IRecipeWrapper {
         List<ItemStack> options = new ArrayList<>();
         for (CampfireCookingRecipe.IngredientEntry entry : recipe.getIngredients()) {
             if (entry.getItem() != null) {
-                options.add(new ItemStack(entry.getItem()));
+                int metadata = entry.getMetadata() == OreDictionary.WILDCARD_VALUE ? 0 : entry.getMetadata();
+                options.add(new ItemStack(entry.getItem(), 1, metadata));
                 continue;
             }
             if (entry.getOreDictName() != null) {

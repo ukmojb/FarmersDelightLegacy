@@ -49,7 +49,8 @@ public final class CookingPotJeiRecipe implements IRecipeWrapper {
         for (CookingPotRecipe.IngredientEntry entry : recipe.getIngredients()) {
             List<ItemStack> options = new ArrayList<>();
             if (entry.getItem() != null) {
-                options.add(new ItemStack(entry.getItem()));
+                int metadata = entry.getMetadata() == OreDictionary.WILDCARD_VALUE ? 0 : entry.getMetadata();
+                options.add(new ItemStack(entry.getItem(), 1, metadata));
             } else if (entry.getOreDictName() != null) {
                 options.addAll(OreDictionary.getOres(entry.getOreDictName()));
             }

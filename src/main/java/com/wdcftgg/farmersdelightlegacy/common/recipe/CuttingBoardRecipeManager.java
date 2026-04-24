@@ -106,8 +106,8 @@ public final class CuttingBoardRecipeManager {
             if (token == null || token.isEmpty()) {
                 return false;
             }
-            Item item = itemOf(token, FarmersDelightLegacy.MOD_ID);
-            if (item == null) {
+            ParsedItemToken parsedItemToken = parseItemToken(token, FarmersDelightLegacy.MOD_ID);
+            if (parsedItemToken == null || parsedItemToken.item == null) {
                 return false;
             }
 
@@ -121,7 +121,8 @@ public final class CuttingBoardRecipeManager {
                 chance = clampChance(resultChances[i]);
             }
 
-            resultEntries.add(new ResultEntry(new ItemStack(item, count), chance));
+            int metadata = parsedItemToken.hasMetadata ? parsedItemToken.metadata : 0;
+            resultEntries.add(new ResultEntry(new ItemStack(parsedItemToken.item, count, metadata), chance));
         }
 
         CuttingRecipeEntry recipeEntry = new CuttingRecipeEntry(key, inputMatcher, toolMatcher, resultEntries);
@@ -588,14 +589,16 @@ public final class CuttingBoardRecipeManager {
                 return;
             }
 
-            Item item = itemOf(token, defaultNamespace);
+            ParsedItemToken parsedItemToken = parseItemToken(token, defaultNamespace);
+            Item item = parsedItemToken == null ? null : parsedItemToken.item;
             if (item != null) {
+                int resolvedMetadata = parsedItemToken.hasMetadata ? parsedItemToken.metadata : metadata;
                 for (ItemStack candidate : itemStacks) {
-                    if (candidate.getItem() == item && candidate.getMetadata() == metadata) {
+                    if (candidate.getItem() == item && candidate.getMetadata() == resolvedMetadata) {
                         return;
                     }
                 }
-                itemStacks.add(new ItemStack(item, 1, metadata));
+                itemStacks.add(new ItemStack(item, 1, resolvedMetadata));
             }
         }
 
@@ -674,9 +677,6 @@ public final class CuttingBoardRecipeManager {
             if (candidateMeta == OreDictionary.WILDCARD_VALUE) {
                 return true;
             }
-            if (target.isItemStackDamageable()) {
-                return true;
-            }
             return candidateMeta == target.getMetadata();
         }
 
@@ -742,6 +742,53 @@ public final class CuttingBoardRecipeManager {
             itemId = new ResourceLocation(defaultNamespace, path);
         }
         return ForgeRegistries.ITEMS.getValue(itemId);
+    }
+
+    private static ParsedItemToken parseItemToken(String token, String defaultNamespace) {
+        if (token == null || token.isEmpty()) {
+            return null;
+        }
+
+        String itemPath = token;
+        boolean hasMetadata = false;
+        int metadata = 0;
+
+        int separatorIndex = token.lastIndexOf('@');
+        if (separatorIndex >= 0 && separatorIndex + 1 < token.length()) {
+            itemPath = token.substring(0, separatorIndex);
+            String metadataToken = token.substring(separatorIndex + 1);
+            if ("*".equals(metadataToken)) {
+                metadata = OreDictionary.WILDCARD_VALUE;
+                hasMetadata = true;
+            } else {
+                try {
+                    metadata = Integer.parseInt(metadataToken);
+                    hasMetadata = true;
+                } catch (NumberFormatException ignored) {
+                    itemPath = token;
+                    metadata = 0;
+                    hasMetadata = false;
+                }
+            }
+        }
+
+        Item item = itemOf(itemPath, defaultNamespace);
+        if (item == null) {
+            return null;
+        }
+        return new ParsedItemToken(item, metadata, hasMetadata);
+    }
+
+    private static final class ParsedItemToken {
+        private final Item item;
+        private final int metadata;
+        private final boolean hasMetadata;
+
+        private ParsedItemToken(Item item, int metadata, boolean hasMetadata) {
+            this.item = item;
+            this.metadata = metadata;
+            this.hasMetadata = hasMetadata;
+        }
     }
 
     private static List<CuttingRecipeEntry> getAllRecipeEntries() {
