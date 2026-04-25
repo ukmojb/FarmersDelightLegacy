@@ -35,11 +35,35 @@ dependencies {
     // Include OSXNarratorBlocker by default for the dev env, for M1+ Macs
     runtimeOnly 'com.cleanroommc:osxnarratorblocker:1.0'
 
+    implementation 'mezz:jei:4.28.0'
 
+    //稻米(含水方块)
+    implementation rfg.deobf("curse.maven:fluidlogged-api-485654:7581579")
 
+    //樱花树
+    implementation rfg.deobf("curse.maven:sakura-reforged-1461245:7883662")
+    runtimeOnly rfg.deobf("curse.maven:mysterious-mountain-lib-368098:3254750")
 
+    //下界更新移植
+    implementation rfg.deobf("curse.maven:unseens-nether-backport-1109447:7694245")
+    runtimeOnly rfg.deobf("curse.maven:nether-api-1306115:7216794")
 
+    //未来的 MC
+    implementation rfg.deobf("curse.maven:future-mc-310059:6162819")
+    runtimeOnly 'io.github.chaosunity.forgelin:Forgelin-Continuous:2.3.20.0'
 
+    //营火
+    implementation rfg.deobf("curse.maven:campfire-719464:4533381")
+
+    //掠夺者
+    implementation rfg.deobf("curse.maven:raids-backport-977633:7890943")
+    runtimeOnly rfg.deobf("curse.maven:atlas-lib-463826:7845224")
+
+    //村庄建筑更新
+    implementation rfg.deobf("curse.maven:village-names-259230:5886882")
+
+    //crt
+    implementation rfg.deobf('CraftTweaker2:CraftTweaker2-MC1120-Main:1.12-4.1.20.698')
 
     // Example - Dependency descriptor:
     // 'com.google.code.gson:gson:2.8.6' << group: com.google.code.gson, name:gson, version:2.8.6

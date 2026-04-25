@@ -4,7 +4,7 @@
   <img src="http://cf.way2muchnoise.eu/full_1517486_downloads.svg" alt="Curseforge Downloads">
 </a>
 <br>
-<img src="https://i.imgur.com/gXOJZc1.png" width="50%">
+<img src="art/logo_hi.png" width="50%">
 
 ### Overview
 

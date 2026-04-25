@@ -17,7 +17,7 @@ public final class ModEntities {
                 EntityRottenTomato.class,
                 "rotten_tomato",
                 ROTTEN_TOMATO_ID,
-                FarmersDelightLegacy.getInstance(),
+                FarmersDelightLegacy.INSTANCE,
                 64,
                 10,
                 true);

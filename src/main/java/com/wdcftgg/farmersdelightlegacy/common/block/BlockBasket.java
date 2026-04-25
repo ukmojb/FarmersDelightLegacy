@@ -178,7 +178,7 @@ public class BlockBasket extends BlockDirectional implements ITileEntityProvider
             return true;
         }
 
-        playerIn.openGui(FarmersDelightLegacy.getInstance(), ModGuiHandler.BASKET_GUI_ID, worldIn, pos.getX(), pos.getY(), pos.getZ());
+        playerIn.openGui(FarmersDelightLegacy.INSTANCE, ModGuiHandler.BASKET_GUI_ID, worldIn, pos.getX(), pos.getY(), pos.getZ());
         return true;
     }
 
