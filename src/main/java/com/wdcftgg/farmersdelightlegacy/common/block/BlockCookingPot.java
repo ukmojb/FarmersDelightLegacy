@@ -73,7 +73,7 @@ public class BlockCookingPot extends BlockContainer {
             }
         }
 
-        playerIn.openGui(FarmersDelightLegacy.getInstance(), ModGuiHandler.COOKING_POT_GUI_ID, worldIn, pos.getX(), pos.getY(), pos.getZ());
+        playerIn.openGui(FarmersDelightLegacy.INSTANCE, ModGuiHandler.COOKING_POT_GUI_ID, worldIn, pos.getX(), pos.getY(), pos.getZ());
         return true;
     }
 

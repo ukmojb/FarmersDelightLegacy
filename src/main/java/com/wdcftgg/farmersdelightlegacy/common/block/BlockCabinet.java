@@ -94,7 +94,7 @@ public class BlockCabinet extends BlockHorizontal implements ITileEntityProvider
         }
 
 
-        playerIn.openGui(FarmersDelightLegacy.getInstance(),
+        playerIn.openGui(FarmersDelightLegacy.INSTANCE,
                 ModGuiHandler.CABINET_GUI_ID,
                 worldIn,
                 pos.getX(),

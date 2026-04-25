@@ -20,24 +20,25 @@ import net.minecraftforge.fml.common.registry.GameRegistry;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-@Mod(modid = FarmersDelightLegacy.MOD_ID,
+@Mod(
+        modid = FarmersDelightLegacy.MOD_ID,
         name = FarmersDelightLegacy.MOD_NAME,
-        version = FarmersDelightLegacy.VERSION,
-        dependencies = "after:oe")
+        version = Tags.VERSION,
+        dependencies = "after:oe",
+        customProperties = {
+                @Mod.CustomProperty(k = "iconItem", v = "farmersdelight:stove"),
+                @Mod.CustomProperty(k = "license", v = "MIT License"),
+                @Mod.CustomProperty(k = "issueTrackerUrl", v = "https://github.com/ukmojb/FarmersDelightLegacy/issues")
+        }
+)
 public class FarmersDelightLegacy {
 
-    public static final String MOD_ID = "farmersdelight";
-    public static final String MOD_NAME = "Farmer's Delight Legacy";
-    public static final String VERSION = "1.0.2";
+    public static final Logger LOGGER = LogManager.getLogger(FarmersDelightLegacy.MOD_NAME);
+    public static final String MOD_ID = Tags.MOD_ID;
+    public static final String MOD_NAME = Tags.MOD_NAME;
 
     @Mod.Instance(FarmersDelightLegacy.MOD_ID)
     public static FarmersDelightLegacy INSTANCE;
-
-    public static FarmersDelightLegacy getInstance() {
-        return INSTANCE;
-    }
-
-    public static final Logger LOGGER = LogManager.getLogger(FarmersDelightLegacy.MOD_NAME);
 
     @Mod.EventHandler
     public void preInit(FMLPreInitializationEvent event) {

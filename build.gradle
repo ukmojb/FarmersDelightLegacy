@@ -164,34 +164,6 @@ dependencies {
         testImplementation 'org.junit.jupiter:junit-jupiter:5.7.1'
         testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
     }
-
-    implementation 'mezz:jei:4.28.0'
-
-    //稻米(含水方块)
-    implementation rfg.deobf('curse.maven:Fluidlogged API-485654:7581579')
-
-    //樱花树
-    implementation rfg.deobf('curse.maven:Sakura Reforged-1461245:7883662')
-
-    //下界更新移植
-    implementation rfg.deobf('curse.maven:Unseen\'s Nether Backport-1109447:7694245')
-
-    //未来的mc
-    implementation rfg.deobf('curse.maven:Future MC-310059:6162819')
-    implementation 'io.github.chaosunity.forgelin:Forgelin-Continuous:2.3.20.0'
-
-    //营火
-    implementation rfg.deobf('curse.maven:Campfire-719464:4533381')
-
-    //掠夺者
-    implementation rfg.deobf('curse.maven:Raids Backport-977633:7890943')
-
-    //村庄建筑更新
-    implementation rfg.deobf('curse.maven:Village Names-259230:5886882')
-
-    //crt
-    implementation rfg.deobf('CraftTweaker2:CraftTweaker2-MC1120-Main:1.12-4.1.20.698')
-
 }
 
 apply from: 'gradle/scripts/dependencies.gradle'
