@@ -1,5 +1,6 @@
 package com.wdcftgg.farmersdelightlegacy.common.item;
 
+import com.wdcftgg.farmersdelightlegacy.common.Configuration;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemFood;
@@ -62,6 +63,9 @@ public class ItemFoodTooltip extends ItemFood {
     @SideOnly(Side.CLIENT)
     public void addInformation(ItemStack stack, @Nullable World worldIn, List<String> tooltip, ITooltipFlag flagIn) {
         super.addInformation(stack, worldIn, tooltip, flagIn);
+        if (!Configuration.foodEffectTooltip) {
+            return;
+        }
 
 //        tooltip.add(TextFormatting.GRAY + new TextComponentTranslation("farmersdelight.tooltip.food.hunger",
 //                String.valueOf(this.foodAmount)).getFormattedText());

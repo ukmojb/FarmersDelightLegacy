@@ -4,8 +4,12 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.wdcftgg.farmersdelightlegacy.FarmersDelightLegacy;
+import com.wdcftgg.farmersdelightlegacy.common.Configuration;
 import com.wdcftgg.farmersdelightlegacy.common.registry.ModOreDictionary;
+import net.minecraft.enchantment.EnchantmentHelper;
+import net.minecraft.init.Enchantments;
 import net.minecraft.item.Item;
+import net.minecraft.item.ItemAxe;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fml.common.Loader;
@@ -48,7 +52,7 @@ public final class CuttingBoardRecipeManager {
 
         for (CuttingRecipeEntry recipeEntry : getAllRecipeEntries()) {
             if (recipeEntry.matches(inputStack, toolStack)) {
-                return recipeEntry.rollResults(random);
+                return recipeEntry.rollResults(random, getFortuneLevel(toolStack));
             }
         }
         return Collections.emptyList();
@@ -401,6 +405,13 @@ public final class CuttingBoardRecipeManager {
         return chance;
     }
 
+    private static int getFortuneLevel(ItemStack toolStack) {
+        if (toolStack.isEmpty()) {
+            return 0;
+        }
+        return EnchantmentHelper.getEnchantmentLevel(Enchantments.FORTUNE, toolStack);
+    }
+
     private static List<ItemStack> copyStacks(List<ItemStack> source) {
         List<ItemStack> result = new ArrayList<>();
         for (ItemStack stack : source) {
@@ -429,12 +440,21 @@ public final class CuttingBoardRecipeManager {
             return inputMatcher.matches(inputStack) && toolMatcher.matchesTool(toolStack);
         }
 
-        private List<ItemStack> rollResults(Random random) {
+        private List<ItemStack> rollResults(Random random, int fortuneLevel) {
             Random actualRandom = random == null ? new Random() : random;
             List<ItemStack> rolledResults = new ArrayList<>();
             for (ResultEntry resultEntry : resultEntries) {
-                if (resultEntry.chance >= 1.0F || actualRandom.nextFloat() <= resultEntry.chance) {
-                    rolledResults.add(resultEntry.stack.copy());
+                double chance = Math.min(1.0D, resultEntry.chance + Configuration.cuttingBoardFortuneBonus * fortuneLevel);
+                int outputCount = resultEntry.stack.getCount();
+                for (int roll = 0; roll < resultEntry.stack.getCount(); roll++) {
+                    if (actualRandom.nextFloat() > chance) {
+                        outputCount--;
+                    }
+                }
+                if (outputCount > 0) {
+                    ItemStack resultStack = resultEntry.stack.copy();
+                    resultStack.setCount(outputCount);
+                    rolledResults.add(resultStack);
                 }
             }
             return rolledResults;
@@ -650,6 +670,12 @@ public final class CuttingBoardRecipeManager {
             }
 
             for (String oreName : oreDictNames) {
+                if (Configuration.toolAxeUsesItemAxeCheck && "toolAxe".equals(oreName)) {
+                    if (stack.getItem() instanceof ItemAxe) {
+                        return true;
+                    }
+                    continue;
+                }
                 for (ItemStack oreStack : OreDictionary.getOres(oreName)) {
                     if (isItemAndMetaMatch(oreStack, stack)) {
                         return true;

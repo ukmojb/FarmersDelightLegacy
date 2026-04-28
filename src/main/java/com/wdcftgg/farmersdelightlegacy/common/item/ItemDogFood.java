@@ -1,5 +1,6 @@
 package com.wdcftgg.farmersdelightlegacy.common.item;
 
+import com.wdcftgg.farmersdelightlegacy.common.Configuration;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.passive.EntityWolf;
@@ -21,7 +22,7 @@ import javax.annotation.Nullable;
 import java.util.Arrays;
 import java.util.List;
 
-public class ItemDogFood extends ItemFoodTooltip {
+public class ItemDogFood extends ItemBowlFoodTooltip {
 
     private static final List<PotionEffect> FEEDING_EFFECTS = Arrays.asList(
             new PotionEffect(MobEffects.SPEED, 6000, 0),
@@ -91,6 +92,9 @@ public class ItemDogFood extends ItemFoodTooltip {
     @Override
     public void addInformation(ItemStack stack, @Nullable World worldIn, List<String> tooltip, ITooltipFlag flagIn) {
         super.addInformation(stack, worldIn, tooltip, flagIn);
+        if (!Configuration.foodEffectTooltip) {
+            return;
+        }
         tooltip.add(TextFormatting.GRAY + new TextComponentTranslation("farmersdelight.tooltip.dog_food.when_feeding").getFormattedText());
         for (PotionEffect effect : FEEDING_EFFECTS) {
             String duration = Potion.getPotionDurationString(effect, 1.0F);

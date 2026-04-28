@@ -1,6 +1,7 @@
 package com.wdcftgg.farmersdelightlegacy.common.event;
 
 import com.wdcftgg.farmersdelightlegacy.FarmersDelightLegacy;
+import com.wdcftgg.farmersdelightlegacy.common.Configuration;
 import com.wdcftgg.farmersdelightlegacy.common.registry.ModBlocks;
 import com.wdcftgg.farmersdelightlegacy.common.registry.ModEffects;
 import com.wdcftgg.farmersdelightlegacy.common.registry.ModEnchantments;
@@ -36,6 +37,7 @@ public final class RegistryEventHandler {
         ModBlocks.registerItemBlocks(event);
         ModItems.registerAll(event);
         ModOreDictionary.registerAll();
+        Configuration.applyRuntimeOverrides();
     }
 
     @SubscribeEvent

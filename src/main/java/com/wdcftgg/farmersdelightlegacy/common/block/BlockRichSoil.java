@@ -1,7 +1,9 @@
 package com.wdcftgg.farmersdelightlegacy.common.block;
 
+import com.wdcftgg.farmersdelightlegacy.common.Configuration;
 import com.wdcftgg.farmersdelightlegacy.common.registry.ModBlocks;
 import net.minecraft.block.Block;
+import net.minecraft.block.IGrowable;
 import net.minecraft.block.BlockFarmland;
 import net.minecraft.block.SoundType;
 import net.minecraft.block.material.Material;
@@ -57,18 +59,28 @@ public class BlockRichSoil extends Block {
 
     @Override
     public void updateTick(World worldIn, BlockPos pos, IBlockState state, Random rand) {
-        if (worldIn.isRemote) {
+        if (worldIn.isRemote || Configuration.richSoilBoostChance <= 0.0D || rand.nextFloat() > Configuration.richSoilBoostChance) {
             return;
         }
 
         BlockPos abovePos = pos.up();
-        Block aboveBlock = worldIn.getBlockState(abovePos).getBlock();
+        IBlockState aboveState = worldIn.getBlockState(abovePos);
+        Block aboveBlock = aboveState.getBlock();
         if (aboveBlock == Blocks.BROWN_MUSHROOM) {
             worldIn.setBlockState(abovePos, ModBlocks.BROWN_MUSHROOM_COLONY.getDefaultState(), 3);
             return;
         }
         if (aboveBlock == Blocks.RED_MUSHROOM) {
             worldIn.setBlockState(abovePos, ModBlocks.RED_MUSHROOM_COLONY.getDefaultState(), 3);
+            return;
+        }
+        if (!(aboveBlock instanceof IGrowable)) {
+            return;
+        }
+
+        IGrowable growable = (IGrowable) aboveBlock;
+        if (growable.canGrow(worldIn, abovePos, aboveState, false) && growable.canUseBonemeal(worldIn, rand, abovePos, aboveState)) {
+            growable.grow(worldIn, rand, abovePos, aboveState);
         }
     }
 

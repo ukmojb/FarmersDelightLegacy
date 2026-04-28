@@ -16,7 +16,7 @@ crt联动 ✓
 
 将配方中的染料矿辞改为具体物品(可可豆,骨粉) ✓
 
-VillageNames联动:
+VillageNames联动: ✓
 平原正常生成
 沙漠生成失败,且火把柱生成过多
 雪原生成失败,且火把柱生成过多
@@ -24,3 +24,22 @@ VillageNames联动:
 针叶林生成失败,但没见到火把柱
 
 村庄内看到了campfire的方块生成,去看看有没有什么联动,如果有就更改现在代码到和已有联动相同写法
+
+
+碗装食物吃了之后不会返还碗 ✓
+刀如果掉耐久了,其矿辞就消失了 ✓
+
+做配置文件 ✓
+
+上游的村民交易、流浪商人、配方书、战利品注入、发射器切菜板等配置键已迁移保留，
+但本 1.12.2 端当前没有等价运行路径，后续若补齐对应功能再直接挂接这些键。
+
+未使用配置项
+
+farmersBuyFDCrops：当前 1.12.2 端没有对应村民交易注入逻辑，所以配置只生成不生效。
+wanderingTraderSellsFDItems：MC 1.12.2 原版没有流浪商人，因此无可挂接行为。 --不实现
+enableRecipeBookCookingPot：当前烹饪锅 GUI 没有 1.13+ 配方书控件实现。 --不实现
+dispenserUsesToolsOnCuttingBoard：当前没有发射器驱动切菜板的行为实现。
+generateFDChestLoot：当前没有把 FD 物品注入原版箱子战利品表的逻辑。
+generateVillageFarmFDCrops：当前没有村庄农田作物替换/生成逻辑。
+

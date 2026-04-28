@@ -1,5 +1,6 @@
 package com.wdcftgg.farmersdelightlegacy.common.block;
 
+import com.wdcftgg.farmersdelightlegacy.common.Configuration;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockPane;
 import net.minecraft.block.SoundType;
@@ -107,7 +108,7 @@ public class BlockRope extends BlockPane {
             return false;
         }
 
-        if (playerIn.isSneaking()) {
+        if (playerIn.isSneaking() && Configuration.enableRopeReeling) {
             return reelRope(worldIn, pos, playerIn);
         }
 

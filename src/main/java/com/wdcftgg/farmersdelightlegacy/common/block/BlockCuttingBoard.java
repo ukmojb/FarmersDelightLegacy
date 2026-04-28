@@ -138,6 +138,18 @@ public class BlockCuttingBoard extends BlockHorizontal implements ITileEntityPro
     }
 
     private static void processStoredItem(World world, BlockPos pos, IBlockState state, EntityPlayer player, TileEntityCuttingBoard cuttingBoard, ItemStack toolStack) {
+        processStoredItem(world, pos, state, player, cuttingBoard, toolStack, true);
+    }
+
+    public static boolean processStoredItemFromDispenser(World world, BlockPos pos, IBlockState state, TileEntityCuttingBoard cuttingBoard, ItemStack toolStack) {
+        if (cuttingBoard == null || cuttingBoard.isEmpty() || !CuttingBoardRecipeManager.hasRecipe(cuttingBoard.getStoredItem(), toolStack)) {
+            return false;
+        }
+        processStoredItem(world, pos, state, null, cuttingBoard, toolStack, true);
+        return true;
+    }
+
+    private static void processStoredItem(World world, BlockPos pos, IBlockState state, EntityPlayer player, TileEntityCuttingBoard cuttingBoard, ItemStack toolStack, boolean damageTool) {
         ItemStack particleStack = cuttingBoard.getStoredItem();
         List<ItemStack> craftedStacks = cuttingBoard.processStoredItem(toolStack);
         EnumFacing dropFacing = state.getValue(FACING).rotateYCCW();
@@ -156,13 +168,24 @@ public class BlockCuttingBoard extends BlockHorizontal implements ITileEntityPro
             drop.motionZ = dropFacing.getZOffset() * 0.2D;
             world.spawnEntity(drop);
         }
-        if (!toolStack.isEmpty()) {
-            toolStack.damageItem(1, player);
+        if (damageTool && !toolStack.isEmpty()) {
+            damageTool(world, player, toolStack);
         }
         world.playSound(null, pos, ModSounds.CUTTING_BOARD_KNIFE, SoundCategory.BLOCKS, 0.9F, 1.0F);
         spawnCuttingParticles(world, pos, particleStack, 5);
         if (player instanceof net.minecraft.entity.player.EntityPlayerMP) {
             ModAdvancements.USE_CUTTING_BOARD.trigger((net.minecraft.entity.player.EntityPlayerMP) player);
+        }
+    }
+
+    private static void damageTool(World world, EntityPlayer player, ItemStack toolStack) {
+        if (player != null) {
+            toolStack.damageItem(1, player);
+            return;
+        }
+        if (toolStack.attemptDamageItem(1, world.rand, null)) {
+            toolStack.shrink(1);
+            toolStack.setItemDamage(0);
         }
     }
 

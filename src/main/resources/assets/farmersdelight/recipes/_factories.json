@@ -1,5 +1,8 @@
 {
   "recipes": {
     "smelting": "com.wdcftgg.farmersdelightlegacy.common.recipe.LegacyHeatingRecipe$Factory"
+  },
+  "conditions": {
+    "vanilla_crates_enabled": "com.wdcftgg.farmersdelightlegacy.common.recipe.VanillaCrateEnabledCondition"
   }
 }

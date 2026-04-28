@@ -1,5 +1,6 @@
 package com.wdcftgg.farmersdelightlegacy.common.item;
 
+import com.wdcftgg.farmersdelightlegacy.common.Configuration;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.passive.AbstractHorse;
@@ -81,6 +82,9 @@ public class ItemHorseFeed extends ItemFoodTooltip {
     @Override
     public void addInformation(ItemStack stack, @Nullable World worldIn, List<String> tooltip, ITooltipFlag flagIn) {
         super.addInformation(stack, worldIn, tooltip, flagIn);
+        if (!Configuration.foodEffectTooltip) {
+            return;
+        }
         tooltip.add(TextFormatting.GRAY + new TextComponentTranslation("farmersdelight.tooltip.horse_feed.when_feeding").getFormattedText());
         for (PotionEffect effect : FEEDING_EFFECTS) {
             String duration = Potion.getPotionDurationString(effect, 1.0F);

@@ -78,9 +78,13 @@ public final class ModOreDictionary {
 
         for (Map.Entry<String, Item> entry : ModItems.ITEMS.entrySet()) {
             if (entry.getKey().endsWith("_knife")) {
-                OreDictionary.registerOre("toolKnife", entry.getValue());
+                OreDictionary.registerOre("toolKnife", new ItemStack(entry.getValue(), 1, OreDictionary.WILDCARD_VALUE));
             }
         }
+
+        registerOreStack("fdRopes", new ItemStack(ModBlocks.ROPE));
+        registerOreStack("rope", new ItemStack(ModBlocks.ROPE));
+        registerOreStack("blockRope", new ItemStack(ModBlocks.ROPE));
 
         registerCanvasSignOreGroups();
     }
@@ -130,7 +134,7 @@ public final class ModOreDictionary {
 
         registerOreStack("toolShears", new ItemStack(Items.SHEARS));
 
-        if (!Loader.isModLoaded("futuremc")) registerOreStack("cropSweetBerry", Items.APPLE.getDefaultInstance());
+        if (!Loader.isModLoaded("futuremc")) registerOreStack("cropSweetBerry", new ItemStack(Items.APPLE));
 
 
 

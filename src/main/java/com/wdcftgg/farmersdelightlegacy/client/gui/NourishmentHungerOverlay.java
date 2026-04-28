@@ -1,6 +1,7 @@
 package com.wdcftgg.farmersdelightlegacy.client.gui;
 
 import com.wdcftgg.farmersdelightlegacy.FarmersDelightLegacy;
+import com.wdcftgg.farmersdelightlegacy.common.Configuration;
 import com.wdcftgg.farmersdelightlegacy.common.registry.ModEffects;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;
@@ -33,7 +34,7 @@ public final class NourishmentHungerOverlay {
 
         Minecraft minecraft = Minecraft.getMinecraft();
         EntityPlayer player = minecraft.player;
-        if (player == null || minecraft.gameSettings.hideGUI || player.getRidingEntity() != null
+        if (!Configuration.nourishmentHungerOverlay || player == null || minecraft.gameSettings.hideGUI || player.getRidingEntity() != null
                 || !minecraft.playerController.shouldDrawHUD() || ModEffects.NOURISHMENT == null
                 || !player.isPotionActive(ModEffects.NOURISHMENT)) {
             return;

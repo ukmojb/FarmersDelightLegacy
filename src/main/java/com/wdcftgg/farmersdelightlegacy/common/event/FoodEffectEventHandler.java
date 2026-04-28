@@ -1,6 +1,7 @@
 package com.wdcftgg.farmersdelightlegacy.common.event;
 
 import com.wdcftgg.farmersdelightlegacy.FarmersDelightLegacy;
+import com.wdcftgg.farmersdelightlegacy.common.Configuration;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.init.Items;
 import net.minecraft.item.Item;
@@ -37,19 +38,25 @@ public final class FoodEffectEventHandler {
         }
 
         Item item = stack.getItem();
-        if (item == Items.RABBIT_STEW) {
+        if (Configuration.rabbitStewJumpBoost && item == Items.RABBIT_STEW) {
             entity.addPotionEffect(new PotionEffect(net.minecraft.init.MobEffects.JUMP_BOOST, 200, 1));
         }
 
-        PotionEffect effect = getVanillaSoupEffects().get(item);
-        if (effect != null) {
-            entity.addPotionEffect(new PotionEffect(effect));
+        if (Configuration.vanillaSoupExtraEffects) {
+            PotionEffect effect = getVanillaSoupEffects().get(item);
+            if (effect != null) {
+                entity.addPotionEffect(new PotionEffect(effect));
+            }
         }
     }
 
     @SideOnly(Side.CLIENT)
     @SubscribeEvent
     public static void onItemTooltip(ItemTooltipEvent event) {
+        if (!Configuration.foodEffectTooltip || !Configuration.vanillaSoupExtraEffects) {
+            return;
+        }
+
         PotionEffect effect = getVanillaSoupEffects().get(event.getItemStack().getItem());
         if (effect == null) {
             return;

@@ -2,6 +2,7 @@ package com.wdcftgg.farmersdelightlegacy.common.registry;
 
 import com.wdcftgg.farmersdelightlegacy.FarmersDelightLegacy;
 import com.wdcftgg.farmersdelightlegacy.common.ModCreativeTab;
+import com.wdcftgg.farmersdelightlegacy.common.item.ItemBowlFoodTooltip;
 import com.wdcftgg.farmersdelightlegacy.common.item.ItemDrinkableTooltip;
 import com.wdcftgg.farmersdelightlegacy.common.item.ItemDogFood;
 import com.wdcftgg.farmersdelightlegacy.common.item.ItemFoodTooltip;
@@ -77,6 +78,16 @@ public final class ModItems {
             "roasted_mutton_chops", "vegetable_noodles", "steak_and_potatoes", "ratatouille",
             "squid_ink_pasta", "grilled_salmon", "roast_chicken", "stuffed_pumpkin",
             "honey_glazed_ham", "shepherds_pie", "dog_food", "horse_feed", "rotten_tomato"
+    ));
+
+    private static final Set<String> BOWL_FOOD_NAMES = new HashSet<>(Arrays.asList(
+            "fruit_salad", "mixed_salad", "nether_salad",
+            "cooked_rice", "bone_broth", "beef_stew", "chicken_soup", "vegetable_soup", "fish_stew",
+            "fried_rice", "pumpkin_soup", "baked_cod_stew", "noodle_soup",
+            "bacon_and_eggs", "pasta_with_meatballs", "pasta_with_mutton_chop", "mushroom_rice",
+            "roasted_mutton_chops", "vegetable_noodles", "steak_and_potatoes", "ratatouille",
+            "squid_ink_pasta", "grilled_salmon", "roast_chicken", "stuffed_pumpkin",
+            "honey_glazed_ham", "shepherds_pie", "dog_food", "tomato_sauce"
     ));
 
     public static final Map<String, Item> ITEMS = new LinkedHashMap<>();
@@ -234,8 +245,10 @@ public final class ModItems {
 
     private static Item registerFood(String path, int amount, float saturation, boolean alwaysEdible, String effectId, int duration,
                                      int amplifier, float chance, String... extraTooltipKeys) {
-        ItemFoodTooltip item = new ItemFoodTooltip(amount, saturation, false,
-                effectId == null ? null : new ResourceLocation(effectId), duration, amplifier, chance, extraTooltipKeys);
+        ResourceLocation effectResource = effectId == null ? null : new ResourceLocation(effectId);
+        ItemFoodTooltip item = BOWL_FOOD_NAMES.contains(path)
+                ? new ItemBowlFoodTooltip(amount, saturation, false, effectResource, duration, amplifier, chance, extraTooltipKeys)
+                : new ItemFoodTooltip(amount, saturation, false, effectResource, duration, amplifier, chance, extraTooltipKeys);
         if (alwaysEdible) {
             item.setAlwaysEdible();
         }

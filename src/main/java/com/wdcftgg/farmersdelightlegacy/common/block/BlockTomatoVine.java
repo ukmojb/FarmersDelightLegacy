@@ -1,5 +1,6 @@
 package com.wdcftgg.farmersdelightlegacy.common.block;
 
+import com.wdcftgg.farmersdelightlegacy.common.Configuration;
 import com.wdcftgg.farmersdelightlegacy.common.advancement.ModAdvancements;
 import com.wdcftgg.farmersdelightlegacy.common.registry.ModBlocks;
 import com.wdcftgg.farmersdelightlegacy.common.registry.ModItems;
@@ -116,7 +117,7 @@ public class BlockTomatoVine extends BlockCrops {
             boolean ropelogged = state.getValue(ROPELOGGED);
             worldIn.destroyBlock(pos, true);
             if (ropelogged) {
-                worldIn.setBlockState(pos, ModBlocks.ROPE.getDefaultState(), 3);
+                worldIn.setBlockState(pos, getConfiguredRopeState(), 3);
             }
             return;
         }
@@ -156,7 +157,7 @@ public class BlockTomatoVine extends BlockCrops {
         }
 
         BlockPos abovePos = pos.up();
-        if (worldIn.getBlockState(abovePos).getBlock() != ModBlocks.ROPE) {
+        if (!Configuration.isTomatoVineClimbableRope(worldIn.getBlockState(abovePos).getBlock())) {
             return;
         }
 
@@ -208,8 +209,16 @@ public class BlockTomatoVine extends BlockCrops {
         boolean ropelogged = state.getValue(ROPELOGGED);
         super.breakBlock(worldIn, pos, state);
         if (!worldIn.isRemote && ropelogged && worldIn.isAirBlock(pos)) {
-            worldIn.setBlockState(pos, ModBlocks.ROPE.getDefaultState(), 3);
+            worldIn.setBlockState(pos, getConfiguredRopeState(), 3);
         }
+    }
+
+    private static IBlockState getConfiguredRopeState() {
+        Block ropeBlock = Configuration.getDefaultTomatoVineRopeBlock();
+        if (ropeBlock == null) {
+            ropeBlock = ModBlocks.ROPE;
+        }
+        return ropeBlock.getDefaultState();
     }
 
     @Override

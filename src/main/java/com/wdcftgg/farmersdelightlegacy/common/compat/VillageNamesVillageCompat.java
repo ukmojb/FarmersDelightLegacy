@@ -6,10 +6,16 @@ import astrotibs.villagenames.utility.FunctionsVN.VillageType;
 import astrotibs.villagenames.village.StructureVillageVN;
 import com.google.common.base.Optional;
 import com.wdcftgg.farmersdelightlegacy.FarmersDelightLegacy;
+import com.wdcftgg.farmersdelightlegacy.common.Configuration;
 import com.wdcftgg.farmersdelightlegacy.common.block.BlockOrganicCompost;
 import com.wdcftgg.farmersdelightlegacy.common.registry.ModBlocks;
 import net.minecraft.block.Block;
+import net.minecraft.block.BlockBush;
+import net.minecraft.block.BlockCrops;
 import net.minecraft.block.BlockDirt;
+import net.minecraft.block.BlockFarmland;
+import net.minecraft.block.BlockFence;
+import net.minecraft.block.BlockFenceGate;
 import net.minecraft.block.BlockDoor;
 import net.minecraft.block.BlockLog;
 import net.minecraft.block.BlockNewLog;
@@ -27,6 +33,7 @@ import net.minecraft.block.properties.IProperty;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.EnumDyeColor;
+import net.minecraft.item.ItemAxe;
 import net.minecraft.nbt.CompressedStreamTools;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
@@ -49,6 +56,7 @@ import net.minecraftforge.fml.common.registry.VillagerRegistry;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -57,6 +65,8 @@ import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Queue;
+import java.util.Random;
 import java.util.Set;
 
 public final class VillageNamesVillageCompat {
@@ -122,7 +132,7 @@ public final class VillageNamesVillageCompat {
     }
 
     public static void registerAll() {
-        if (registered || !Loader.isModLoaded("villagenames")) {
+        if (registered || !Configuration.generateVillageCompostHeaps || !Loader.isModLoaded("villagenames")) {
             return;
         }
 
@@ -200,6 +210,190 @@ public final class VillageNamesVillageCompat {
 
     private static boolean isObsoleteVillageTypeMapping(String mapping) {
         return mapping != null && mapping.startsWith(OBSOLETE_GENERIC_COMPONENT_CLASS + "|");
+    }
+
+    public static void replaceVillageFarmCrops(World world, Random random, int chunkX, int chunkZ) {
+        if (!Configuration.generateVillageFarmFDCrops || !Loader.isModLoaded("villagenames")) {
+            return;
+        }
+
+        Set<BlockPos> visitedPositions = new HashSet<>();
+        int startX = chunkX << 4;
+        int startZ = chunkZ << 4;
+        for (int localX = 0; localX < 16; localX++) {
+            for (int localZ = 0; localZ < 16; localZ++) {
+                replaceVillageFarmColumn(world, startX + localX, startZ + localZ, visitedPositions);
+            }
+        }
+    }
+
+    private static void replaceVillageFarmColumn(World world, int x, int z, Set<BlockPos> visitedPositions) {
+        int topY = Math.min(255, world.getHeight(x, z));
+        for (int y = 48; y <= topY; y++) {
+            BlockPos cropPos = new BlockPos(x, y, z);
+            if (visitedPositions.contains(cropPos)) {
+                continue;
+            }
+
+            IBlockState cropState = world.getBlockState(cropPos);
+            if (!isVillageFarmTarget(world, cropPos, cropState) || !hasVillageNamesFarmFootprint(world, cropPos)) {
+                continue;
+            }
+
+            List<BlockPos> cropBlockPositions = collectVillageFarmCropBlock(world, cropPos, visitedPositions);
+            if (cropBlockPositions.size() < 4) {
+                continue;
+            }
+
+            int replacementChoice = getVillageFarmReplacementChoice(world, cropBlockPositions);
+            replaceVillageFarmCropBlock(world, cropBlockPositions, replacementChoice);
+        }
+    }
+
+    private static boolean isVillageFarmTarget(World world, BlockPos cropPos, IBlockState cropState) {
+        return world.getBlockState(cropPos.down()).getBlock() == Blocks.FARMLAND && isVillageFarmCrop(cropState);
+    }
+
+    private static List<BlockPos> collectVillageFarmCropBlock(World world, BlockPos origin, Set<BlockPos> visitedPositions) {
+        List<BlockPos> cropBlockPositions = new ArrayList<>();
+        Queue<BlockPos> pendingPositions = new ArrayDeque<>();
+        visitedPositions.add(origin);
+        pendingPositions.add(origin);
+
+        while (!pendingPositions.isEmpty() && cropBlockPositions.size() < 128) {
+            BlockPos currentPos = pendingPositions.remove();
+            IBlockState currentState = world.getBlockState(currentPos);
+            if (!isVillageFarmTarget(world, currentPos, currentState)) {
+                continue;
+            }
+
+            cropBlockPositions.add(currentPos);
+            for (EnumFacing facing : EnumFacing.Plane.HORIZONTAL) {
+                BlockPos nextPos = currentPos.offset(facing);
+                if (visitedPositions.add(nextPos)) {
+                    pendingPositions.add(nextPos);
+                }
+            }
+        }
+
+        return cropBlockPositions;
+    }
+
+    private static void replaceVillageFarmCropBlock(World world, List<BlockPos> cropBlockPositions, int replacementChoice) {
+        for (BlockPos cropPos : cropBlockPositions) {
+            IBlockState cropState = world.getBlockState(cropPos);
+            IBlockState replacementState = getVillageFarmReplacement(replacementChoice, cropState);
+            if (replacementState != null && canVillageReplacementStay(world, cropPos, replacementState)) {
+                world.setBlockState(cropPos, replacementState, 2);
+            }
+        }
+    }
+
+    private static boolean isVillageFarmCrop(IBlockState state) {
+        Block block = state.getBlock();
+        return block == Blocks.WHEAT
+                || block == Blocks.CARROTS
+                || block == Blocks.POTATOES
+                || block == Blocks.BEETROOTS
+                || block == ModBlocks.CABBAGES
+                || block == ModBlocks.ONIONS
+                || block == ModBlocks.BUDDING_TOMATOES;
+    }
+
+    private static boolean hasVillageNamesFarmFootprint(World world, BlockPos cropPos) {
+        int farmCropCount = 0;
+        int villageBlockCount = 0;
+        for (int offsetX = -3; offsetX <= 3; offsetX++) {
+            for (int offsetZ = -3; offsetZ <= 3; offsetZ++) {
+                BlockPos nearbyPos = cropPos.add(offsetX, 0, offsetZ);
+                IBlockState nearbyCrop = world.getBlockState(nearbyPos);
+                IBlockState nearbySoil = world.getBlockState(nearbyPos.down());
+                if (nearbySoil.getBlock() == Blocks.FARMLAND && isVillageFarmCrop(nearbyCrop)) {
+                    farmCropCount++;
+                }
+
+                IBlockState surfaceState = world.getBlockState(nearbyPos.down());
+                if (isVillageNamesSurfaceBlock(surfaceState) || isVillageNamesSurfaceBlock(world.getBlockState(nearbyPos))) {
+                    villageBlockCount++;
+                }
+            }
+        }
+        return farmCropCount >= 6 && villageBlockCount >= 2;
+    }
+
+    private static boolean isVillageNamesSurfaceBlock(IBlockState state) {
+        Block block = state.getBlock();
+        return block == Blocks.GRAVEL
+                || block == Blocks.COBBLESTONE
+                || block == Blocks.PLANKS
+                || block == Blocks.LOG
+                || block == Blocks.LOG2
+                || block == Blocks.WATER
+                || block == Blocks.FLOWING_WATER
+                || block instanceof BlockFarmland
+                || block instanceof BlockFence
+                || block instanceof BlockFenceGate;
+    }
+
+    private static int getVillageFarmReplacementChoice(World world, List<BlockPos> cropBlockPositions) {
+        BlockPos anchorPos = cropBlockPositions.get(0);
+        for (BlockPos cropPos : cropBlockPositions) {
+            if (cropPos.getX() < anchorPos.getX()
+                    || cropPos.getX() == anchorPos.getX() && cropPos.getZ() < anchorPos.getZ()
+                    || cropPos.getX() == anchorPos.getX() && cropPos.getZ() == anchorPos.getZ() && cropPos.getY() < anchorPos.getY()) {
+                anchorPos = cropPos;
+            }
+        }
+
+        long blockSeed = world.getSeed();
+        blockSeed ^= anchorPos.getX() * 341873128712L;
+        blockSeed ^= anchorPos.getZ() * 132897987541L;
+        blockSeed ^= anchorPos.getY() * 42317861L;
+        return (int) Math.floorMod(blockSeed, 7L);
+    }
+
+    private static IBlockState getVillageFarmReplacement(int choice, IBlockState sourceState) {
+        int sourceAge = getVillageCropAge(sourceState);
+        if (choice == 0) {
+            return getCropState(Blocks.WHEAT, sourceAge);
+        }
+        if (choice == 1) {
+            return getCropState(Blocks.CARROTS, sourceAge);
+        }
+        if (choice == 2) {
+            return getCropState(Blocks.POTATOES, sourceAge);
+        }
+        if (choice == 3) {
+            return getCropState(Blocks.BEETROOTS, sourceAge);
+        }
+        if (choice == 4) {
+            return getCropState(ModBlocks.CABBAGES, sourceAge);
+        }
+        if (choice == 5) {
+            return getCropState(ModBlocks.ONIONS, sourceAge);
+        }
+        return getCropState(ModBlocks.BUDDING_TOMATOES, sourceAge);
+    }
+
+    private static IBlockState getCropState(Block cropBlock, int sourceAge) {
+        BlockCrops crop = (BlockCrops) cropBlock;
+        return crop.withAge(Math.min(sourceAge, crop.getMaxAge()));
+    }
+
+    private static boolean canVillageReplacementStay(World world, BlockPos cropPos, IBlockState replacementState) {
+        Block block = replacementState.getBlock();
+        if (block instanceof BlockBush) {
+            return ((BlockBush) block).canBlockStay(world, cropPos, replacementState);
+        }
+        return block.canPlaceBlockAt(world, cropPos);
+    }
+
+    private static int getVillageCropAge(IBlockState sourceState) {
+        Block block = sourceState.getBlock();
+        if (block instanceof BlockCrops) {
+            return block.getMetaFromState(sourceState) & 7;
+        }
+        return 0;
     }
 
     private interface PieceFactory {

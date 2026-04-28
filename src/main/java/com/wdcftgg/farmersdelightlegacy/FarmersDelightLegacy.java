@@ -1,10 +1,13 @@
 package com.wdcftgg.farmersdelightlegacy;
 
+import com.wdcftgg.farmersdelightlegacy.common.Configuration;
 import com.wdcftgg.farmersdelightlegacy.common.advancement.ModAdvancements;
 import com.wdcftgg.farmersdelightlegacy.common.compat.CampfireHeatSourceCompat;
 import com.wdcftgg.farmersdelightlegacy.common.compat.FutureMcSmithingCompat;
 import com.wdcftgg.farmersdelightlegacy.common.compat.VillageNamesVillageCompat;
 import com.wdcftgg.farmersdelightlegacy.common.event.HeatSourceExample;
+import com.wdcftgg.farmersdelightlegacy.common.registry.ModDispenserBehaviors;
+import com.wdcftgg.farmersdelightlegacy.common.event.ModVillagerTradeHandler;
 import com.wdcftgg.farmersdelightlegacy.common.gui.ModGuiHandler;
 import com.wdcftgg.farmersdelightlegacy.common.recipe.LegacyHeatingRecipe;
 import com.wdcftgg.farmersdelightlegacy.common.registry.ModEntities;
@@ -42,6 +45,8 @@ public class FarmersDelightLegacy {
 
     @Mod.EventHandler
     public void preInit(FMLPreInitializationEvent event) {
+        Configuration.load(event.getSuggestedConfigurationFile());
+        Configuration.applyRuntimeOverrides();
         ModAdvancements.registerAll();
         ModEntities.registerAll();
         ModTileEntities.registerAll();
@@ -55,6 +60,7 @@ public class FarmersDelightLegacy {
     public void init(FMLInitializationEvent event) {
         CampfireHeatSourceCompat.registerAll();
         FutureMcSmithingCompat.registerAll();
+        ModVillagerTradeHandler.registerAll();
         if (Loader.isModLoaded("villagenames")) {
             VillageNamesVillageCompat.registerAll();
         }
@@ -64,6 +70,7 @@ public class FarmersDelightLegacy {
     @Mod.EventHandler
     public void postInit(FMLPostInitializationEvent event) {
         LegacyHeatingRecipe.registerSmeltingRecipes();
+        ModDispenserBehaviors.registerAll();
     }
 
 }

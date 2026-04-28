@@ -1,5 +1,6 @@
 package com.wdcftgg.farmersdelightlegacy.common.block;
 
+import com.wdcftgg.farmersdelightlegacy.common.Configuration;
 import com.wdcftgg.farmersdelightlegacy.common.registry.ModBlocks;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockCrops;
@@ -23,9 +24,6 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 import java.util.Random;
 
 public class BlockRichSoilFarmland extends BlockFarmland {
-    private static final int BASE_BOOST_CHANCE = 8;
-    private static final int BOOSTED_CHANCE_WITH_RICH_SOIL = 4;
-
     public BlockRichSoilFarmland() {
         this.setHardness(0.7F);
         this.setResistance(2.7F);
@@ -115,8 +113,14 @@ public class BlockRichSoilFarmland extends BlockFarmland {
             return;
         }
 
-        int chance = this.hasAdjacentRichSoil(worldIn, farmlandPos) ? BOOSTED_CHANCE_WITH_RICH_SOIL : BASE_BOOST_CHANCE;
-        if (rand.nextInt(chance) != 0) {
+        double boostChance = Configuration.richSoilBoostChance;
+        if (boostChance <= 0.0D) {
+            return;
+        }
+        if (this.hasAdjacentRichSoil(worldIn, farmlandPos)) {
+            boostChance = Math.min(1.0D, boostChance * 2.0D);
+        }
+        if (rand.nextFloat() > boostChance) {
             return;
         }
 

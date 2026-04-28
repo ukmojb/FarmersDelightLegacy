@@ -1,6 +1,7 @@
 package com.wdcftgg.farmersdelightlegacy.client.render;
 
 import com.wdcftgg.farmersdelightlegacy.FarmersDelightLegacy;
+import com.wdcftgg.farmersdelightlegacy.common.Configuration;
 import com.wdcftgg.farmersdelightlegacy.common.block.BlockCanvasHangingSign;
 import com.wdcftgg.farmersdelightlegacy.common.block.BlockCanvasStandingSign;
 import com.wdcftgg.farmersdelightlegacy.common.block.BlockCanvasWallHangingSign;
@@ -95,7 +96,7 @@ public class TileEntityCanvasSignRenderer extends TileEntitySpecialRenderer<Tile
         }
         GlStateManager.popMatrix();
 
-        renderSignText(te, anyHangingSign);
+        renderSignText(te, anyHangingSign, block);
         GlStateManager.popMatrix();
     }
 
@@ -115,7 +116,7 @@ public class TileEntityCanvasSignRenderer extends TileEntitySpecialRenderer<Tile
         return DEFAULT_TEXTURE;
     }
 
-    private void renderSignText(TileEntityCanvasSign te, boolean hangingSign) {
+    private void renderSignText(TileEntityCanvasSign te, boolean hangingSign, Block block) {
         FontRenderer fontRenderer = this.getFontRenderer();
         if (hangingSign && te.isHangingTextOnBack()) {
             GlStateManager.rotate(180.0F, 0.0F, 1.0F, 0.0F);
@@ -138,14 +139,37 @@ public class TileEntityCanvasSignRenderer extends TileEntitySpecialRenderer<Tile
                 lineText = "> " + lineText + " <";
             }
             int centeredX = -fontRenderer.getStringWidth(lineText) / 2;
-            fontRenderer.drawString(lineText, centeredX, line * 10 - te.signText.length * 5, 0);
+            fontRenderer.drawString(lineText, centeredX, line * 10 - te.signText.length * 5, getTextColor(block));
         }
 
         GlStateManager.depthMask(true);
         GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
         GL11.glNormal3f(0.0F, 0.0F, -1.0F);
     }
+
+    private int getTextColor(Block block) {
+        return Configuration.isCanvasSignDarkBackground(getCanvasColorName(block)) ? 0xFFFFFF : 0;
+    }
+
+    private String getCanvasColorName(Block block) {
+        if (block == null || block.getRegistryName() == null) {
+            return "";
+        }
+
+        String path = block.getRegistryName().getPath();
+        String[] baseNames = new String[]{"canvas_sign", "canvas_wall_sign", "hanging_canvas_sign", "wall_hanging_canvas_sign"};
+        for (String baseName : baseNames) {
+            if (baseName.equals(path)) {
+                return "";
+            }
+        }
+
+        String[] suffixes = new String[]{"_canvas_sign", "_canvas_wall_sign", "_hanging_canvas_sign", "_wall_hanging_canvas_sign"};
+        for (String suffix : suffixes) {
+            if (path.endsWith(suffix)) {
+                return path.substring(0, path.length() - suffix.length());
+            }
+        }
+        return "";
+    }
 }
-
-
-
