@@ -1,5 +1,6 @@
 package com.wdcftgg.farmersdelightlegacy.common.item;
 
+import com.wdcftgg.farmersdelightlegacy.common.compat.UniversalTweaksMilkCompat;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
@@ -112,13 +113,13 @@ public class ItemDrinkableTooltip extends ItemFoodTooltip {
         CLEAR_ONE {
             @Override
             void apply(World worldIn, EntityPlayer player) {
-                clearRandomEffect(player, false, worldIn);
+                clearRandomEffect(player, false, true, worldIn);
             }
         },
         CLEAR_ONE_HARMFUL {
             @Override
             void apply(World worldIn, EntityPlayer player) {
-                clearRandomEffect(player, true, worldIn);
+                clearRandomEffect(player, true, false, worldIn);
             }
         },
         HEAL_MINOR {
@@ -130,14 +131,14 @@ public class ItemDrinkableTooltip extends ItemFoodTooltip {
 
         abstract void apply(World worldIn, EntityPlayer player);
 
-        static void clearRandomEffect(EntityPlayer player, boolean harmfulOnly, World worldIn) {
+        static void clearRandomEffect(EntityPlayer player, boolean harmfulOnly, boolean respectUniversalTweaks, World worldIn) {
             List<Potion> compatibleEffects = new ArrayList<>();
             for (PotionEffect effect : player.getActivePotionEffects()) {
                 if (harmfulOnly && !effect.getPotion().isBadEffect()) {
                     continue;
                 }
                 boolean curableByMilk = effect.getCurativeItems().stream().anyMatch(curative -> curative.getItem() == Items.MILK_BUCKET);
-                if (curableByMilk) {
+                if (curableByMilk && (!respectUniversalTweaks || UniversalTweaksMilkCompat.canMilkCure(effect))) {
                     compatibleEffects.add(effect.getPotion());
                 }
             }
