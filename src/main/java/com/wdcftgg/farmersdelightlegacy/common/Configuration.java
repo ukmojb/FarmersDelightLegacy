@@ -61,6 +61,7 @@ public final class Configuration {
 
     public static final String CATEGORY_WORLD = "world";
     public static boolean generateFDChestLoot = true;
+    public static boolean useReducedRopeChestLoot = false;
     public static boolean generateVillageCompostHeaps = true;
     public static boolean generateVillageFarmFDCrops = true;
     public static int chanceWildCabbages = 30;
@@ -175,7 +176,9 @@ public final class Configuration {
                 "List of BowlFoodItems. They must be vanilla ItemSoup items or return a bowl container to be affected.");
 
         generateFDChestLoot = config.getBoolean("generateFDChestLoot", CATEGORY_WORLD, true,
-                "Should this mod add some of its items as extra chest loot across Minecraft? (Kept for upstream parity; chest-loot injection is not present in this 1.12.2 port.)");
+                "Should this mod add some of its items as extra chest loot across Minecraft?");
+        useReducedRopeChestLoot = config.getBoolean("useReducedRopeChestLoot", CATEGORY_WORLD, true,
+                "Should abandoned mineshaft and simple dungeon chests use one rope loot roll instead of the original three rolls? Disable this to restore the original, more abundant rope loot.");
         generateVillageCompostHeaps = config.getBoolean("genVillageCompostHeaps", CATEGORY_WORLD, true,
                 "Should FD generate Compost Heaps across village biomes when the Village Names compatibility path is loaded?");
         generateVillageFarmFDCrops = config.getBoolean("genFDCropsOnVillageFarms", CATEGORY_WORLD, true,

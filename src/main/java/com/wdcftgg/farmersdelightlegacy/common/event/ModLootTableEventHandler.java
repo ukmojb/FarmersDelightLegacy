@@ -50,7 +50,7 @@ public final class ModLootTableEventHandler {
                 countEntry("cabbage_seeds", 1, 2, 4),
                 countEntry("rice", 1, 2, 4),
                 empty(2));
-        addPool(event, "fd_abandoned_mineshaft_rope", fixedRolls(3),
+        addPool(event, "fd_abandoned_mineshaft_rope", getRopeLootRolls(),
                 countEntry("rope", 1, 2, 12),
                 empty(2));
     }
@@ -59,7 +59,7 @@ public final class ModLootTableEventHandler {
                 countEntry("tomato_seeds", 1, 2, 4),
                 countEntry("cabbage_seeds", 1, 2, 4),
                 empty(2));
-        addPool(event, "fd_simple_dungeon_rope", fixedRolls(3),
+        addPool(event, "fd_simple_dungeon_rope", getRopeLootRolls(),
                 countEntry("rope", 1, 2, 12),
                 empty(2));
     }
@@ -131,6 +131,9 @@ public final class ModLootTableEventHandler {
     }
     private static RandomValueRange fixedRolls(float value) {
         return new RandomValueRange(value);
+    }
+    private static RandomValueRange getRopeLootRolls() {
+        return fixedRolls(Configuration.useReducedRopeChestLoot ? 1 : 3);
     }
     private static RandomValueRange rangedRolls(float min, float max) {
         return new RandomValueRange(min, max);
