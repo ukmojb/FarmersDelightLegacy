@@ -21,7 +21,7 @@ public class BlockTatamiHalfMat extends BlockHorizontal {
     private static final AxisAlignedBB SHAPE = new AxisAlignedBB(0.0D, 0.0D, 0.0D, 1.0D, 2.0D / 16.0D, 1.0D);
 
     public BlockTatamiHalfMat() {
-        super(Material.CLOTH);
+        super(Material.CARPET);
         this.setHardness(0.3F);
         this.setResistance(0.3F);
         this.setSoundType(SoundType.CLOTH);
