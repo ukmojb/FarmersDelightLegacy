@@ -1,0 +1,24 @@
+{
+  "conditions": {
+    "items": [
+      "suikecherry:spruce_chest_boat",
+      "minecraft:spruce_boat"
+    ]
+  },
+  "ingredients": [
+    {
+      "item": "suikecherry:spruce_chest_boat"
+    }
+  ],
+  "tool": "ore:toolHoe",
+  "result": [
+    {
+      "item": "minecraft:spruce_boat",
+      "count": 1
+    },
+    {
+      "item": "minecraft:chest",
+      "count": 1
+    }
+  ]
+}

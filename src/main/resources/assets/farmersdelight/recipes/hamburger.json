@@ -2,14 +2,15 @@
   "type": "minecraft:crafting_shapeless",
   "ingredients": [
     {
-      "item": "minecraft:bread"
+      "type": "forge:ore_dict",
+      "ore": "foodBread"
     },
     {
       "item": "farmersdelight:beef_patty"
     },
     {
       "type": "forge:ore_dict",
-      "ore": "listAllveggie"
+      "ore": "foodLeafyGreen"
     },
     {
       "type": "forge:ore_dict",

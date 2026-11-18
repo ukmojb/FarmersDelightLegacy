@@ -1,6 +1,8 @@
 {
   "ingredients": [
-    "minecraft:bricks"
+    {
+      "item": "minecraft:brick_block"
+    }
   ],
   "tool": "ore:toolPickaxe",
   "result": [

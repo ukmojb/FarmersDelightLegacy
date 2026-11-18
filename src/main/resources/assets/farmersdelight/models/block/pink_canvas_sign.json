@@ -2,6 +2,6 @@
   "parent": "farmersdelight:block/template_canvas_sign",
   "textures": {
     "texture": "farmersdelight:item/pink_canvas_sign",
-    "particle": "farmersdelight:item/pink_canvas_sign"
+    "particle": "minecraft:blocks/planks_spruce"
   }
 }

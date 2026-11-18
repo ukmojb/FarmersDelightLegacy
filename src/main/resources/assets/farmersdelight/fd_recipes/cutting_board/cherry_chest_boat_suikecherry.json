@@ -1,0 +1,24 @@
+{
+  "conditions": {
+    "items": [
+      "suikecherry:cherry_chest_boat",
+      "suikecherry:cherry_boat"
+    ]
+  },
+  "ingredients": [
+    {
+      "item": "suikecherry:cherry_chest_boat"
+    }
+  ],
+  "tool": "ore:toolHoe",
+  "result": [
+    {
+      "item": "suikecherry:cherry_boat",
+      "count": 1
+    },
+    {
+      "item": "minecraft:chest",
+      "count": 1
+    }
+  ]
+}

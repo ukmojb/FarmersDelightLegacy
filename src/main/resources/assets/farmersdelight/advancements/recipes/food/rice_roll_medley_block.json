@@ -34,5 +34,14 @@
     "recipes": [
       "farmersdelight:rice_roll_medley_block"
     ]
-  }
+  },
+  "conditions": [
+    {
+      "type": "farmersdelight:ingredients_available",
+      "items": [
+        "farmersdelight:rice_roll_medley_block",
+        "farmersdelight:kelp_roll_slice"
+      ]
+    }
+  ]
 }

@@ -46,19 +46,8 @@ public class TileEntitySkilletRenderer extends TileEntitySpecialRenderer<TileEnt
     }
 
     private int getModelCount(ItemStack stack) {
-        if (stack.getCount() > 48) {
-            return 5;
-        }
-        if (stack.getCount() > 32) {
-            return 4;
-        }
-        if (stack.getCount() > 16) {
-            return 3;
-        }
-        if (stack.getCount() > 1) {
-            return 2;
-        }
-        return 1;
+        return stack.getCount() > 1
+                ? 1 + (int) Math.ceil(stack.getCount() * 4.0F / stack.getMaxStackSize()) : 1;
     }
 }
 

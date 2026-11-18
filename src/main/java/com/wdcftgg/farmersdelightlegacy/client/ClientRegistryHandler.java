@@ -1,7 +1,8 @@
 package com.wdcftgg.farmersdelightlegacy.client;
 
 import com.wdcftgg.farmersdelightlegacy.FarmersDelightLegacy;
-import com.wdcftgg.farmersdelightlegacy.client.model.SkilletCompositeBakedModel;
+import com.wdcftgg.farmersdelightlegacy.client.model.SkilletBakedModel;
+import com.wdcftgg.farmersdelightlegacy.client.render.SkilletItemRenderer;
 import com.wdcftgg.farmersdelightlegacy.client.particle.CookingPotParticleBridge;
 import com.wdcftgg.farmersdelightlegacy.client.render.TileEntityCanvasSignRenderer;
 import com.wdcftgg.farmersdelightlegacy.client.render.TileEntityCuttingBoardRenderer;
@@ -10,6 +11,7 @@ import com.wdcftgg.farmersdelightlegacy.client.render.TileEntityStoveRenderer;
 import com.wdcftgg.farmersdelightlegacy.common.block.sign.BlockCanvasHangingSign;
 import com.wdcftgg.farmersdelightlegacy.common.block.sign.BlockCanvasWallHangingSign;
 import com.wdcftgg.farmersdelightlegacy.common.entity.EntityRottenTomato;
+import com.wdcftgg.farmersdelightlegacy.common.entity.EntityFireproofItem;
 import com.wdcftgg.farmersdelightlegacy.common.registry.ModBlocks;
 import com.wdcftgg.farmersdelightlegacy.common.registry.ModItems;
 import com.wdcftgg.farmersdelightlegacy.common.tile.TileEntityCanvasSign;
@@ -24,6 +26,7 @@ import net.minecraft.client.renderer.block.model.ModelBakery;
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
 import net.minecraft.client.renderer.block.statemap.StateMap;
 import net.minecraft.client.renderer.entity.RenderSnowball;
+import net.minecraft.client.renderer.entity.RenderEntityItem;
 import net.minecraft.item.Item;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.client.event.ModelBakeEvent;
@@ -61,6 +64,8 @@ public final class ClientRegistryHandler {
             RenderingRegistry.registerEntityRenderingHandler(EntityRottenTomato.class,
                     renderManager -> new RenderSnowball<>(renderManager, ModItems.ITEMS.get("rotten_tomato"),
                             net.minecraft.client.Minecraft.getMinecraft().getRenderItem()));
+            RenderingRegistry.registerEntityRenderingHandler(EntityFireproofItem.class,
+                    renderManager -> new RenderEntityItem(renderManager, net.minecraft.client.Minecraft.getMinecraft().getRenderItem()));
             entityRenderersBound = true;
         }
 
@@ -96,7 +101,9 @@ public final class ClientRegistryHandler {
         IBakedModel skilletCookingModel = event.getModelRegistry().getObject(skilletCookingInventory);
 
         if (skilletBaseModel != null && skilletCookingModel != null) {
-            event.getModelRegistry().putObject(skilletInventory, new SkilletCompositeBakedModel(skilletBaseModel, skilletCookingModel));
+            SkilletItemRenderer renderer = new SkilletItemRenderer(skilletCookingModel);
+            Item.getItemFromBlock(ModBlocks.SKILLET).setTileEntityItemStackRenderer(renderer);
+            event.getModelRegistry().putObject(skilletInventory, new SkilletBakedModel(skilletBaseModel, skilletCookingModel, renderer));
         }
     }
 

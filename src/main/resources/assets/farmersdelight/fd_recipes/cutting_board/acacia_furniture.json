@@ -1,0 +1,17 @@
+{
+  "ingredients": [
+    "ore:fdFurnitureacacia"
+  ],
+  "tool": [
+    "ore:toolAxe",
+    { "action": "axe_dig" }
+  ],
+  "result": [
+    {
+      "item": "minecraft:planks",
+      "count": 1,
+      "data": 4,
+      "chance": 0.75
+    }
+  ]
+}

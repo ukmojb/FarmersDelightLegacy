@@ -28,5 +28,17 @@
     "recipes": [
       "farmersdelight:honey_glazed_ham_block"
     ]
-  }
+  },
+  "conditions": [
+    {
+      "type": "farmersdelight:ingredients_available",
+      "ores": [
+        "foodHoney",
+        "listAllberry"
+      ],
+      "items": [
+        "farmersdelight:honey_glazed_ham_block"
+      ]
+    }
+  ]
 }

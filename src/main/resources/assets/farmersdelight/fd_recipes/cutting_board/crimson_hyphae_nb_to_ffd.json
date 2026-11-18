@@ -1,0 +1,24 @@
+{
+  "conditions": {
+    "items": [
+      "nb:crimson_hyphae",
+      "farmers_future_delight:stripped_crimson_hyphae"
+    ]
+  },
+  "ingredients": [
+    {
+      "item": "nb:crimson_hyphae"
+    }
+  ],
+  "tool": "ore:toolAxe",
+  "result": [
+    {
+      "item": "farmers_future_delight:stripped_crimson_hyphae",
+      "count": 1
+    },
+    {
+      "item": "farmersdelight:tree_bark",
+      "count": 1
+    }
+  ]
+}

@@ -1,6 +1,6 @@
 {
   "ingredients": [
-    "minecraft:leather_horse_armor"
+    "ore:fdLeatherHorseArmor"
   ],
   "tool": "ore:toolShears",
   "result": [
@@ -8,5 +8,10 @@
       "item": "minecraft:leather",
       "count": 2
     }
-  ]
+  ],
+  "conditions": {
+    "ores": [
+      "fdLeatherHorseArmor"
+    ]
+  }
 }

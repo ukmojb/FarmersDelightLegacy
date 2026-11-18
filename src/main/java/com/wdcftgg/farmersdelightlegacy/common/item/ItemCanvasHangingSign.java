@@ -2,18 +2,16 @@ package com.wdcftgg.farmersdelightlegacy.common.item;
 
 import com.wdcftgg.farmersdelightlegacy.common.block.sign.BlockCanvasHangingSign;
 import com.wdcftgg.farmersdelightlegacy.common.block.sign.BlockCanvasWallHangingSign;
-import com.wdcftgg.farmersdelightlegacy.common.network.ModNetworkHandler;
-import com.wdcftgg.farmersdelightlegacy.common.network.PacketOpenCanvasSignEditor;
+import com.wdcftgg.farmersdelightlegacy.common.block.sign.CanvasSignInteractionHelper;
+import com.wdcftgg.farmersdelightlegacy.common.compat.FluidloggingCompat;
 import com.wdcftgg.farmersdelightlegacy.common.tile.TileEntityCanvasSign;
 import net.minecraft.block.Block;
 import net.minecraft.block.SoundType;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemBlock;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.tileentity.TileEntitySign;
 import net.minecraft.util.EnumActionResult;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
@@ -60,20 +58,19 @@ public class ItemCanvasHangingSign extends ItemBlock {
             return EnumActionResult.FAIL;
         }
 
-        worldIn.setBlockState(placePos, placementSelection.state, 11);
+        if (!FluidloggingCompat.placeBlock(worldIn, placePos, placementSelection.state, 11)) {
+            return EnumActionResult.FAIL;
+        }
         TileEntity tileEntity = worldIn.getTileEntity(placePos);
-        if (tileEntity instanceof TileEntityCanvasSign) {
-            TileEntityCanvasSign canvasSign = (TileEntityCanvasSign) tileEntity;
-            configureHangingTextFace(player, placePos, placementSelection.state, canvasSign);
-            if (!setTileEntityNBT(worldIn, player, placePos, stack) && player instanceof EntityPlayerMP) {
-                ((TileEntitySign) tileEntity).setPlayer(player);
-            ModNetworkHandler.INSTANCE.sendTo(new PacketOpenCanvasSignEditor(placePos), (EntityPlayerMP) player);
-            }
+        if (tileEntity instanceof TileEntityCanvasSign && !setTileEntityNBT(worldIn, player, placePos, stack)) {
+            CanvasSignInteractionHelper.openEditor(worldIn, placePos, player);
         }
 
         SoundType soundType = placementSelection.state.getBlock().getSoundType(placementSelection.state, worldIn, placePos, player);
         worldIn.playSound(null, placePos, soundType.getPlaceSound(), SoundCategory.BLOCKS, (soundType.getVolume() + 1.0F) / 2.0F, soundType.getPitch() * 0.8F);
-        stack.shrink(1);
+        if (!player.capabilities.isCreativeMode) {
+            stack.shrink(1);
+        }
         return EnumActionResult.SUCCESS;
     }
 
@@ -122,49 +119,6 @@ public class ItemCanvasHangingSign extends ItemBlock {
                 playerFacing.getOpposite()
         };
     }
-
-    private void configureHangingTextFace(EntityPlayer player, BlockPos placePos, IBlockState placedState, TileEntityCanvasSign canvasSign) {
-        if (!(placedState.getBlock() instanceof BlockCanvasWallHangingSign)) {
-            canvasSign.setHangingTextOnBack(false);
-            return;
-        }
-
-        EnumFacing defaultTextFacing = getWallHangingTextFacing(placedState, false);
-        EnumFacing flippedTextFacing = defaultTextFacing.getOpposite();
-        EnumFacing playerSide = getNearestPlayerSide(player, placePos);
-
-        int defaultScore = directionSimilarity(defaultTextFacing, playerSide);
-        int flippedScore = directionSimilarity(flippedTextFacing, playerSide);
-        boolean textOnBack = flippedScore > defaultScore;
-        canvasSign.setHangingTextOnBack(textOnBack);
-    }
-
-    private EnumFacing getWallHangingTextFacing(IBlockState placedState, boolean flipped) {
-        EnumFacing facing = placedState.getValue(BlockCanvasWallHangingSign.FACING);
-        EnumFacing attachedFace = facing.getOpposite();
-        float rotation = -attachedFace.getHorizontalAngle();
-        if (flipped) {
-            rotation += 180.0F;
-        }
-        return EnumFacing.fromAngle(rotation);
-    }
-
-    private EnumFacing getNearestPlayerSide(EntityPlayer player, BlockPos signPos) {
-        double centerX = signPos.getX() + 0.5D;
-        double centerZ = signPos.getZ() + 0.5D;
-        double diffX = player.posX - centerX;
-        double diffZ = player.posZ - centerZ;
-
-        if (Math.abs(diffX) > Math.abs(diffZ)) {
-            return diffX >= 0.0D ? EnumFacing.WEST : EnumFacing.EAST;
-        }
-        return diffZ >= 0.0D ? EnumFacing.SOUTH : EnumFacing.NORTH;
-    }
-
-    private int directionSimilarity(EnumFacing first, EnumFacing second) {
-        return first.getXOffset() * second.getXOffset() + first.getZOffset() * second.getZOffset();
-    }
-
 
     private static class PlacementSelection {
         private final Block block;

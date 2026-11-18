@@ -1,5 +1,6 @@
 package com.wdcftgg.farmersdelightlegacy.common.block;
 
+import com.wdcftgg.farmersdelightlegacy.common.compat.FluidloggingCompat;
 import com.wdcftgg.farmersdelightlegacy.common.registry.ModSounds;
 import com.wdcftgg.farmersdelightlegacy.common.tile.TileEntitySkillet;
 import net.minecraft.block.BlockHorizontal;
@@ -49,6 +50,11 @@ public class BlockSkillet extends BlockHorizontal implements ITileEntityProvider
     }
 
     @Override
+    public BlockRenderLayer getRenderLayer() {
+        return BlockRenderLayer.CUTOUT;
+    }
+
+    @Override
     public AxisAlignedBB getBoundingBox(IBlockState state, IBlockAccess source, BlockPos pos) {
         return SHAPE;
     }
@@ -89,23 +95,26 @@ public class BlockSkillet extends BlockHorizontal implements ITileEntityProvider
 
         TileEntitySkillet skillet = (TileEntitySkillet) tileEntity;
         ItemStack heldStack = playerIn.getHeldItem(hand);
-        if (!worldIn.isRemote) {
-            if (heldStack.isEmpty()) {
-                ItemStack extracted = skillet.removeItem();
-                if (!extracted.isEmpty() && !playerIn.capabilities.isCreativeMode) {
-                    playerIn.setHeldItem(hand, extracted);
-                }
-            } else {
-                ItemStack remainder = skillet.addItemToCook(heldStack, playerIn);
-                if (remainder.getCount() != heldStack.getCount()) {
-                    if (!playerIn.capabilities.isCreativeMode) {
-                        playerIn.setHeldItem(hand, remainder);
-                    }
-                    worldIn.playSound(null, pos, net.minecraft.init.SoundEvents.BLOCK_METAL_PLACE, SoundCategory.BLOCKS, 0.7F, 1.0F);
-                }
-            }
+        if (worldIn.isRemote) {
+            return true;
         }
-        return true;
+        if (heldStack.isEmpty()) {
+            ItemStack extracted = skillet.removeItem();
+            if (!playerIn.capabilities.isCreativeMode) {
+                playerIn.setHeldItem(hand, extracted);
+            }
+            return true;
+        }
+        ItemStack remainder = skillet.addItemToCook(heldStack, playerIn);
+        if (remainder.getCount() != heldStack.getCount()) {
+            if (!playerIn.capabilities.isCreativeMode) {
+                playerIn.setHeldItem(hand, remainder);
+            }
+            worldIn.playSound(null, pos, net.minecraft.init.SoundEvents.BLOCK_METAL_PLACE,
+                    SoundCategory.BLOCKS, 0.7F, 1.0F);
+            return true;
+        }
+        return false;
     }
 
     @Override
@@ -178,7 +187,7 @@ public class BlockSkillet extends BlockHorizontal implements ITileEntityProvider
 
     @Override
     protected BlockStateContainer createBlockState() {
-        return new BlockStateContainer(this, FACING, SUPPORT);
+        return FluidloggingCompat.createBlockState(this, FACING, SUPPORT);
     }
 
     @Override

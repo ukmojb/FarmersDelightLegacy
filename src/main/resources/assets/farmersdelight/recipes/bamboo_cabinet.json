@@ -5,6 +5,12 @@
     {
       "type": "forge:mod_loaded",
       "modid": "sakura"
+    },
+    {
+      "type": "farmersdelight:ingredients_available",
+      "items": [
+        "farmersdelight:bamboo_cabinet"
+      ]
     }
   ],
   "group": "fd_cabinet",

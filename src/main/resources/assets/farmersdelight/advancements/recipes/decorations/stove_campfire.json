@@ -1,8 +1,10 @@
 {
   "conditions": [
     {
-      "type": "forge:mod_loaded",
-      "modid": "campfire"
+      "type": "farmersdelight:ingredients_available",
+      "ores": [
+        "campfire"
+      ]
     }
   ],
   "parent": "minecraft:recipes/root",

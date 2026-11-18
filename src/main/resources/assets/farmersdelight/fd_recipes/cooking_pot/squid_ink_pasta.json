@@ -1,11 +1,11 @@
 {
   "ingredients": [
-    "ore:listAllfishraw",
+    "ore:fdSafeRawFish",
     "ore:foodPasta",
     "ore:cropTomato",
-    "minecraft:dye"
+    "minecraft:dye@0"
   ],
-  "experience": 1.0,
+  "experience": 1,
   "result": {
     "item": "farmersdelight:squid_ink_pasta",
     "count": 1

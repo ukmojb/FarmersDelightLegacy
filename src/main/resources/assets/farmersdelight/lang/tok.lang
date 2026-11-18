@@ -244,9 +244,7 @@ item.farmersdelight.vegetable_noodles.name=kili ma lon pan linja
 item.farmersdelight.vegetable_soup.name=telo moku pi kili ma
 item.farmersdelight.wheat_dough.name=pan lete
 itemGroup.farmersdelight=ante Farmer's Delight
-
 item.farmersdelight.pumpkin_pie_slice.name=kipisi pi panpi
-
 farmersdelight.advancement.craft_knife.desc=o pali e ilo kipisi moku. kepeken ona la, jan li kama jo e ijo namako tan kasi, tan soweli.
 farmersdelight.advancement.craft_knife=alasa
 farmersdelight.advancement.eat_comfort_food.desc=moku lon poki sike li pona e sijelo sina. wile moku sina li pini ala e ni!
@@ -304,3 +302,15 @@ farmersdelight.subtitles.cutting_board.remove_item=Item removed from board
 farmersdelight.subtitles.cutting_board.carve_tool=Tool carved on board
 farmersdelight.subtitles.food.take_portion=Portion served
 farmersdelight.subtitles.food.slice=Food sliced
+tile.farmersdelight.wooden_basket.name=poki palisa
+subtitles.farmersdelight.block.cooking_pot.boil=poki seli telo li kalama
+subtitles.farmersdelight.block.cutting_board.knife_cut=ilo kipisi moku li kipisi
+subtitles.farmersdelight.block.stove.crackle=supa pi seli moku li kalama
+subtitles.farmersdelight.block.skillet.sizzle=ilo luka pi seli moku li kalama
+subtitles.farmersdelight.block.skillet.add_food=ilo luka pi seli moku li kama jo
+subtitles.farmersdelight.block.cabinet.open=poki lupa li open
+subtitles.farmersdelight.block.cabinet.close=poki lupa li kama open ala
+subtitles.farmersdelight.block.tomatoes.pick_tomatoes=kili linja li weka tan kasi linja
+subtitles.farmersdelight.entity.rotten_tomato.throw=jan li pana e kili linja jaki
+subtitles.farmersdelight.entity.rotten_tomato.hit=kili linja jaki li pakala
+entity.rotten_tomato.name=kasi linja jaki

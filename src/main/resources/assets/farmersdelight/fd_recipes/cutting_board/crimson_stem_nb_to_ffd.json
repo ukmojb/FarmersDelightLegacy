@@ -1,0 +1,24 @@
+{
+  "conditions": {
+    "items": [
+      "nb:crimson_stem",
+      "farmers_future_delight:stripped_crimson_stem"
+    ]
+  },
+  "ingredients": [
+    {
+      "item": "nb:crimson_stem"
+    }
+  ],
+  "tool": "ore:toolAxe",
+  "result": [
+    {
+      "item": "farmers_future_delight:stripped_crimson_stem",
+      "count": 1
+    },
+    {
+      "item": "farmersdelight:tree_bark",
+      "count": 1
+    }
+  ]
+}

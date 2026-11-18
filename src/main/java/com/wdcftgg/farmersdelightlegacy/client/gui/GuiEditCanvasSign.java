@@ -2,7 +2,9 @@ package com.wdcftgg.farmersdelightlegacy.client.gui;
 
 import com.wdcftgg.farmersdelightlegacy.FarmersDelightLegacy;
 import com.wdcftgg.farmersdelightlegacy.client.render.ModelCanvasHangingSign;
-import com.wdcftgg.farmersdelightlegacy.common.Configuration;
+import com.wdcftgg.farmersdelightlegacy.client.render.TileEntityCanvasSignRenderer;
+import com.wdcftgg.farmersdelightlegacy.common.network.ModNetworkHandler;
+import com.wdcftgg.farmersdelightlegacy.common.network.PacketUpdateCanvasSign;
 import com.wdcftgg.farmersdelightlegacy.common.block.sign.BlockCanvasHangingSign;
 import com.wdcftgg.farmersdelightlegacy.common.block.sign.BlockCanvasStandingSign;
 import com.wdcftgg.farmersdelightlegacy.common.block.sign.BlockCanvasWallHangingSign;
@@ -12,13 +14,11 @@ import net.minecraft.block.Block;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.model.ModelSign;
-import net.minecraft.client.network.NetHandlerPlayClient;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.resources.I18n;
-import net.minecraft.network.play.client.CPacketUpdateSign;
 import net.minecraft.util.ChatAllowedCharacters;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.text.TextComponentString;
+import java.util.Arrays;
 import org.lwjgl.input.Keyboard;
 
 import java.io.IOException;
@@ -26,11 +26,17 @@ import java.io.IOException;
 public class GuiEditCanvasSign extends GuiScreen {
 
     private static final int MAX_LINES = 4;
-    private static final int MAX_LINE_LENGTH = 18;
-    private static final int MAX_LINE_LENGTH_HANGING = 14;
+    private static final int MAX_LINE_WIDTH = 90;
+    private static final int MAX_LINE_WIDTH_HANGING = 60;
     private static final int TEXT_LINE_SPACING = 9;
-    private static final int TEXT_LINE_SPACING_HANGING = 10;
+    private static final int TEXT_PADDING = 10;
+    private static final int SIGN_CENTER_Y = 87;
+    private static final int HANGING_SIGN_CENTER_Y = 125;
+    private static final float SIGN_MODEL_SCALE = (MAX_LINE_WIDTH + TEXT_PADDING * 2) / 1.5F;
+    private static final float HANGING_SIGN_MODEL_SCALE = (MAX_LINE_WIDTH_HANGING + TEXT_PADDING * 2) / 0.875F;
     private final TileEntityCanvasSign tileSign;
+    private final boolean front;
+    private final String[] lines;
     private final ModelSign signModel = new ModelSign();
     private final ModelCanvasHangingSign hangingSignModel = new ModelCanvasHangingSign();
     private int updateCounter;
@@ -38,7 +44,13 @@ public class GuiEditCanvasSign extends GuiScreen {
     private GuiButton doneButton;
 
     public GuiEditCanvasSign(TileEntityCanvasSign tileSign) {
+        this(tileSign, true);
+    }
+
+    public GuiEditCanvasSign(TileEntityCanvasSign tileSign, boolean front) {
         this.tileSign = tileSign;
+        this.front = front;
+        this.lines = Arrays.stream(tileSign.getText(front)).map(net.minecraft.util.text.ITextComponent::getUnformattedText).toArray(String[]::new);
     }
 
     @Override
@@ -46,17 +58,14 @@ public class GuiEditCanvasSign extends GuiScreen {
         this.buttonList.clear();
         Keyboard.enableRepeatEvents(true);
         this.doneButton = this.addButton(new GuiButton(0, this.width / 2 - 100, this.height / 4 + 120, I18n.format("gui.done")));
-        this.tileSign.setEditable(false);
     }
 
     @Override
     public void onGuiClosed() {
         Keyboard.enableRepeatEvents(false);
-        NetHandlerPlayClient netHandler = this.mc.getConnection();
-        if (netHandler != null) {
-            netHandler.sendPacket(new CPacketUpdateSign(this.tileSign.getPos(), this.tileSign.signText));
+        if (this.mc.getConnection() != null) {
+            ModNetworkHandler.INSTANCE.sendToServer(new PacketUpdateCanvasSign(this.tileSign.getPos(), front, lines));
         }
-        this.tileSign.setEditable(true);
     }
 
     @Override
@@ -67,7 +76,6 @@ public class GuiEditCanvasSign extends GuiScreen {
     @Override
     protected void actionPerformed(GuiButton button) throws IOException {
         if (button.enabled && button.id == 0) {
-            this.tileSign.markDirty();
             this.mc.displayGuiScreen(null);
         }
     }
@@ -81,14 +89,14 @@ public class GuiEditCanvasSign extends GuiScreen {
             this.editLine = this.editLine + 1 & 3;
         }
 
-        String lineText = this.tileSign.signText[this.editLine].getUnformattedText();
+        String lineText = lines[this.editLine];
         if (keyCode == 14 && !lineText.isEmpty()) {
             lineText = lineText.substring(0, lineText.length() - 1);
         }
-        if (ChatAllowedCharacters.isAllowedCharacter(typedChar) && lineText.length() < (isHangingSign() ? MAX_LINE_LENGTH_HANGING : MAX_LINE_LENGTH)) {
+        if (ChatAllowedCharacters.isAllowedCharacter(typedChar) && this.fontRenderer.getStringWidth(lineText + typedChar) <= (isHangingSign() ? MAX_LINE_WIDTH_HANGING : MAX_LINE_WIDTH)) {
             lineText = lineText + typedChar;
         }
-        this.tileSign.signText[this.editLine] = new TextComponentString(lineText);
+        lines[this.editLine] = lineText;
 
         if (keyCode == 1) {
             this.actionPerformed(this.doneButton);
@@ -124,22 +132,24 @@ public class GuiEditCanvasSign extends GuiScreen {
     }
 
     private void drawCanvasSign() {
-        GlStateManager.translate((float) this.width / 2.0F, 0.0F, 50.0F);
-        GlStateManager.scale(58.0F, -58.0F, 58.0F);
-        GlStateManager.translate(0.0F, -2F, 0.0F);
+        GlStateManager.translate(this.width / 2.0F, SIGN_CENTER_Y + SIGN_MODEL_SCALE / 2.0F, 50.0F);
+        GlStateManager.scale(SIGN_MODEL_SCALE, -SIGN_MODEL_SCALE, SIGN_MODEL_SCALE);
         GlStateManager.rotate(180.0F, 0.0F, 1.0F, 0.0F);
         GlStateManager.rotate(180.0F, 0.0F, 0.0F, 1.0F);
+        if (!front) {
+            GlStateManager.rotate(180.0F, 0.0F, 1.0F, 0.0F);
+        }
         this.mc.getTextureManager().bindTexture(this.getTextureLocation());
         this.signModel.signStick.showModel = this.tileSign.getBlockType() instanceof BlockCanvasStandingSign;
         this.signModel.renderSign();
     }
 
     private void drawHangingCanvasSign() {
-        GlStateManager.translate((float) this.width / 2.0F, 125.0F, 50.0F);
-        GlStateManager.scale(78.0F, -78.0F, 78.0F);
+        GlStateManager.translate(this.width / 2.0F, HANGING_SIGN_CENTER_Y, 50.0F);
+        GlStateManager.scale(HANGING_SIGN_MODEL_SCALE, -HANGING_SIGN_MODEL_SCALE, HANGING_SIGN_MODEL_SCALE);
         GlStateManager.rotate(180.0F, 0.0F, 0.0F, 1.0F);
 
-        if (this.tileSign.isHangingTextOnBack()) {
+        if (!front) {
             GlStateManager.rotate(180.0F, 0.0F, 1.0F, 0.0F);
         }
         GlStateManager.translate(0.0F, -0.3125F, 0.0F);
@@ -149,19 +159,23 @@ public class GuiEditCanvasSign extends GuiScreen {
 
     private void drawEditorTextOverlay() {
         int centerX = this.width / 2;
-        int centerY = this.isHangingSign() ? 122 : 82;
-        int startY = centerY - ((MAX_LINES - 1) * (this.isHangingSign() ? TEXT_LINE_SPACING_HANGING : TEXT_LINE_SPACING)) / 2;
+        int centerY = this.isHangingSign() ? HANGING_SIGN_CENTER_Y : SIGN_CENTER_Y;
+        int maxLineWidth = this.isHangingSign() ? MAX_LINE_WIDTH_HANGING : MAX_LINE_WIDTH;
+        int startY = centerY - ((MAX_LINES - 1) * TEXT_LINE_SPACING + this.fontRenderer.FONT_HEIGHT) / 2;
         int textColor = this.getTextColor();
         GlStateManager.pushMatrix();
         GlStateManager.disableLighting();
         GlStateManager.disableDepth();
-        for (int line = 0; line < Math.min(MAX_LINES, this.tileSign.signText.length); ++line) {
-            String lineText = this.tileSign.signText[line].getUnformattedText();
-            if (line == this.editLine && this.updateCounter / 6 % 2 == 0) {
-                lineText = "> " + lineText + " <";
-            }
+        for (int line = 0; line < Math.min(MAX_LINES, lines.length); ++line) {
+            String lineText = this.fontRenderer.trimStringToWidth(lines[line], maxLineWidth);
+            int textWidth = this.fontRenderer.getStringWidth(lineText);
+            int x = centerX - textWidth / 2;
             int y = startY + line * TEXT_LINE_SPACING;
-            this.fontRenderer.drawString(lineText, centerX - this.fontRenderer.getStringWidth(lineText) / 2, y, textColor);
+            this.fontRenderer.drawString(lineText, x, y, textColor);
+            if (line == this.editLine && this.updateCounter / 6 % 2 == 0) {
+                int cursorX = x + textWidth + 1;
+                drawRect(cursorX, y, cursorX + 1, y + this.fontRenderer.FONT_HEIGHT, 0xFF000000 | textColor);
+            }
         }
         GlStateManager.enableDepth();
         GlStateManager.enableLighting();
@@ -175,7 +189,7 @@ public class GuiEditCanvasSign extends GuiScreen {
     }
 
     private int getTextColor() {
-        return Configuration.isCanvasSignDarkBackground(this.getCanvasColorName()) ? 0xFFFFFF : 0;
+        return TileEntityCanvasSignRenderer.getTextColor(tileSign.getColor(front));
     }
 
     private ResourceLocation getTextureLocation() {
@@ -195,24 +209,4 @@ public class GuiEditCanvasSign extends GuiScreen {
         return new ResourceLocation(FarmersDelightLegacy.MOD_ID, "textures/entity/signs/canvas.png");
     }
 
-    private String getCanvasColorName() {
-        Block block = this.tileSign.getBlockType();
-        if (block == null || block.getRegistryName() == null) {
-            return "";
-        }
-        String path = block.getRegistryName().getPath();
-        String[] baseNames = new String[]{"canvas_sign", "canvas_wall_sign", "hanging_canvas_sign", "wall_hanging_canvas_sign"};
-        for (String baseName : baseNames) {
-            if (baseName.equals(path)) {
-                return "";
-            }
-        }
-        String[] suffixes = new String[]{"_wall_hanging_canvas_sign", "_hanging_canvas_sign", "_canvas_wall_sign", "_canvas_sign"};
-        for (String suffix : suffixes) {
-            if (path.endsWith(suffix)) {
-                return path.substring(0, path.length() - suffix.length());
-            }
-        }
-        return "";
-    }
 }

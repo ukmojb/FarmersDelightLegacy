@@ -1,0 +1,19 @@
+{
+  "conditions": {},
+  "ingredients": [
+    {
+      "item": "minecraft:chest_minecart"
+    }
+  ],
+  "tool": "ore:toolHoe",
+  "result": [
+    {
+      "item": "minecraft:minecart",
+      "count": 1
+    },
+    {
+      "item": "minecraft:chest",
+      "count": 1
+    }
+  ]
+}

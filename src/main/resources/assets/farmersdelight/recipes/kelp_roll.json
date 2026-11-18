@@ -13,10 +13,22 @@
       "item": "farmersdelight:cooked_rice"
     },
     "X": {
-      "item": "minecraft:carrot"
+      "type": "forge:ore_dict",
+      "ore": "listAllveggie"
     }
   },
   "result": {
     "item": "farmersdelight:kelp_roll"
-  }
+  },
+  "conditions": [
+    {
+      "type": "farmersdelight:ingredients_available",
+      "ores": [
+        "mayBeKelp"
+      ],
+      "items": [
+        "farmersdelight:kelp_roll"
+      ]
+    }
+  ]
 }

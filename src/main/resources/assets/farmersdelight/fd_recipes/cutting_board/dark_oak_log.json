@@ -1,6 +1,9 @@
 {
   "conditions": {
-    "block_not_registered": "futuremc:stripped_dark_oak_log"
+    "block_not_registered": [
+      "futuremc:stripped_dark_oak_log",
+      "farmers_future_delight:stripped_dark_oak_log"
+    ]
   },
   "ingredients": [
     {

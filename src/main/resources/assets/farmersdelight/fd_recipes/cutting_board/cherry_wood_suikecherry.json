@@ -1,0 +1,24 @@
+{
+  "conditions": {
+    "items": [
+      "suikecherry:cherry_wood",
+      "suikecherry:cherry_stripped_wood"
+    ]
+  },
+  "ingredients": [
+    {
+      "item": "suikecherry:cherry_wood"
+    }
+  ],
+  "tool": "ore:toolAxe",
+  "result": [
+    {
+      "item": "suikecherry:cherry_stripped_wood",
+      "count": 1
+    },
+    {
+      "item": "farmersdelight:tree_bark",
+      "count": 1
+    }
+  ]
+}

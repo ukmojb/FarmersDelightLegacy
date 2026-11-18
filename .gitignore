@@ -23,3 +23,5 @@ run
 .tmp_upstream_fd
 /docs
 /tools
+/generated
+/logs

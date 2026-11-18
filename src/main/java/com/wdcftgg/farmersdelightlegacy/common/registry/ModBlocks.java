@@ -2,6 +2,8 @@ package com.wdcftgg.farmersdelightlegacy.common.registry;
 
 import com.wdcftgg.farmersdelightlegacy.FarmersDelightLegacy;
 import com.wdcftgg.farmersdelightlegacy.common.block.*;
+import com.wdcftgg.farmersdelightlegacy.common.compat.FarmersFutureDelightCompat;
+import com.wdcftgg.farmersdelightlegacy.common.compat.FarmersFutureDelightWaterlogging;
 import com.wdcftgg.farmersdelightlegacy.common.block.sign.BlockCanvasHangingSign;
 import com.wdcftgg.farmersdelightlegacy.common.block.sign.BlockCanvasStandingSign;
 import com.wdcftgg.farmersdelightlegacy.common.block.sign.BlockCanvasWallHangingSign;
@@ -30,10 +32,11 @@ public final class ModBlocks {
     public static final Map<String, Block> BLOCKS = new LinkedHashMap<>();
     public static final List<Item> BLOCK_ITEMS = new ArrayList<>();
     private static final List<String> SINGLE_STACK_BLOCK_ITEMS = java.util.Arrays.asList(
-            "roast_chicken_block", "stuffed_pumpkin_block", "honey_glazed_ham_block", "shepherds_pie_block", "rice_roll_medley_block"
+            "roast_chicken_block", "stuffed_pumpkin_block", "honey_glazed_ham_block", "shepherds_pie_block", "rice_roll_medley_block", "gleaming_salad_block"
     );
 
     public static final Block TOMATOES = registerBlockOnly("tomatoes", new BlockTomatoVine());
+    public static final Block TOMATOES_ON_ROPE = registerBlockOnly("tomatoes_on_rope", new BlockHangingTomato());
     public static final Block RICE = registerBlockOnly("rice", createRiceBlock());
     public static final Block CABBAGES = registerBlockOnly("cabbages", new BlockCabbage());
     public static final Block ONIONS = registerBlockOnly("onions", new BlockOnion());
@@ -42,7 +45,9 @@ public final class ModBlocks {
 
     public static final Block COOKING_POT = register("cooking_pot", new BlockCookingPot(), ItemCookingPot::new);
     public static final Block CUTTING_BOARD = register("cutting_board", new BlockCuttingBoard());
-    public static final Block BASKET = register("basket", new BlockBasket());
+    public static final Block BASKET = register("basket", new BlockBasket()).setCreativeTab(null);
+    public static final Block WOODEN_BASKET = register("wooden_basket", new BlockBasket());
+    public static final Block BAMBOO_BASKET = register("bamboo_basket", new BlockBasket());
     public static final Block CARROT_CRATE = register("carrot_crate", basicBlock(Material.WOOD, SoundType.WOOD, 2.0F));
     public static final Block POTATO_CRATE = register("potato_crate", basicBlock(Material.WOOD, SoundType.WOOD, 2.0F));
     public static final Block BEETROOT_CRATE = register("beetroot_crate", basicBlock(Material.WOOD, SoundType.WOOD, 2.0F));
@@ -66,17 +71,18 @@ public final class ModBlocks {
     public static final Block WARPED_CABINET = register("warped_cabinet", new BlockCabinet());
     public static final Block STOVE = register("stove", new BlockStove());
     public static final Block SKILLET = register("skillet", new BlockSkillet(), ItemSkillet::new);
-    public static final Block ROAST_CHICKEN_BLOCK = register("roast_chicken_block", new BlockRoastChickenFeast(4, "roast_chicken", "minecraft:bowl", true));
-    public static final Block HONEY_GLAZED_HAM_BLOCK = register("honey_glazed_ham_block", new BlockHoneyGlazedHamFeast(4, "honey_glazed_ham", "minecraft:bowl", true));
-    public static final Block SHEPHERDS_PIE_BLOCK = register("shepherds_pie_block", new BlockShepherdsPieFeast(4, "shepherds_pie", "minecraft:bowl", true));
-    public static final Block STUFFED_PUMPKIN_BLOCK = register("stuffed_pumpkin_block", new BlockFeast(4, "stuffed_pumpkin", "minecraft:bowl", false));
-    public static final Block RICE_ROLL_MEDLEY_BLOCK = register("rice_roll_medley_block", new BlockRiceRollMedley());
+    public static final Block ROAST_CHICKEN_BLOCK = register("roast_chicken_block", new BlockRoastChickenFeast(4, "roast_chicken", "minecraft:bowl", true), ItemPlaceable::new);
+    public static final Block HONEY_GLAZED_HAM_BLOCK = register("honey_glazed_ham_block", new BlockHoneyGlazedHamFeast(4, "honey_glazed_ham", "minecraft:bowl", true), ItemPlaceable::new);
+    public static final Block SHEPHERDS_PIE_BLOCK = register("shepherds_pie_block", new BlockShepherdsPieFeast(4, "shepherds_pie", "minecraft:bowl", true), ItemPlaceable::new);
+    public static final Block STUFFED_PUMPKIN_BLOCK = register("stuffed_pumpkin_block", new BlockFeast(4, "stuffed_pumpkin", "minecraft:bowl", false), ItemPlaceable::new);
+    public static final Block GLEAMING_SALAD_BLOCK = register("gleaming_salad_block", new BlockGleamingSalad(), ItemPlaceable::new);
+    public static final Block RICE_ROLL_MEDLEY_BLOCK = register("rice_roll_medley_block", new BlockRiceRollMedley(), ItemPlaceable::new);
     public static final Block ORGANIC_COMPOST = register("organic_compost", new BlockOrganicCompost());
     public static final Block RICH_SOIL = register("rich_soil", new BlockRichSoil());
     public static final Block RICH_SOIL_FARMLAND = register("rich_soil_farmland", new BlockRichSoilFarmland());
-    public static final Block APPLE_PIE = register("apple_pie", new BlockPie("apple_pie_slice"));
-    public static final Block SWEET_BERRY_CHEESECAKE = register("sweet_berry_cheesecake", new BlockPie("sweet_berry_cheesecake_slice"));
-    public static final Block CHOCOLATE_PIE = register("chocolate_pie", new BlockPie("chocolate_pie_slice"));
+    public static final Block APPLE_PIE = register("apple_pie", new BlockPie("apple_pie_slice"), ItemPlaceable::new);
+    public static final Block SWEET_BERRY_CHEESECAKE = register("sweet_berry_cheesecake", new BlockPie("sweet_berry_cheesecake_slice"), ItemPlaceable::new);
+    public static final Block CHOCOLATE_PIE = register("chocolate_pie", new BlockPie("chocolate_pie_slice"), ItemPlaceable::new);
     public static final Block pumpkinPie = registerBlockOnly("pumpkin_pie", new BlockPie("pumpkin_pie_slice"));
     public static final Block SANDY_SHRUB = register("sandy_shrub", new BlockSandyShrub());
     public static final Block WILD_CABBAGES = register("wild_cabbages",
@@ -94,7 +100,9 @@ public final class ModBlocks {
     public static final Block WILD_RICE = register("wild_rice", createWildRiceBlock());
     public static final Block BROWN_MUSHROOM_COLONY = register("brown_mushroom_colony", new BlockMushroomColony("minecraft:brown_mushroom"), ItemMushroomColony::new);
     public static final Block RED_MUSHROOM_COLONY = register("red_mushroom_colony", new BlockMushroomColony("minecraft:red_mushroom"), ItemMushroomColony::new);
-    public static final Block ROPE = register("rope", new BlockRope());
+    public static final Block ROPE = register("rope", new BlockRope(), ItemRope::new);
+    public static final Block ROPE_FENCE = register("rope_fence", new BlockRopeFence());
+    public static final Block ROPE_FENCE_GATE = register("rope_fence_gate", new BlockRopeFenceGate());
     public static final Block CANVAS_RUG = register("canvas_rug", new BlockCanvasRug());
     public static final Block TATAMI = register("tatami", new BlockTatami());
     public static final Block FULL_TATAMI_MAT = register("full_tatami_mat", new BlockTatamiMat());
@@ -108,6 +116,9 @@ public final class ModBlocks {
     }
 
     public static void registerAll(RegistryEvent.Register<Block> event) {
+        BackportContent.lockRegistrationSettings();
+        BLOCKS.entrySet().removeIf(entry -> !BackportContent.isEnabled(entry.getKey()));
+        BLOCK_ITEMS.removeIf(item -> !BackportContent.isEnabled(item.getRegistryName().getPath()));
         for (Block block : BLOCKS.values()) {
             event.getRegistry().register(block);
         }
@@ -154,28 +165,29 @@ public final class ModBlocks {
 
     private static Block createRiceBlock() {
         if (!Loader.isModLoaded("fluidlogged_api")) {
-            return new BlockRice();
+            return Loader.isModLoaded(FarmersFutureDelightCompat.MOD_ID)
+                    ? FarmersFutureDelightWaterlogging.createRice() : new BlockRice();
         }
 
-        Block compatBlock = instantiateCompatBlock("com.wdcftgg.farmersdelightlegacy.common.compat.fluidlogged.BlockFluidloggedRice");
-        return compatBlock != null ? compatBlock : new BlockRice();
+        return FluidloggedBlocks.createRice();
     }
 
     private static Block createWildRiceBlock() {
         if (!Loader.isModLoaded("fluidlogged_api")) {
-            return new BlockWildRice();
+            return Loader.isModLoaded(FarmersFutureDelightCompat.MOD_ID)
+                    ? FarmersFutureDelightWaterlogging.createWildRice() : new BlockWildRice();
         }
 
-        Block compatBlock = instantiateCompatBlock("com.wdcftgg.farmersdelightlegacy.common.compat.fluidlogged.BlockFluidloggedWildRice");
-        return compatBlock != null ? compatBlock : new BlockWildRice();
+        return FluidloggedBlocks.createWildRice();
     }
 
-    private static Block instantiateCompatBlock(String className) {
-        try {
-            return (Block) Class.forName(className).getDeclaredConstructor().newInstance();
-        } catch (ReflectiveOperationException | LinkageError exception) {
-            FarmersDelightLegacy.LOGGER.warn("Failed to load optional compatibility block: {}; falling back to the default implementation.", className, exception);
-            return null;
+    private static final class FluidloggedBlocks {
+        private static Block createRice() {
+            return new com.wdcftgg.farmersdelightlegacy.common.compat.fluidlogged.BlockFluidloggedRice();
+        }
+
+        private static Block createWildRice() {
+            return new com.wdcftgg.farmersdelightlegacy.common.compat.fluidlogged.BlockFluidloggedWildRice();
         }
     }
 

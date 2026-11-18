@@ -90,6 +90,9 @@ public class ContainerCookingPot extends Container {
 
     @Override
     public ItemStack transferStackInSlot(EntityPlayer playerIn, int index) {
+        if (index == MEAL_DISPLAY_SLOT || index < 0 || index >= this.inventorySlots.size()) {
+            return ItemStack.EMPTY;
+        }
         ItemStack itemStack = ItemStack.EMPTY;
         Slot slot = this.inventorySlots.get(index);
 
@@ -103,17 +106,20 @@ public class ContainerCookingPot extends Container {
                     return ItemStack.EMPTY;
                 }
                 slot.onSlotChange(slotStack, itemStack);
-                slot.onTake(playerIn, slotStack);
+                ItemStack taken = itemStack.copy();
+                taken.setCount(itemStack.getCount() - slotStack.getCount());
+                slot.onTake(playerIn, taken);
             } else if (index < tileSlotCount) {
                 if (!this.mergeItemStack(slotStack, tileSlotCount, this.inventorySlots.size(), true)) {
                     return ItemStack.EMPTY;
                 }
             } else {
                 boolean isValidContainer = tileEntityCookingPot.isServingContainer(slotStack);
-                if (isValidContainer && !this.mergeItemStack(slotStack, CONTAINER_SLOT, CONTAINER_SLOT + 1, false)) {
-                    return ItemStack.EMPTY;
-                }
-                if (!slotStack.isEmpty() && !this.mergeItemStack(slotStack, 0, INPUT_SLOT_COUNT, false)) {
+                if (isValidContainer) {
+                    if (!this.mergeItemStack(slotStack, CONTAINER_SLOT, CONTAINER_SLOT + 1, false)) {
+                        return ItemStack.EMPTY;
+                    }
+                } else if (!this.mergeItemStack(slotStack, 0, INPUT_SLOT_COUNT, false)) {
                     return ItemStack.EMPTY;
                 }
             }

@@ -3,6 +3,7 @@
     "smelting": "com.wdcftgg.farmersdelightlegacy.common.recipe.LegacyHeatingRecipe$Factory"
   },
   "conditions": {
+    "ingredients_available": "com.wdcftgg.farmersdelightlegacy.common.recipe.condition.IngredientsAvailableCondition",
     "vanilla_crates_enabled": "com.wdcftgg.farmersdelightlegacy.common.recipe.condition.VanillaCrateEnabledCondition"
   }
 }

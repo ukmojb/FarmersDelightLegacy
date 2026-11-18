@@ -3,29 +3,27 @@
   "category": "misc",
   "conditions": [
     {
-      "type": "forge:not",
-      "value": {
-        "type": "forge:mod_loaded",
-        "modid": "futuremc"
-      }
+      "type": "farmersdelight:ingredients_available",
+      "ores": [
+        "foodHoney"
+      ],
+      "items": [
+        "farmersdelight:honey_cookie"
+      ]
     }
   ],
   "ingredients": [
     {
-      "type": "minecraft:item_nbt",
-      "item": "minecraft:potion",
-      "nbt": {
-        "Potion": "minecraft:water"
-      }
+      "type": "forge:ore_dict",
+      "ore": "foodHoney"
     },
     {
-      "item": "minecraft:sugar"
+      "type": "forge:ore_dict",
+      "ore": "cropWheat"
     },
     {
-      "item": "minecraft:wheat"
-    },
-    {
-      "item": "minecraft:wheat"
+      "type": "forge:ore_dict",
+      "ore": "cropWheat"
     }
   ],
   "result": {

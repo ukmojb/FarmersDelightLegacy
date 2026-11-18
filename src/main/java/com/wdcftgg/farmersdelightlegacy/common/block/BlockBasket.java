@@ -1,5 +1,6 @@
 package com.wdcftgg.farmersdelightlegacy.common.block;
 
+import com.wdcftgg.farmersdelightlegacy.common.compat.FluidloggingCompat;
 import com.wdcftgg.farmersdelightlegacy.FarmersDelightLegacy;
 import com.wdcftgg.farmersdelightlegacy.common.gui.ModGuiHandler;
 import com.wdcftgg.farmersdelightlegacy.common.tile.TileEntityBasket;
@@ -100,6 +101,11 @@ public class BlockBasket extends BlockDirectional implements ITileEntityProvider
     @Override
     public EnumBlockRenderType getRenderType(IBlockState state) {
         return EnumBlockRenderType.MODEL;
+    }
+
+    @Override
+    public BlockRenderLayer getRenderLayer() {
+        return BlockRenderLayer.CUTOUT;
     }
 
     @Override
@@ -209,7 +215,7 @@ public class BlockBasket extends BlockDirectional implements ITileEntityProvider
 
     @Override
     protected BlockStateContainer createBlockState() {
-        return new BlockStateContainer(this, FACING, ENABLED);
+        return FluidloggingCompat.createBlockState(this, FACING, ENABLED);
     }
 
     @Override

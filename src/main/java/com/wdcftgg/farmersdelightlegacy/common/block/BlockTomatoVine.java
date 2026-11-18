@@ -18,6 +18,7 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
+import net.minecraft.util.NonNullList;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
@@ -34,12 +35,15 @@ public class BlockTomatoVine extends BlockCrops {
     private static final AxisAlignedBB SHAPE = new AxisAlignedBB(2.0D / 16.0D, 0.0D, 2.0D / 16.0D, 14.0D / 16.0D, 1.0D, 14.0D / 16.0D);
 
     public BlockTomatoVine() {
+        this(false);
+    }
+
+    protected BlockTomatoVine(boolean hanging) {
         this.setTickRandomly(true);
         this.setHardness(0.0F);
         this.setSoundType(SoundType.PLANT);
-        this.setDefaultState(this.blockState.getBaseState()
-                .withProperty(this.getAgeProperty(), 0)
-                .withProperty(ROPELOGGED, false));
+        IBlockState state = this.blockState.getBaseState().withProperty(this.getAgeProperty(), 0);
+        this.setDefaultState(hanging ? state : state.withProperty(ROPELOGGED, false));
     }
 
     @Override
@@ -111,7 +115,8 @@ public class BlockTomatoVine extends BlockCrops {
             }
 
             worldIn.playSound(playerIn, pos, ModSounds.tomatoesPickTomatoes, SoundCategory.BLOCKS, 1.0F, soundPitch);
-            if (state.getValue(ROPELOGGED) && playerIn instanceof net.minecraft.entity.player.EntityPlayerMP) {
+            if (((BlockTomatoVine) state.getBlock()).hasRope(state)
+                    && playerIn instanceof net.minecraft.entity.player.EntityPlayerMP) {
                 ModAdvancements.HARVEST_ROPELOGGED_TOMATO.trigger((net.minecraft.entity.player.EntityPlayerMP) playerIn);
             }
             worldIn.setBlockState(pos, state.withProperty(AGE, 0), 2);
@@ -121,48 +126,93 @@ public class BlockTomatoVine extends BlockCrops {
     @Override
     public void updateTick(World worldIn, BlockPos pos, IBlockState state, Random rand) {
         if (!this.canBlockStay(worldIn, pos, state)) {
-            boolean ropelogged = state.getValue(ROPELOGGED);
             worldIn.destroyBlock(pos, true);
-            if (ropelogged) {
-                worldIn.setBlockState(pos, getConfiguredRopeState(), 3);
-            }
-            return;
-        }
-
-        if (!worldIn.isAreaLoaded(pos, 1)) {
-            return;
-        }
-
-        if (worldIn.getLightFromNeighbors(pos.up()) >= 9) {
-            int age = this.getAge(state);
-            if (age < this.getMaxAge()) {
-                float growthChance = getGrowthChance(this, worldIn, pos);
-                if (ForgeHooks.onCropsGrowPre(worldIn, pos, state, rand.nextInt((int) (25.0F / growthChance) + 1) == 0)) {
-                    IBlockState grownState = state.withProperty(this.getAgeProperty(), age + 1);
-                    worldIn.setBlockState(pos, grownState, 2);
-                    ForgeHooks.onCropsGrowPost(worldIn, pos, state, grownState);
-                    state = grownState;
-                }
-            }
-
-            if (!worldIn.isRemote) {
-                attemptRopeClimb(worldIn, pos, rand);
+            if (state.getPropertyKeys().contains(ROPELOGGED) && state.getValue(ROPELOGGED)) {
+                placeRope(worldIn, pos);
             }
         }
     }
 
     @Override
-    public void grow(World worldIn, Random rand, BlockPos pos, IBlockState state) {
-        int newAge = Math.min(this.getAge(state) + Math.max(1, this.getBonemealAgeIncrease(worldIn) / 2), this.getMaxAge());
-        worldIn.setBlockState(pos, state.withProperty(this.getAgeProperty(), newAge), 2);
-        attemptRopeClimb(worldIn, pos, rand);
-    }
-
-    private void attemptRopeClimb(World worldIn, BlockPos pos, Random rand) {
-        if (rand.nextFloat() >= 0.3F) {
+    public void randomTick(World worldIn, BlockPos pos, IBlockState state, Random rand) {
+        if (worldIn.isRemote || !worldIn.isAreaLoaded(pos, 1)) {
             return;
         }
+        if (convertLegacyState(worldIn, pos, state)) {
+            return;
+        }
+        if (worldIn.getLightFromNeighbors(pos) >= 9) {
+            int age = this.getAge(state);
+            if (age < this.getMaxAge()) {
+                if (ForgeHooks.onCropsGrowPre(worldIn, pos, state, rand.nextInt(6) == 0)) {
+                    IBlockState grownState = state.withProperty(this.getAgeProperty(), age + 1);
+                    worldIn.setBlockState(pos, grownState, 2);
+                    ForgeHooks.onCropsGrowPost(worldIn, pos, state, worldIn.getBlockState(pos));
+                }
+            }
+            climbRopeAbove(worldIn, pos);
+        }
+    }
 
+    @Override
+    public void grow(World worldIn, Random rand, BlockPos pos, IBlockState state) {
+        if (worldIn.isRemote || convertLegacyState(worldIn, pos, state)) {
+            return;
+        }
+        int newAge = this.getAge(state) + this.getBonemealAgeIncrease(worldIn) / 2;
+        if (newAge <= getMaxAge()) {
+            worldIn.setBlockState(pos, state.withProperty(getAgeProperty(), newAge), 3);
+            if (rand.nextFloat() < 0.3F) {
+                climbRopeAbove(worldIn, pos);
+            }
+        } else {
+            IBlockState above = worldIn.getBlockState(pos.up());
+            if (Configuration.isTomatoVineClimbableRope(above.getBlock())) {
+                climbRopeAbove(worldIn, pos);
+            } else if (above.getBlock() instanceof BlockHangingTomato) {
+                BlockHangingTomato hanging = (BlockHangingTomato) above.getBlock();
+                if (hanging.canGrow(worldIn, pos.up(), above, false)) {
+                    hanging.grow(worldIn, rand, pos.up(), above);
+                }
+            }
+        }
+    }
+
+    @Override
+    public void grow(World worldIn, BlockPos pos, IBlockState state) {
+        grow(worldIn, worldIn.rand, pos, state);
+    }
+
+    @Override
+    public boolean canGrow(World worldIn, BlockPos pos, IBlockState state, boolean isClient) {
+        if (!isMaxAge(state)) {
+            return true;
+        }
+        for (int height = 1; height <= 2; height++) {
+            IBlockState above = worldIn.getBlockState(pos.up(height));
+            if (Configuration.isTomatoVineClimbableRope(above.getBlock())) {
+                return true;
+            }
+            if (!(above.getBlock() instanceof BlockHangingTomato)) {
+                return false;
+            }
+            if (!isMaxAge(above)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean convertLegacyState(World world, BlockPos pos, IBlockState state) {
+        if (state.getBlock() == ModBlocks.TOMATOES && state.getValue(ROPELOGGED)) {
+            world.setBlockState(pos, ModBlocks.TOMATOES_ON_ROPE.getDefaultState()
+                    .withProperty(getAgeProperty(), getAge(state)), 3);
+            return true;
+        }
+        return false;
+    }
+
+    private void climbRopeAbove(World worldIn, BlockPos pos) {
         BlockPos abovePos = pos.up();
         if (!Configuration.isTomatoVineClimbableRope(worldIn.getBlockState(abovePos).getBlock())) {
             return;
@@ -173,29 +223,26 @@ public class BlockTomatoVine extends BlockCrops {
             height++;
         }
         if (height < 3) {
-            worldIn.setBlockState(abovePos, this.getDefaultState().withProperty(ROPELOGGED, true), 3);
+            worldIn.setBlockState(abovePos, ModBlocks.TOMATOES_ON_ROPE.getDefaultState(), 3);
         }
     }
 
     @Override
     public boolean isLadder(IBlockState state, IBlockAccess world, BlockPos pos, EntityLivingBase entity) {
-        return state.getValue(ROPELOGGED);
+        return hasRope(state);
     }
 
     @Override
     public void onEntityCollision(World worldIn, BlockPos pos, IBlockState state, net.minecraft.entity.Entity entityIn) {
-        if (state.getValue(ROPELOGGED) && entityIn instanceof EntityLivingBase) {
+        if (hasRope(state) && entityIn instanceof EntityLivingBase) {
             BlockRope.applyClimbingMotion((EntityLivingBase) entityIn);
         }
     }
 
     @Override
     public boolean canBlockStay(World worldIn, BlockPos pos, IBlockState state) {
-        if (state.getValue(ROPELOGGED)) {
-            IBlockState belowState = worldIn.getBlockState(pos.down());
-            boolean belowIsTomato = belowState.getBlock() == this;
-            boolean goodLight = worldIn.getLightFromNeighbors(pos) >= 8 || worldIn.canSeeSky(pos);
-            return belowIsTomato && goodLight;
+        if (worldIn.getBlockState(pos.down()).getBlock() instanceof BlockTomatoVine) {
+            return worldIn.getLightFromNeighbors(pos) >= 8 || worldIn.canSeeSky(pos);
         }
         return super.canBlockStay(worldIn, pos, state);
     }
@@ -208,24 +255,42 @@ public class BlockTomatoVine extends BlockCrops {
             }
             return;
         }
-        super.neighborChanged(state, worldIn, pos, blockIn, fromPos);
     }
 
     @Override
-    public void breakBlock(World worldIn, BlockPos pos, IBlockState state) {
-        boolean ropelogged = state.getValue(ROPELOGGED);
-        super.breakBlock(worldIn, pos, state);
-        if (!worldIn.isRemote && ropelogged && worldIn.isAirBlock(pos)) {
-            worldIn.setBlockState(pos, getConfiguredRopeState(), 3);
+    public boolean removedByPlayer(IBlockState state, World world, BlockPos pos, EntityPlayer player, boolean willHarvest) {
+        if (hasRope(state)) {
+            onBlockHarvested(world, pos, state, player);
+            return placeRope(world, pos);
         }
+        return super.removedByPlayer(state, world, pos, player, willHarvest);
     }
 
-    private static IBlockState getConfiguredRopeState() {
+    protected boolean hasRope(IBlockState state) {
+        return state.getValue(ROPELOGGED);
+    }
+
+    protected boolean placeRope(World world, BlockPos pos) {
         Block ropeBlock = Configuration.getDefaultTomatoVineRopeBlock();
-        if (ropeBlock == null) {
-            ropeBlock = ModBlocks.ROPE;
+        IBlockState rope = ropeBlock == ModBlocks.ROPE
+                ? ropeBlock.getStateForPlacement(world, pos, EnumFacing.UP, 0.5F, 0.5F, 0.5F, 0, null, EnumHand.MAIN_HAND)
+                : ropeBlock.getDefaultState();
+        return world.setBlockState(pos, rope, world.isRemote ? 11 : 3);
+    }
+
+    @Override
+    public void getDrops(NonNullList<ItemStack> drops, IBlockAccess world, BlockPos pos, IBlockState state, int fortune) {
+        Random random = world instanceof World ? ((World) world).rand : RANDOM;
+        if (!hasRope(state)) {
+            drops.add(new ItemStack(getSeed()));
         }
-        return ropeBlock.getDefaultState();
+        if (isMaxAge(state)) {
+            int count = 1 + random.nextInt(2) + random.nextInt(Math.max(0, fortune) + 1);
+            drops.add(new ItemStack(getCrop(), count));
+            if (random.nextFloat() < 0.05F) {
+                drops.add(new ItemStack(ModItems.get("rotten_tomato")));
+            }
+        }
     }
 
     @Override

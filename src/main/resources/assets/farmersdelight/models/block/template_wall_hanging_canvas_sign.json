@@ -1,7 +1,7 @@
 {
   "parent": "block/block",
   "textures": {
-    "particle": "#all",
+    "particle": "minecraft:blocks/planks_spruce",
     "all": "farmersdelight:item/hanging_canvas_sign"
   },
   "elements": [

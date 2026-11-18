@@ -10,7 +10,6 @@ import net.minecraft.potion.Potion;
 import net.minecraft.potion.PotionEffect;
 import net.minecraft.util.FoodStats;
 import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
@@ -34,23 +33,12 @@ public class PotionNourishment extends Potion {
         EntityPlayer player = (EntityPlayer) entityLivingBaseIn;
         FoodStats foodStats = player.getFoodStats();
         boolean naturalRegen = player.world.getGameRules().getBoolean("naturalRegeneration");
-        boolean playerHealingWithHunger = naturalRegen && player.shouldHeal() && foodStats.getFoodLevel() >= 18;
-        if (!playerHealingWithHunger) {
-            reduceExhaustion(foodStats);
-        }
+        updateExhaustion(foodStats, naturalRegen, player.shouldHeal());
     }
 
-    private static void reduceExhaustion(FoodStats foodStats) {
-        try {
-            float exhaustion = ObfuscationReflectionHelper.getPrivateValue(FoodStats.class, foodStats,
-                    "foodExhaustionLevel", "field_75126_c");
-            if (exhaustion > 0.0F) {
-                // 与上游一致，只抵消现有消耗，不让 exhaustion 变成负值。
-                ObfuscationReflectionHelper.setPrivateValue(FoodStats.class, foodStats,
-                        Math.max(0.0F, exhaustion - 4.0F), "foodExhaustionLevel", "field_75126_c");
-            }
-        } catch (RuntimeException ignored) {
-            foodStats.addExhaustion(-4.0F);
+    public static void updateExhaustion(FoodStats foodStats, boolean naturalRegeneration, boolean injured) {
+        if (!(naturalRegeneration && injured && foodStats.getSaturationLevel() > 0.0F)) {
+            foodStats.foodExhaustionLevel = 0.0F;
         }
     }
 

@@ -1,0 +1,25 @@
+{
+  "conditions": {
+    "items": [
+      "farmers_future_delight:stripped_jungle_log"
+    ],
+    "block_not_registered": "futuremc:stripped_jungle_log"
+  },
+  "ingredients": [
+    {
+      "item": "minecraft:log",
+      "data": 3
+    }
+  ],
+  "tool": "ore:toolAxe",
+  "result": [
+    {
+      "item": "farmers_future_delight:stripped_jungle_log",
+      "count": 1
+    },
+    {
+      "item": "farmersdelight:tree_bark",
+      "count": 1
+    }
+  ]
+}

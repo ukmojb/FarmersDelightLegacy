@@ -3,9 +3,14 @@
     "ore:foodDough",
     "ore:cropCabbage",
     "ore:cropOnion",
-    "ore:dumplingFilling"
+    [
+      "ore:listAllchickenraw",
+      "ore:listAllporkraw",
+      "ore:listAllbeefraw",
+      "minecraft:brown_mushroom"
+    ]
   ],
-  "experience": 1.0,
+  "experience": 1,
   "result": {
     "item": "farmersdelight:dumplings",
     "count": 2

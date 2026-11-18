@@ -1,7 +1,6 @@
 package com.wdcftgg.farmersdelightlegacy.common.item;
 
 import com.google.common.collect.Multimap;
-import com.wdcftgg.farmersdelightlegacy.FarmersDelightLegacy;
 import com.wdcftgg.farmersdelightlegacy.common.block.BlockSkillet;
 import com.wdcftgg.farmersdelightlegacy.common.recipe.CampfireCookingRecipe;
 import com.wdcftgg.farmersdelightlegacy.common.recipe.manager.CampfireCookingRecipeManager;
@@ -10,8 +9,12 @@ import com.wdcftgg.farmersdelightlegacy.common.tile.TileEntitySkillet;
 import com.wdcftgg.farmersdelightlegacy.common.util.HeatSourceHelper;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.resources.I18n;
+import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.enchantment.EnchantmentHelper;
-import net.minecraft.entity.Entity;
+import net.minecraft.enchantment.Enchantment;
+import net.minecraft.enchantment.EnumEnchantmentType;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.ai.attributes.AttributeModifier;
@@ -26,10 +29,12 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.*;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.TextComponentTranslation;
+import net.minecraft.util.text.TextFormatting;
 import net.minecraft.world.World;
-import net.minecraftforge.event.entity.living.LivingDamageEvent;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
+import javax.annotation.Nullable;
+import java.util.List;
 
 
 public class ItemSkillet extends ItemBlock {
@@ -42,6 +47,14 @@ public class ItemSkillet extends ItemBlock {
         super(block);
         this.setMaxStackSize(1);
         this.setMaxDamage(SKILLET_TOOL_MATERIAL.getMaxUses());
+    }
+
+    @SideOnly(Side.CLIENT)
+    @Override
+    public void addInformation(ItemStack stack, @Nullable World world, List<String> tooltip, ITooltipFlag flag) {
+        super.addInformation(stack, world, tooltip, flag);
+        tooltip.add(TextFormatting.DARK_GRAY.toString() + TextFormatting.ITALIC
+                + I18n.format("tooltip.farmersdelight.placeable_sneaking"));
     }
 
     @Override
@@ -104,11 +117,45 @@ public class ItemSkillet extends ItemBlock {
         return BlockSkillet.getSkilletCookingTime(cookingTime, fireAspectLevel);
     }
 
+    @Override
+    public boolean showDurabilityBar(ItemStack stack) {
+        return isCooking(stack) || super.showDurabilityBar(stack);
+    }
+
+    @Override
+    @SideOnly(Side.CLIENT)
+    public double getDurabilityForDisplay(ItemStack stack) {
+        if (!isCooking(stack)) {
+            return super.getDurabilityForDisplay(stack);
+        }
+        EntityPlayer player = Minecraft.getMinecraft().player;
+        if (player == null || player.getActiveItemStack() != stack) {
+            return 1.0D;
+        }
+        return Math.min(1.0D, Math.max(0.0D, player.getItemInUseCount() / (double) getMaxItemUseDuration(stack)));
+    }
+
+    @Override
+    public int getRGBDurabilityForDisplay(ItemStack stack) {
+        return isCooking(stack) ? 0xFF8B4F : super.getRGBDurabilityForDisplay(stack);
+    }
+
+    private static boolean isCooking(ItemStack stack) {
+        return stack.hasTagCompound() && stack.getTagCompound().hasKey(NBT_COOK_TIME_HANDHELD, 3);
+    }
+
 
     @Override
     public void onUsingTick(ItemStack stack, EntityLivingBase player, int count) {
         World world = player.world;
-        if (world.rand.nextInt(50) == 0) {
+        if (!world.isRemote) {
+            SkilletFlip.tick(stack, world.getTotalWorldTime());
+        } else if (SkilletFlip.isLandingSoundTick(stack, world.getTotalWorldTime())) {
+            world.playSound(player.posX, player.posY, player.posZ, ModSounds.SKILLET_ADD_FOOD,
+                    SoundCategory.PLAYERS, 0.4F, world.rand.nextFloat() * 0.2F + 0.9F, false);
+        } else if (world.rand.nextInt(50) == 0 && (!SkilletFlip.isFlipping(stack)
+                || SkilletFlip.progress(stack, world.getTotalWorldTime(), 0) < 1.0F / 3.0F
+                || SkilletFlip.progress(stack, world.getTotalWorldTime(), 0) > 0.75F)) {
             world.playSound(player.posX, player.posY, player.posZ,
                     ModSounds.SKILLET_SIZZLE,
                     SoundCategory.BLOCKS,
@@ -116,6 +163,16 @@ public class ItemSkillet extends ItemBlock {
                     world.rand.nextFloat() * 0.2F + 0.9F,
                     false);
         }
+    }
+
+    @Override
+    public boolean canContinueUsing(ItemStack oldStack, ItemStack newStack) {
+        return SkilletFlip.sameCookingState(oldStack, newStack);
+    }
+
+    @Override
+    public boolean shouldCauseReequipAnimation(ItemStack oldStack, ItemStack newStack, boolean slotChanged) {
+        return slotChanged || !SkilletFlip.sameCookingState(oldStack, newStack);
     }
 
     @Override
@@ -179,6 +236,17 @@ public class ItemSkillet extends ItemBlock {
     @Override
     public boolean getIsRepairable(ItemStack toRepair, ItemStack repair) {
         return SKILLET_TOOL_MATERIAL.getRepairItemStack().getItem() == repair.getItem() || super.getIsRepairable(toRepair, repair);
+    }
+
+    @Override
+    public int getItemEnchantability() {
+        return SKILLET_TOOL_MATERIAL.getEnchantability();
+    }
+
+    @Override
+    public boolean canApplyAtEnchantingTable(ItemStack stack, Enchantment enchantment) {
+        return enchantment != Enchantments.SWEEPING
+                && (enchantment.type == EnumEnchantmentType.WEAPON || super.canApplyAtEnchantingTable(stack, enchantment));
     }
 
     @Override
@@ -256,48 +324,11 @@ public class ItemSkillet extends ItemBlock {
         }
         tag.removeTag(NBT_COOKING);
         tag.removeTag(NBT_COOK_TIME_HANDHELD);
+        SkilletFlip.clear(tag);
         if (tag.getSize() == 0) {
             stack.setTagCompound(null);
         }
     }
 
-    @Mod.EventBusSubscriber(modid = FarmersDelightLegacy.MOD_ID)
-    public static class SkilletEvents {
-
-        @SubscribeEvent
-        public static void onLivingDamage(LivingDamageEvent event) {
-            DamageSource damageSource = event.getSource();
-            Entity attacker = damageSource.getImmediateSource();
-            if (!(attacker instanceof EntityLivingBase)) {
-                return;
-            }
-
-            EntityLivingBase living = (EntityLivingBase) attacker;
-            ItemStack mainhand = living.getHeldItemMainhand();
-            if (!(mainhand.getItem() instanceof ItemSkillet)) {
-                return;
-            }
-
-            if (living.world.isRemote) {
-                return;
-            }
-
-            float pitch = 0.9F + (living.getRNG().nextFloat() * 0.2F);
-            if (living instanceof EntityPlayer) {
-                EntityPlayer player = (EntityPlayer) living;
-                float attackPower = player.getCooledAttackStrength(0.0F);
-                if (attackPower > 0.8F) {
-                    player.world.playSound(null, player.posX, player.posY, player.posZ,
-                            ModSounds.SKILLET_ATTACK_STRONG, SoundCategory.PLAYERS, 1.0F, pitch);
-                } else {
-                    player.world.playSound(null, player.posX, player.posY, player.posZ,
-                            ModSounds.SKILLET_ATTACK_WEAK, SoundCategory.PLAYERS, 0.8F, 0.9F);
-                }
-            } else {
-                living.world.playSound(null, living.posX, living.posY, living.posZ,
-                        ModSounds.SKILLET_ATTACK_STRONG, SoundCategory.PLAYERS, 1.0F, pitch);
-            }
-        }
-    }
 }
 

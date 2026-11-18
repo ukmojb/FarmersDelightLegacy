@@ -1,5 +1,7 @@
 package com.wdcftgg.farmersdelightlegacy.common.block;
 
+import com.wdcftgg.farmersdelightlegacy.common.registry.BlockCategories;
+
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockBush;
 import net.minecraft.block.IGrowable;
@@ -15,6 +17,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.stats.StatList;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.NonNullList;
+import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
@@ -67,8 +70,27 @@ public class BlockWildCrop extends BlockBush implements IGrowable {
 
     @Override
     protected boolean canSustainBush(IBlockState state) {
-        Block block = state.getBlock();
-        return super.canSustainBush(state) || block == net.minecraft.init.Blocks.GRASS || block == net.minecraft.init.Blocks.DIRT || block == net.minecraft.init.Blocks.SAND;
+        return BlockCategories.contains("fdTerrain", state);
+    }
+
+    @Override
+    public boolean canPlaceBlockAt(World world, BlockPos pos) {
+        return world.getBlockState(pos).getBlock().isReplaceable(world, pos) && canSustainBush(world.getBlockState(pos.down()));
+    }
+
+    @Override
+    public boolean canBlockStay(World world, BlockPos pos, IBlockState state) {
+        return canSustainBush(world.getBlockState(pos.down()));
+    }
+
+    @Override
+    public int getFlammability(IBlockAccess world, BlockPos pos, EnumFacing face) {
+        return 100;
+    }
+
+    @Override
+    public int getFireSpreadSpeed(IBlockAccess world, BlockPos pos, EnumFacing face) {
+        return 60;
     }
 
     @Override

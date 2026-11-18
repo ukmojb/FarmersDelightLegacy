@@ -12,11 +12,11 @@
     },
     {
       "type": "forge:ore_dict",
-      "ore": "cropSweetBerry"
+      "ore": "listAllberry"
     },
     {
       "type": "forge:ore_dict",
-      "ore": "cropSweetBerry"
+      "ore": "listAllberry"
     },
     {
       "item": "farmersdelight:pumpkin_slice"
@@ -27,5 +27,16 @@
   ],
   "result": {
     "item": "farmersdelight:fruit_salad"
-  }
+  },
+  "conditions": [
+    {
+      "type": "farmersdelight:ingredients_available",
+      "ores": [
+        "listAllberry"
+      ],
+      "items": [
+        "farmersdelight:fruit_salad"
+      ]
+    }
+  ]
 }

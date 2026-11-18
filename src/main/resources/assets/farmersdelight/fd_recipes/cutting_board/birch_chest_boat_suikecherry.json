@@ -1,0 +1,24 @@
+{
+  "conditions": {
+    "items": [
+      "suikecherry:birch_chest_boat",
+      "minecraft:birch_boat"
+    ]
+  },
+  "ingredients": [
+    {
+      "item": "suikecherry:birch_chest_boat"
+    }
+  ],
+  "tool": "ore:toolHoe",
+  "result": [
+    {
+      "item": "minecraft:birch_boat",
+      "count": 1
+    },
+    {
+      "item": "minecraft:chest",
+      "count": 1
+    }
+  ]
+}

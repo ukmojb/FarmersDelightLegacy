@@ -37,6 +37,13 @@ public final class ZenCookingPotRecipes {
     public static boolean addRecipeAdvanced(String key, IIngredient[] ingredients, IItemStack result,
                                             IItemStack outputContainerStack,
                                             int cookingTime, float experience, boolean hasContainerDefinition) {
+        return addRecipeAdvanced(key, ingredients, result, outputContainerStack, cookingTime, experience, hasContainerDefinition, "");
+    }
+
+    @ZenMethod
+    public static boolean addRecipeAdvanced(String key, IIngredient[] ingredients, IItemStack result,
+                                            IItemStack outputContainerStack, int cookingTime, float experience,
+                                            boolean hasContainerDefinition, String group) {
         List<IngredientEntry> ingredientEntries = CraftTweakerCompatHelper.toCookingPotIngredients(ingredients);
         ItemStack resultStack = CraftTweakerCompatHelper.stackOf(result);
         ItemStack outputContainer = CraftTweakerCompatHelper.stackOf(outputContainerStack);
@@ -44,7 +51,7 @@ public final class ZenCookingPotRecipes {
             return false;
         }
         return CookingPotRecipeManager.registerScriptRecipe(key, ingredientEntries, resultStack, outputContainer,
-                cookingTime, experience, hasContainerDefinition);
+                cookingTime, experience, hasContainerDefinition, group);
     }
 
     @ZenMethod
@@ -78,12 +85,43 @@ public final class ZenCookingPotRecipes {
 
     @ZenMethod
     public static boolean removeRecipe(String key) {
-        return CookingPotRecipeManager.unregisterScriptRecipe(key);
+        return CookingPotRecipeManager.removeRecipe(key);
+    }
+
+    @ZenMethod
+    public static int removeAll() {
+        return CookingPotRecipeManager.removeRecipes(recipe -> true);
+    }
+
+    @ZenMethod
+    public static ZenCookingRecipe[] getRecipes() {
+        return CookingPotRecipeManager.getRecipes().stream().map(ZenCookingRecipe::new).toArray(ZenCookingRecipe[]::new);
+    }
+
+    @ZenMethod
+    public static ZenCookingRecipe getRecipe(String id) {
+        for (com.wdcftgg.farmersdelightlegacy.common.recipe.CookingPotRecipe recipe : CookingPotRecipeManager.getRecipes()) {
+            if (recipe.getRecipeId().equals(id)) {
+                return new ZenCookingRecipe(recipe);
+            }
+        }
+        crafttweaker.CraftTweakerAPI.logError("Unknown cooking recipe: " + id);
+        return null;
+    }
+
+    @ZenMethod
+    public static String[] dumpRecipes() {
+        return java.util.Arrays.stream(getRecipes()).map(ZenCookingRecipe::toCommandString).toArray(String[]::new);
     }
 
     @ZenMethod
     public static int removeRecipesByOutput(IItemStack outputStack) {
-        return CookingPotRecipeManager.removeRecipesByOutput(CraftTweakerCompatHelper.stackOf(outputStack));
+        if (outputStack == null) {
+            crafttweaker.CraftTweakerAPI.logError("Cooking recipe removal requires an output");
+            return 0;
+        }
+        return CookingPotRecipeManager.removeRecipes(recipe ->
+                outputStack.matches(crafttweaker.api.minecraft.CraftTweakerMC.getIItemStack(recipe.getResultStack())));
     }
 
     @ZenMethod

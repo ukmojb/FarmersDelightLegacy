@@ -130,18 +130,35 @@ public final class HarvestDropRecipeManager {
     }
 
     public static void addDrops(BlockEvent.HarvestDropsEvent event, ItemStack toolStack) {
+        addDrops(event, false);
+    }
+
+    public static void addStrawDrops(BlockEvent.HarvestDropsEvent event) {
+        addDrops(event, true);
+    }
+
+    public static void addStrawDrops(IBlockState state, int fortuneLevel, Random random, List<ItemStack> drops) {
+        addDrops(state, fortuneLevel, random, drops, true);
+    }
+
+    private static void addDrops(BlockEvent.HarvestDropsEvent event, boolean strawOnly) {
+        addDrops(event.getState(), event.getFortuneLevel(), event.getWorld().rand, event.getDrops(), strawOnly);
+    }
+
+    private static void addDrops(IBlockState state, int fortuneLevel, Random random, List<ItemStack> drops, boolean strawOnly) {
         registerDefaults();
-        IBlockState state = event.getState();
-        int fortuneLevel = event.getFortuneLevel();
         for (HarvestDropRecipe recipe : getRecipeSnapshot()) {
             if (recipe.jeiOnly || !recipe.matches(state)) {
                 continue;
             }
             for (HuntingDropOutput output : recipe.getOutputs()) {
-                if (event.getWorld().rand.nextFloat() > output.getChanceWithLooting(fortuneLevel)) {
+                if (strawOnly && output.getOutputStack().getItem() != ModItems.get("straw")) {
                     continue;
                 }
-                addExtraDrop(event, output.getOutputStack(), recipe.preventDuplicateStacking);
+                if (random.nextFloat() > output.getChanceWithLooting(fortuneLevel)) {
+                    continue;
+                }
+                addExtraDrop(drops, output.getOutputStack(), recipe.preventDuplicateStacking);
             }
         }
     }
@@ -174,6 +191,9 @@ public final class HarvestDropRecipeManager {
                 Collections.singletonList(new HuntingDropOutput(itemStack("straw"))),
                 false, Blocks.WHEAT.getDefaultState().withProperty(BlockCrops.AGE, 7),
                 Blocks.FARMLAND.getDefaultState());
+        registerRecipe("farmersdelight:sandy_shrub_straw", state -> state.getBlock() == ModBlocks.SANDY_SHRUB,
+                Collections.singletonList(new HuntingDropOutput(itemStack("straw"), 0.3F, 0.0F)),
+                false, ModBlocks.SANDY_SHRUB.getDefaultState(), Blocks.SAND.getDefaultState());
         registerRecipe("farmersdelight:rice_panicle_straw", HarvestDropRecipeManager::isMatureRicePanicle,
                 Collections.singletonList(new HuntingDropOutput(itemStack("straw"))),
                 false, createWildRiceDisplayBlockStates(), Blocks.DIRT.getDefaultState());
@@ -277,19 +297,19 @@ public final class HarvestDropRecipeManager {
         return item == null ? ItemStack.EMPTY : new ItemStack(item);
     }
 
-    private static void addExtraDrop(BlockEvent.HarvestDropsEvent event, ItemStack stack, boolean preventDuplicateStacking) {
+    private static void addExtraDrop(List<ItemStack> drops, ItemStack stack, boolean preventDuplicateStacking) {
         if (stack.isEmpty()) {
             return;
         }
         if (preventDuplicateStacking) {
-            for (ItemStack dropStack : event.getDrops()) {
+            for (ItemStack dropStack : drops) {
                 if (!dropStack.isEmpty() && areStacksMergeable(dropStack, stack)) {
                     dropStack.grow(stack.getCount());
                     return;
                 }
             }
         }
-        event.getDrops().add(stack.copy());
+        drops.add(stack.copy());
     }
 
     private static boolean areStacksMergeable(ItemStack firstStack, ItemStack secondStack) {

@@ -138,5 +138,23 @@
       "farmersdelight:entity/slime/attack1",
       "farmersdelight:entity/slime/attack2"
     ]
+  },
+  "block.rope_fence_gate.open": {
+    "sounds": [
+      {
+        "type": "event",
+        "name": "minecraft:entity.leash_knot.break"
+      }
+    ],
+    "subtitle": "subtitles.farmersdelight.block.rope_fence_gate.open"
+  },
+  "block.rope_fence_gate.close": {
+    "sounds": [
+      {
+        "type": "event",
+        "name": "minecraft:entity.leash_knot.place"
+      }
+    ],
+    "subtitle": "subtitles.farmersdelight.block.rope_fence_gate.close"
   }
 }

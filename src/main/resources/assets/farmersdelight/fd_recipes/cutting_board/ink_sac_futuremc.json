@@ -1,0 +1,26 @@
+{
+  "ingredients": [
+    {
+      "item": "minecraft:dye",
+      "data": 0
+    }
+  ],
+  "tool": {
+    "tag": "forge:tools/knives"
+  },
+  "result": [
+    {
+      "item": "futuremc:dye",
+      "data": 3,
+      "count": 2
+    }
+  ],
+  "conditions": {
+    "items": [
+      "futuremc:dye"
+    ],
+    "items_absent": [
+      "farmers_future_delight:black_dye"
+    ]
+  }
+}

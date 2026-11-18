@@ -1,0 +1,32 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "conditions": [
+    {
+      "type": "farmersdelight:ingredients_available",
+      "ores": [
+        "bamboo"
+      ],
+      "items": [
+        "farmers_future_delight:scaffolding"
+      ]
+    }
+  ],
+  "pattern": [
+    "b#b",
+    "b b",
+    "b b"
+  ],
+  "key": {
+    "b": {
+      "type": "forge:ore_dict",
+      "ore": "bamboo"
+    },
+    "#": {
+      "item": "farmersdelight:canvas"
+    }
+  },
+  "result": {
+    "item": "farmers_future_delight:scaffolding",
+    "count": 6
+  }
+}

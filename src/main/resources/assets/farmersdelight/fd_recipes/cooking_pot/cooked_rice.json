@@ -1,6 +1,6 @@
 {
   "ingredients": [
-    "farmersdelight:rice"
+    "ore:cropRice"
   ],
   "cookingtime": 100,
   "experience": 0.35,

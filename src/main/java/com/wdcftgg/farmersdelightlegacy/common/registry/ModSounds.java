@@ -25,6 +25,8 @@ public final class ModSounds {
     public static SoundEvent tomatoesPickTomatoes;
     public static SoundEvent ROTTEN_TOMATO_THROW;
     public static SoundEvent ROTTEN_TOMATO_HIT;
+    public static SoundEvent ropeFenceGateOpen;
+    public static SoundEvent ropeFenceGateClose;
 
     private ModSounds() {
     }
@@ -48,6 +50,8 @@ public final class ModSounds {
         tomatoesPickTomatoes = register(event, "block.tomato_bush.pick_tomatoes");
         ROTTEN_TOMATO_THROW = register(event, "entity.rotten_tomato.throw");
         ROTTEN_TOMATO_HIT = register(event, "entity.rotten_tomato.hit");
+        ropeFenceGateOpen = register(event, "block.rope_fence_gate.open");
+        ropeFenceGateClose = register(event, "block.rope_fence_gate.close");
     }
 
     private static SoundEvent register(RegistryEvent.Register<SoundEvent> event, String soundPath) {

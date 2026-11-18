@@ -9,33 +9,10 @@
       "type": "forge:ore_dict",
       "ore": "cropOnion"
     },
-    [
-      {
-        "item": "minecraft:cooked_beef"
-      },
-      {
-        "item": "minecraft:cooked_porkchop"
-      },
-      {
-        "item": "minecraft:cooked_chicken"
-      },
-      {
-        "item": "minecraft:cooked_mutton"
-      },
-      [
-        {
-          "item": "minecraft:cooked_fish",
-          "data": 0
-        },
-        {
-          "item": "minecraft:cooked_fish",
-          "data": 1
-        }
-      ],
-      {
-        "item": "minecraft:cooked_rabbit"
-      }
-    ],
+    {
+      "type": "forge:ore_dict",
+      "ore": "listAllmeatcooked"
+    },
     {
       "item": "minecraft:stick"
     }

@@ -19,7 +19,8 @@
       "item": "minecraft:sugar"
     },
     "w": {
-      "item": "minecraft:wheat"
+      "type": "forge:ore_dict",
+      "ore": "cropWheat"
     }
   },
   "result": {

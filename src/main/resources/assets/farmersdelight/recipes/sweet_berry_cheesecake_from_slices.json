@@ -12,5 +12,14 @@
   },
   "result": {
     "item": "farmersdelight:sweet_berry_cheesecake"
-  }
+  },
+  "conditions": [
+    {
+      "type": "farmersdelight:ingredients_available",
+      "items": [
+        "farmersdelight:sweet_berry_cheesecake_slice",
+        "farmersdelight:sweet_berry_cheesecake"
+      ]
+    }
+  ]
 }

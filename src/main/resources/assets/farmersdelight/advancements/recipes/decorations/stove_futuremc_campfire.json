@@ -1,15 +1,10 @@
 {
   "conditions": [
     {
-      "type": "forge:mod_loaded",
-      "modid": "futuremc"
-    },
-    {
-      "type": "forge:not",
-      "value": {
-        "type": "forge:mod_loaded",
-        "modid": "campfire"
-      }
+      "type": "farmersdelight:ingredients_available",
+      "ores": [
+        "campfire"
+      ]
     }
   ],
   "parent": "minecraft:recipes/root",
@@ -18,7 +13,7 @@
       "conditions": {
         "items": [
           {
-            "item": "minecraft:bricks"
+            "item": "minecraft:brick_block"
           }
         ]
       },
@@ -28,7 +23,8 @@
       "conditions": {
         "items": [
           {
-            "item": "futuremc:campfire"
+            "type": "forge:ore_dict",
+            "ore": "campfire"
           }
         ]
       },
@@ -36,7 +32,7 @@
     },
     "has_the_recipe": {
       "conditions": {
-        "recipe": "farmersdelight:stove_futuremc_campfire"
+        "recipe": "farmersdelight:stove_campfire"
       },
       "trigger": "minecraft:recipe_unlocked"
     }
@@ -50,7 +46,7 @@
   ],
   "rewards": {
     "recipes": [
-      "farmersdelight:stove_futuremc_campfire"
+      "farmersdelight:stove_campfire"
     ]
   }
 }

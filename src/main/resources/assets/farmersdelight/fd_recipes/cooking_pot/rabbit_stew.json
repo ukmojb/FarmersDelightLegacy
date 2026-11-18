@@ -1,11 +1,14 @@
 {
   "ingredients": [
-    "ore:potatoOrBaked",
+    "ore:cropPotato",
     "minecraft:rabbit",
-    "minecraft:carrot",
-    "ore:listAllmushroom"
+    "ore:cropCarrot",
+    [
+      "minecraft:brown_mushroom",
+      "minecraft:red_mushroom"
+    ]
   ],
-  "experience": 1.0,
+  "experience": 1,
   "result": {
     "item": "minecraft:rabbit_stew",
     "count": 1

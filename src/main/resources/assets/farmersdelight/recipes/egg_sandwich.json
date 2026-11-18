@@ -2,15 +2,16 @@
   "type": "minecraft:crafting_shapeless",
   "ingredients": [
     {
-      "item": "minecraft:bread"
+      "type": "forge:ore_dict",
+      "ore": "foodBread"
     },
     {
       "type": "forge:ore_dict",
-      "ore": "listAllEgg"
+      "ore": "cooked_eggs"
     },
     {
       "type": "forge:ore_dict",
-      "ore": "listAllEgg"
+      "ore": "cooked_eggs"
     }
   ],
   "result": {

@@ -204,9 +204,7 @@ item.farmersdelight.vegetable_noodles.name=Groente Noedels
 item.farmersdelight.vegetable_soup.name=Groentesoep
 item.farmersdelight.wheat_dough.name=Tarwedeeg
 itemGroup.farmersdelight=Farmer's Delight
-
 item.farmersdelight.pumpkin_pie_slice.name=Stuk pompoentaart
-
 farmersdelight.advancement.craft_knife.desc=Maak een mes om extra goederen van planten en dieren te verzamelen.
 farmersdelight.advancement.craft_knife=Jaag en Verzamel
 farmersdelight.advancement.eat_comfort_food.desc=Warme kommaaltijden zorgen ervoor dat je steeds geneest, hoe hongerig je ook bent!
@@ -262,3 +260,13 @@ farmersdelight.subtitles.cutting_board.remove_item=Item removed from board
 farmersdelight.subtitles.cutting_board.carve_tool=Tool carved on board
 farmersdelight.subtitles.food.take_portion=Portion served
 farmersdelight.subtitles.food.slice=Food sliced
+tile.farmersdelight.wooden_basket.name=Mand
+subtitles.farmersdelight.block.cooking_pot.boil=Kookpot Kookt
+subtitles.farmersdelight.block.cutting_board.knife_cut=Mes Snijdt
+subtitles.farmersdelight.block.stove.crackle=Fornuis Knettert
+subtitles.farmersdelight.block.skillet.sizzle=Koekenpan Sist
+subtitles.farmersdelight.block.skillet.add_food=Koekenpan Spetterd
+subtitles.farmersdelight.block.tomatoes.pick_tomatoes=Tomataten knallen
+subtitles.farmersdelight.entity.rotten_tomato.throw=Verrotte Tomaat vliegt
+subtitles.farmersdelight.entity.rotten_tomato.hit=Verrotte Tomaat spat
+entity.rotten_tomato.name=Verrotte Tomaat

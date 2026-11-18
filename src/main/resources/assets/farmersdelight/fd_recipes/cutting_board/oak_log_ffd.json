@@ -1,0 +1,25 @@
+{
+  "conditions": {
+    "items": [
+      "farmers_future_delight:stripped_oak_log"
+    ],
+    "block_not_registered": "futuremc:stripped_oak_log"
+  },
+  "ingredients": [
+    {
+      "item": "minecraft:log",
+      "data": 0
+    }
+  ],
+  "tool": "ore:toolAxe",
+  "result": [
+    {
+      "item": "farmers_future_delight:stripped_oak_log",
+      "count": 1
+    },
+    {
+      "item": "farmersdelight:tree_bark",
+      "count": 1
+    }
+  ]
+}

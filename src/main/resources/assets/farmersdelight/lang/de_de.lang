@@ -244,9 +244,7 @@ item.farmersdelight.vegetable_noodles.name=Gemüsenudeln
 item.farmersdelight.vegetable_soup.name=Gemüsesuppe
 item.farmersdelight.wheat_dough.name=Teigball
 itemGroup.farmersdelight=Farmer's Delight
-
 item.farmersdelight.pumpkin_pie_slice.name=Stueck Kuerbiskuchen
-
 farmersdelight.advancement.craft_knife.desc=Stelle ein Messer her um mehr Material von Pflanzen und Tieren zu sammeln
 farmersdelight.advancement.craft_knife=Jagen und sammeln
 farmersdelight.advancement.eat_comfort_food.desc=Suppen und Eintöpfe sind toll um Kälte und Krankheit fernzuhalten!
@@ -304,3 +302,15 @@ farmersdelight.subtitles.cutting_board.remove_item=Item removed from board
 farmersdelight.subtitles.cutting_board.carve_tool=Tool carved on board
 farmersdelight.subtitles.food.take_portion=Portion served
 farmersdelight.subtitles.food.slice=Food sliced
+tile.farmersdelight.wooden_basket.name=Korb
+subtitles.farmersdelight.block.cooking_pot.boil=Kochtopf kocht
+subtitles.farmersdelight.block.cutting_board.knife_cut=Messer schneidet
+subtitles.farmersdelight.block.stove.crackle=Herd knistert
+subtitles.farmersdelight.block.skillet.sizzle=Bratpfanne brutzelt
+subtitles.farmersdelight.block.skillet.add_food=Bratpfanne zischt
+subtitles.farmersdelight.block.cabinet.open=Küchenschrank öffnet
+subtitles.farmersdelight.block.cabinet.close=Küchenschrank Schließt
+subtitles.farmersdelight.block.tomatoes.pick_tomatoes=Tomate gepflückt
+subtitles.farmersdelight.entity.rotten_tomato.throw=Verdorbene Tomate fliegt
+subtitles.farmersdelight.entity.rotten_tomato.hit=Verdorbene Tomaten spritzt
+entity.rotten_tomato.name=Verdorbene Tomate

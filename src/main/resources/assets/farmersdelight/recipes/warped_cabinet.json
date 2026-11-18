@@ -3,8 +3,14 @@
   "category": "misc",
   "conditions": [
     {
-      "type": "forge:mod_loaded",
-      "modid": "nb"
+      "type": "farmersdelight:ingredients_available",
+      "ores": [
+        "warpedPlank",
+        "warpedTrapdoor"
+      ],
+      "items": [
+        "farmersdelight:warped_cabinet"
+      ]
     }
   ],
   "group": "fd_cabinet",
@@ -14,7 +20,8 @@
       "ore": "warpedTrapdoor"
     },
     "_": {
-      "item": "nb:warped_planks"
+      "type": "forge:ore_dict",
+      "ore": "warpedPlank"
     }
   },
   "pattern": [

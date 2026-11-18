@@ -1,15 +1,22 @@
 {
   "ingredients": [
-    "minecraft:lily_of_the_valley"
+    "ore:fdLilyOfTheValley"
   ],
   "tool": {
     "tag": "forge:tools/knives"
   },
   "result": [
     {
-      "item": "minecraft:dye",
-      "count": 2,
-      "data": 15
+      "item": "farmers_future_delight:white_dye",
+      "count": 2
     }
-  ]
+  ],
+  "conditions": {
+    "ores": [
+      "fdLilyOfTheValley"
+    ],
+    "items": [
+      "farmers_future_delight:white_dye"
+    ]
+  }
 }

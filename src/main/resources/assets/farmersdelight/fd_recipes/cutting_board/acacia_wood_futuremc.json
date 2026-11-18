@@ -1,0 +1,24 @@
+{
+  "conditions": {
+    "items": [
+      "futuremc:acacia_wood",
+      "futuremc:stripped_acacia_wood"
+    ]
+  },
+  "ingredients": [
+    {
+      "item": "futuremc:acacia_wood"
+    }
+  ],
+  "tool": "ore:toolAxe",
+  "result": [
+    {
+      "item": "futuremc:stripped_acacia_wood",
+      "count": 1
+    },
+    {
+      "item": "farmersdelight:tree_bark",
+      "count": 1
+    }
+  ]
+}

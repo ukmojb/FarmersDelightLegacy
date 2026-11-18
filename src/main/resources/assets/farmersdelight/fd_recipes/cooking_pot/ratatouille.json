@@ -2,10 +2,10 @@
   "ingredients": [
     "ore:cropTomato",
     "ore:cropOnion",
-    "minecraft:beetroot",
-    "ore:listAllveggie"
+    "ore:cropBeetroot",
+    "ore:fdCookingVegetable"
   ],
-  "experience": 1.0,
+  "experience": 1,
   "result": {
     "item": "farmersdelight:ratatouille",
     "count": 1

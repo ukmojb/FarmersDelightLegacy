@@ -1,0 +1,44 @@
+{
+  "parent": "minecraft:recipes/root",
+  "criteria": {
+    "has_ingredients": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "item": "farmersdelight:cabbage"
+          }
+        ]
+      }
+    },
+    "has_the_recipe": {
+      "trigger": "minecraft:recipe_unlocked",
+      "conditions": {
+        "recipe": "farmersdelight:gleaming_salad_block"
+      }
+    }
+  },
+  "requirements": [
+    [
+      "has_ingredients",
+      "has_the_recipe"
+    ]
+  ],
+  "rewards": {
+    "recipes": [
+      "farmersdelight:gleaming_salad_block"
+    ]
+  },
+  "conditions": [
+    {
+      "type": "farmersdelight:ingredients_available",
+      "ores": [
+        "cropGlowBerry",
+        "foodHoney"
+      ],
+      "items": [
+        "farmersdelight:gleaming_salad_block"
+      ]
+    }
+  ]
+}

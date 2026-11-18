@@ -1,12 +1,12 @@
 {
   "ingredients": [
     "ore:listAllchickenraw",
-    "minecraft:carrot",
-    "ore:listAllveggie",
-    "ore:listAllveggie"
+    "ore:cropCarrot",
+    "ore:foodLeafyGreen",
+    "ore:fdCookingVegetable"
   ],
   "cookingtime": 200,
-  "experience": 1.0,
+  "experience": 1,
   "result": {
     "item": "farmersdelight:chicken_soup",
     "count": 1

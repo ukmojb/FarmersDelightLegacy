@@ -1,14 +1,22 @@
 {
   "ingredients": [
-    "minecraft:wither_rose"
+    "ore:fdWitherRose"
   ],
   "tool": {
     "tag": "forge:tools/knives"
   },
   "result": [
     {
-      "item": "minecraft:dye",
+      "item": "farmers_future_delight:black_dye",
       "count": 2
     }
-  ]
+  ],
+  "conditions": {
+    "ores": [
+      "fdWitherRose"
+    ],
+    "items": [
+      "farmers_future_delight:black_dye"
+    ]
+  }
 }

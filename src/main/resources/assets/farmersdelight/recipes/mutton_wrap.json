@@ -2,14 +2,16 @@
   "type": "minecraft:crafting_shapeless",
   "ingredients": [
     {
-      "item": "minecraft:bread"
-    },
-    {
-      "item": "minecraft:cooked_mutton"
+      "type": "forge:ore_dict",
+      "ore": "foodBread"
     },
     {
       "type": "forge:ore_dict",
-      "ore": "listAllveggie"
+      "ore": "listAllmuttoncooked"
+    },
+    {
+      "type": "forge:ore_dict",
+      "ore": "foodLeafyGreen"
     },
     {
       "type": "forge:ore_dict",

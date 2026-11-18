@@ -281,9 +281,7 @@ item.farmersdelight.vegetable_noodles.name=Көкөністі кеспе
 item.farmersdelight.vegetable_soup.name=Көкөніс сорпа
 item.farmersdelight.wheat_dough.name=Қамыр
 itemGroup.farmersdelight=Фермердің қуанышы
-
 item.farmersdelight.pumpkin_pie_slice.name=Asqabaq pirogynyng tilimi
-
 farmersdelight.advancement.craft_knife.desc=Өсімдіктер мен жануарлардан қосымша өнім алу үшін пышақ жаса
 farmersdelight.advancement.craft_knife=Аңшылық пен терушілік
 farmersdelight.advancement.eat_comfort_food.desc=Қаншалықты аш болсаң да, ыстық тағам тұрақты емдей береді!
@@ -341,3 +339,15 @@ farmersdelight.subtitles.cutting_board.remove_item=Item removed from board
 farmersdelight.subtitles.cutting_board.carve_tool=Tool carved on board
 farmersdelight.subtitles.food.take_portion=Portion served
 farmersdelight.subtitles.food.slice=Food sliced
+tile.farmersdelight.wooden_basket.name=Себет
+subtitles.farmersdelight.block.cooking_pot.boil=Қазан қайнап жатыр
+subtitles.farmersdelight.block.cutting_board.knife_cut=Пышақ кесті
+subtitles.farmersdelight.block.stove.crackle=Пеш шытырлады
+subtitles.farmersdelight.block.skillet.sizzle=Таба шырылдады
+subtitles.farmersdelight.block.skillet.add_food=Таба ысқырды
+subtitles.farmersdelight.block.cabinet.open=Аcaдал ашылды
+subtitles.farmersdelight.block.cabinet.close=Аcaдал жабылды
+subtitles.farmersdelight.block.tomatoes.pick_tomatoes=Қызанақ езілді
+subtitles.farmersdelight.entity.rotten_tomato.throw=Шіріген қызанақ ұшты
+subtitles.farmersdelight.entity.rotten_tomato.hit=Шіріген қызанақ шашырады
+entity.rotten_tomato.name=Шіріген қызанақ

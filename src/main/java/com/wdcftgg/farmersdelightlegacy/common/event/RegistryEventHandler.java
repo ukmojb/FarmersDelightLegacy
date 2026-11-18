@@ -36,8 +36,9 @@ public final class RegistryEventHandler {
         Configuration.applyRuntimeOverrides();
     }
 
+    // 声音注册晚于所有物品注册，早于 JSON 配方条件求值。
     @SubscribeEvent(priority = EventPriority.LOWEST)
-    public static void onRegisterCompatOreDictionary(RegistryEvent.Register<Item> event) {
+    public static void onRegisterCompatOreDictionary(RegistryEvent.Register<SoundEvent> event) {
         ModOreDictionary.registerCompatOres();
     }
 

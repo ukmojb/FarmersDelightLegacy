@@ -3,8 +3,14 @@
   "category": "misc",
   "conditions": [
     {
-      "type": "forge:mod_loaded",
-      "modid": "nb"
+      "type": "farmersdelight:ingredients_available",
+      "ores": [
+        "crimsonPlank",
+        "crimsonTrapdoor"
+      ],
+      "items": [
+        "farmersdelight:crimson_cabinet"
+      ]
     }
   ],
   "group": "fd_cabinet",
@@ -14,7 +20,8 @@
       "ore": "crimsonTrapdoor"
     },
     "_": {
-      "item": "nb:crimson_planks"
+      "type": "forge:ore_dict",
+      "ore": "crimsonPlank"
     }
   },
   "pattern": [

@@ -237,9 +237,7 @@ item.farmersdelight.vegetable_noodles.name=Nouilles aux légumes
 item.farmersdelight.vegetable_soup.name=Soupe aux légumes
 item.farmersdelight.wheat_dough.name=Pâte de blé
 itemGroup.farmersdelight=Farmer's Delight
-
 item.farmersdelight.pumpkin_pie_slice.name=Part de tarte a la citrouille
-
 farmersdelight.advancement.craft_knife.desc=Fabriquez un couteau pour récolter plus de ressources des plantes et animaux
 farmersdelight.advancement.craft_knife=Chasse et cueillette
 farmersdelight.advancement.eat_comfort_food.desc=Les soupes sont pratiques pour se réchauffer en hiver
@@ -297,3 +295,15 @@ farmersdelight.subtitles.cutting_board.remove_item=Item removed from board
 farmersdelight.subtitles.cutting_board.carve_tool=Tool carved on board
 farmersdelight.subtitles.food.take_portion=Portion served
 farmersdelight.subtitles.food.slice=Food sliced
+tile.farmersdelight.wooden_basket.name=Panier
+subtitles.farmersdelight.block.cooking_pot.boil=Marmite qui bout
+subtitles.farmersdelight.block.cutting_board.knife_cut=Couteau découpe
+subtitles.farmersdelight.block.stove.crackle=Four qui crépite
+subtitles.farmersdelight.block.skillet.sizzle=Poêle qui grésille
+subtitles.farmersdelight.block.skillet.add_food=Poêle qui siffle
+subtitles.farmersdelight.block.cabinet.open=Armoire s'ouvre
+subtitles.farmersdelight.block.cabinet.close=Armoire se ferme
+subtitles.farmersdelight.block.tomatoes.pick_tomatoes=Tomate cueillie
+subtitles.farmersdelight.entity.rotten_tomato.throw=Tomate pourrie lancée
+subtitles.farmersdelight.entity.rotten_tomato.hit=Tomate pourrie s'écrase
+entity.rotten_tomato.name=Tomate pourrie

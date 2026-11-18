@@ -16,6 +16,7 @@ import com.wdcftgg.farmersdelightlegacy.common.recipe.manager.CuttingBoardRecipe
 import com.wdcftgg.farmersdelightlegacy.common.registry.ModDispenserBehaviors;
 import com.wdcftgg.farmersdelightlegacy.common.registry.ModEntities;
 import com.wdcftgg.farmersdelightlegacy.common.registry.ModTileEntities;
+import com.wdcftgg.farmersdelightlegacy.common.world.RichSoilPineTree;
 import com.wdcftgg.farmersdelightlegacy.common.world.WildCropWorldGenerator;
 import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.common.Mod;
@@ -29,7 +30,8 @@ import org.apache.logging.log4j.Logger;
         modid = FarmersDelightLegacy.MOD_ID,
         name = FarmersDelightLegacy.MOD_NAME,
         version = Tags.VERSION,
-        dependencies = "after:oe;after:traders",
+        guiFactory = "com.wdcftgg.farmersdelightlegacy.client.gui.ConfigGuiFactory",
+        dependencies = "after:oe;after:traders;after:futuremc;after:campfire;after:farmers_future_delight@[1.6.0,);after:sereneseasons;after:immersiveengineering",
         customProperties = {
                 @Mod.CustomProperty(k = "iconItem", v = "farmersdelight:stove"),
                 @Mod.CustomProperty(k = "license", v = "MIT License"),
@@ -60,6 +62,7 @@ public class FarmersDelightLegacy {
         ModTileEntities.registerAll();
         NetworkRegistry.INSTANCE.registerGuiHandler(this, new ModGuiHandler());
         ModNetworkHandler.registerAll();
+        FluidloggingCompat.registerAll();
         GameRegistry.registerWorldGenerator(new WildCropWorldGenerator(), 0);
         HeatSourceExample.registerHeatSourceExample();
         HuntingDropExample.registerHuntingDropExample();
@@ -68,11 +71,24 @@ public class FarmersDelightLegacy {
 
     @Mod.EventHandler
     public void init(FMLInitializationEvent event) {
+        RichSoilPineTree.registerAll();
         AnimalFoodCompat.registerAll();
+        if (Loader.isModLoaded("sereneseasons")) {
+            SereneSeasonsCompat.registerAll();
+        }
+        if (Loader.isModLoaded("immersiveengineering")) {
+            ImmersiveEngineeringCompat.registerAll();
+        }
         CampfireHeatSourceCompat.registerAll();
-        FutureMcSmithingCompat.registerAll();
-        FutureMcComposterCompat.registerAll();
+        if (Loader.isModLoaded("futuremc")) {
+            FutureMcSmithingCompat.registerAll();
+            FutureMcComposterCompat.registerAll();
+        }
+        if (Loader.isModLoaded(FarmersFutureDelightCompat.MOD_ID)) {
+            FarmersFutureDelightCompat.registerAll();
+        }
         ModVillagerTradeHandler.registerAll();
+        com.wdcftgg.farmersdelightlegacy.common.world.VillageCompostPiece.registerAll();
         if (Loader.isModLoaded("villagenames")) {
             VillageNamesVillageCompat.registerAll();
         }

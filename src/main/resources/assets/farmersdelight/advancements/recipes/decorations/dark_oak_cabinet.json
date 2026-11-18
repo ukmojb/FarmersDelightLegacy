@@ -28,5 +28,11 @@
     "recipes": [
       "farmersdelight:dark_oak_cabinet_futuremc"
     ]
-  }
+  },
+  "conditions": [
+    {
+      "type": "forge:mod_loaded",
+      "modid": "futuremc"
+    }
+  ]
 }

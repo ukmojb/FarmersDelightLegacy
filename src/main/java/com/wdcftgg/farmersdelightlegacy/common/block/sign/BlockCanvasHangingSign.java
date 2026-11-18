@@ -1,5 +1,6 @@
 package com.wdcftgg.farmersdelightlegacy.common.block.sign;
 
+import com.wdcftgg.farmersdelightlegacy.common.compat.FluidloggingCompat;
 import com.wdcftgg.farmersdelightlegacy.FarmersDelightLegacy;
 import com.wdcftgg.farmersdelightlegacy.common.tile.TileEntityCanvasSign;
 import net.minecraft.block.Block;
@@ -58,8 +59,13 @@ public class BlockCanvasHangingSign extends BlockContainer {
     }
 
     @Override
+    public boolean hasCustomBreakingProgress(IBlockState state) {
+        return true;
+    }
+
+    @Override
     public boolean onBlockActivated(World worldIn, BlockPos pos, IBlockState state, EntityPlayer playerIn, EnumHand hand, EnumFacing facing, float hitX, float hitY, float hitZ) {
-        return CanvasSignInteractionHelper.openEditor(worldIn, pos, playerIn);
+        return CanvasSignInteractionHelper.interact(worldIn, pos, playerIn, hand, true);
     }
 
     @Override
@@ -98,12 +104,11 @@ public class BlockCanvasHangingSign extends BlockContainer {
 
     @Override
     public void neighborChanged(IBlockState state, World worldIn, BlockPos pos, Block blockIn, BlockPos fromPos) {
-        // 悬挂牌不依赖邻接支撑，保持存在。
     }
 
     @Override
     protected BlockStateContainer createBlockState() {
-        return new BlockStateContainer(this, ROTATION);
+        return FluidloggingCompat.createBlockState(this, ROTATION);
     }
 
     @Override

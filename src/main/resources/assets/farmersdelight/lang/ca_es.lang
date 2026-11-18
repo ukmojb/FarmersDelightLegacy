@@ -213,9 +213,7 @@ item.farmersdelight.vegetable_noodles.name=Fideus de verdures
 item.farmersdelight.vegetable_soup.name=Sopa de verdures
 item.farmersdelight.wheat_dough.name=Massa de blat
 itemGroup.farmersdelight=Farmer's Delight
-
 item.farmersdelight.pumpkin_pie_slice.name=Tall de pastis de carbassa
-
 farmersdelight.advancement.craft_knife.desc=Crea un ganivet per obtenir més bens de les plantes i els animals.
 farmersdelight.advancement.craft_knife=Caça i recol·lecció
 farmersdelight.advancement.eat_comfort_food.desc=La sopa i els guisats són perfectes per allunyar el fred i les malalties.
@@ -271,3 +269,14 @@ farmersdelight.subtitles.cutting_board.remove_item=Item removed from board
 farmersdelight.subtitles.cutting_board.carve_tool=Tool carved on board
 farmersdelight.subtitles.food.take_portion=Portion served
 farmersdelight.subtitles.food.slice=Food sliced
+tile.farmersdelight.wooden_basket.name=Cistella
+item.farmersdelight.salmon_roll.name=Rotllo de salmó
+subtitles.farmersdelight.block.cooking_pot.boil=Olla bullint
+subtitles.farmersdelight.block.cutting_board.knife_cut=Tall de ganivet
+subtitles.farmersdelight.block.stove.crackle=Graella crepita
+subtitles.farmersdelight.block.skillet.sizzle=Paella espurneja
+subtitles.farmersdelight.block.skillet.add_food=Paella xiula
+subtitles.farmersdelight.block.tomatoes.pick_tomatoes=Tomàquet sent recollit
+subtitles.farmersdelight.entity.rotten_tomato.throw=Tomàquet podrit llançat
+subtitles.farmersdelight.entity.rotten_tomato.hit=Tomàquet podrit esclatant
+entity.rotten_tomato.name=Tomàquet podrit

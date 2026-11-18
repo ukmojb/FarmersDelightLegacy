@@ -83,8 +83,8 @@ public class ItemDrinkableTooltip extends ItemFoodTooltip {
             }
         }
 
-        stack.shrink(1);
         if (!(entityLiving instanceof EntityPlayer)) {
+            stack.shrink(1);
             return stack;
         }
 
@@ -94,6 +94,7 @@ public class ItemDrinkableTooltip extends ItemFoodTooltip {
         }
 
         ItemStack bottle = this.getContainerItem(stack);
+        stack.shrink(1);
         if (stack.isEmpty()) {
             return bottle;
         }

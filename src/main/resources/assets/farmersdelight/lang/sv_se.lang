@@ -218,9 +218,7 @@ item.farmersdelight.vegetable_noodles.name=Grönsaksnudlar
 item.farmersdelight.vegetable_soup.name=Vegetarisk soppa
 item.farmersdelight.wheat_dough.name=Vetedeg
 itemGroup.farmersdelight=Farmer's Delight
-
 item.farmersdelight.pumpkin_pie_slice.name=Skiva pumpapaj
-
 farmersdelight.advancement.craft_knife.desc=Skapa en kniv för att fånga extra gods från växter och djur
 farmersdelight.advancement.craft_knife=Jaga och samla
 farmersdelight.advancement.eat_comfort_food.desc=Varma skålmåltider kommer att hålla dig läkande stadigt, oavsett hur hungrig du är!
@@ -278,3 +276,15 @@ farmersdelight.subtitles.cutting_board.remove_item=Item removed from board
 farmersdelight.subtitles.cutting_board.carve_tool=Tool carved on board
 farmersdelight.subtitles.food.take_portion=Portion served
 farmersdelight.subtitles.food.slice=Food sliced
+tile.farmersdelight.wooden_basket.name=Korg
+subtitles.farmersdelight.block.cooking_pot.boil=Matlagningsgrytan kokar
+subtitles.farmersdelight.block.cutting_board.knife_cut=Kniven skär
+subtitles.farmersdelight.block.stove.crackle=Det sprakar i spisen
+subtitles.farmersdelight.block.skillet.sizzle=Pannan fräser
+subtitles.farmersdelight.block.skillet.add_food=Pannan väser
+subtitles.farmersdelight.block.cabinet.open=Skåpet öppnas
+subtitles.farmersdelight.block.cabinet.close=Skåpet stängs
+subtitles.farmersdelight.block.tomatoes.pick_tomatoes=Tomater poppar
+subtitles.farmersdelight.entity.rotten_tomato.throw=Rutten tomat flyger
+subtitles.farmersdelight.entity.rotten_tomato.hit=Rutten tomat stänker
+entity.rotten_tomato.name=Rutten tomat

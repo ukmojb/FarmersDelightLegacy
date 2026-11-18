@@ -14,5 +14,8 @@ public final class ModNetworkHandler {
 
     public static void registerAll() {
         INSTANCE.registerMessage(PacketOpenCanvasSignEditor.Handler.class, PacketOpenCanvasSignEditor.class, 0, Side.CLIENT);
+        INSTANCE.registerMessage(PacketStarParticles.Handler.class, PacketStarParticles.class, 1, Side.CLIENT);
+        INSTANCE.registerMessage(PacketFlipSkillet.Handler.class, PacketFlipSkillet.class, 2, Side.SERVER);
+        INSTANCE.registerMessage(PacketUpdateCanvasSign.Handler.class, PacketUpdateCanvasSign.class, 3, Side.SERVER);
     }
 }

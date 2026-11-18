@@ -1,6 +1,9 @@
 {
   "conditions": {
-    "block_not_registered": "futuremc:stripped_spruce_log"
+    "block_not_registered": [
+      "futuremc:stripped_spruce_log",
+      "farmers_future_delight:stripped_spruce_log"
+    ]
   },
   "ingredients": [
     {

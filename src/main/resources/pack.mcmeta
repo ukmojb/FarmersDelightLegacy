@@ -2,5 +2,13 @@
 	"pack": {
 		"description": "${mod_name} Resources",
 		"pack_format": 3
+	},
+	"language": {
+		"es_ec": { "name": "Español", "region": "Ecuador", "bidirectional": false },
+		"kk_kz": { "name": "Қазақша", "region": "Қазақстан", "bidirectional": false },
+		"lzh": { "name": "文言", "region": "華夏", "bidirectional": false },
+		"tok": { "name": "toki pona", "region": "ma pona", "bidirectional": false },
+		"vp_vl": { "name": "Volapük", "region": "Vol", "bidirectional": false },
+		"zh_hk": { "name": "繁體中文", "region": "香港", "bidirectional": false }
 	}
 }

@@ -1,0 +1,24 @@
+{
+  "conditions": {
+    "items": [
+      "suikecherry:dark_oak_chest_boat",
+      "minecraft:dark_oak_boat"
+    ]
+  },
+  "ingredients": [
+    {
+      "item": "suikecherry:dark_oak_chest_boat"
+    }
+  ],
+  "tool": "ore:toolHoe",
+  "result": [
+    {
+      "item": "minecraft:dark_oak_boat",
+      "count": 1
+    },
+    {
+      "item": "minecraft:chest",
+      "count": 1
+    }
+  ]
+}

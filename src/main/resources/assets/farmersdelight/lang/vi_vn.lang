@@ -244,9 +244,7 @@ item.farmersdelight.vegetable_noodles.name=Mì xào rau củ
 item.farmersdelight.vegetable_soup.name=Súp rau củ
 item.farmersdelight.wheat_dough.name=Bột mì
 itemGroup.farmersdelight=Niềm Vui Của Người Nông Dân
-
 item.farmersdelight.pumpkin_pie_slice.name=Lat banh bi ngo
-
 farmersdelight.advancement.craft_knife.desc=Chế tạo một con dao để thu thập thêm những sản phẩm từ thực vật và động vật
 farmersdelight.advancement.craft_knife=Săn bắt và hái lượm
 farmersdelight.advancement.eat_comfort_food.desc=Những bữa ăn ấm áp sẽ giúp bạn chữa lành vết thương đều đặn, bất kể bạn đói như thế nào!
@@ -304,3 +302,15 @@ farmersdelight.subtitles.cutting_board.remove_item=Item removed from board
 farmersdelight.subtitles.cutting_board.carve_tool=Tool carved on board
 farmersdelight.subtitles.food.take_portion=Portion served
 farmersdelight.subtitles.food.slice=Food sliced
+tile.farmersdelight.wooden_basket.name=Giỏ
+subtitles.farmersdelight.block.cooking_pot.boil=Nồi Nấu sôi
+subtitles.farmersdelight.block.cutting_board.knife_cut=Dao cắt
+subtitles.farmersdelight.block.stove.crackle=Bếp kêu lách tách
+subtitles.farmersdelight.block.skillet.sizzle=Chảo Rán kêu xèo xèo
+subtitles.farmersdelight.block.skillet.add_food=Chảo Rán kêu xì xì
+subtitles.farmersdelight.block.cabinet.open=Tủ mở
+subtitles.farmersdelight.block.cabinet.close=Tủ đóng
+subtitles.farmersdelight.block.tomatoes.pick_tomatoes=Cà chua nổ lách tách
+subtitles.farmersdelight.entity.rotten_tomato.throw=Cà chua thối bay
+subtitles.farmersdelight.entity.rotten_tomato.hit=Cà chua thối vỡ
+entity.rotten_tomato.name=Cà chua thối

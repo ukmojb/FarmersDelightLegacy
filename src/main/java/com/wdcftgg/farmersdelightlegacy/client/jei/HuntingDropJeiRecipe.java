@@ -14,6 +14,7 @@ import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.gui.inventory.GuiInventory;
 import net.minecraft.client.renderer.GlStateManager;
+import net.minecraft.client.renderer.OpenGlHelper;
 import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.client.util.ITooltipFlag;
@@ -307,8 +308,9 @@ public final class HuntingDropJeiRecipe implements IRecipeWrapper {
             } else {
                 this.entityErrored = true;
             }
-        } catch (Exception ignored) {
+        } catch (Exception exception) {
             this.entityErrored = true;
+            FarmersDelightLegacy.LOGGER.error("创建 JEI 狩猎实体预览失败，配方：{}，实体：{}", this.recipeId, this.entityId, exception);
         }
     }
 
@@ -341,13 +343,20 @@ public final class HuntingDropJeiRecipe implements IRecipeWrapper {
             this.renderScale = Math.min(entityBoxWidth / width, entityBoxHeight / height);
         }
 
+        float previousBrightnessX = OpenGlHelper.lastBrightnessX;
+        float previousBrightnessY = OpenGlHelper.lastBrightnessY;
         GlStateManager.enableDepth();
         GlStateManager.pushMatrix();
-        GlStateManager.translate(35, 52, 0);
-        GuiInventory.drawEntityOnScreen(0, 0, (int) Math.round(this.renderScale), -100, 0, this.entityInstance);
-        drawPreviewParticles(minecraft);
-        GlStateManager.popMatrix();
-        GlStateManager.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
+        try {
+            OpenGlHelper.setLightmapTextureCoords(OpenGlHelper.lightmapTexUnit, 240.0F, 240.0F);
+            GlStateManager.translate(35, 52, 0);
+            GuiInventory.drawEntityOnScreen(0, 0, (int) Math.round(this.renderScale), -100, 0, this.entityInstance);
+            drawPreviewParticles(minecraft);
+        } finally {
+            OpenGlHelper.setLightmapTextureCoords(OpenGlHelper.lightmapTexUnit, previousBrightnessX, previousBrightnessY);
+            GlStateManager.popMatrix();
+            GlStateManager.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
+        }
     }
 
     private void drawPreviewParticles(Minecraft minecraft) {

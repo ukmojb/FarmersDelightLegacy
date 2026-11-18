@@ -3,14 +3,15 @@
   "ingredients": [
     {
       "type": "forge:ore_dict",
-      "ore": "listAllveggie"
+      "ore": "foodLeafyGreen"
     },
     {
       "type": "forge:ore_dict",
       "ore": "cropTomato"
     },
     {
-      "item": "minecraft:beetroot"
+      "type": "forge:ore_dict",
+      "ore": "cropBeetroot"
     },
     {
       "item": "minecraft:bowl"

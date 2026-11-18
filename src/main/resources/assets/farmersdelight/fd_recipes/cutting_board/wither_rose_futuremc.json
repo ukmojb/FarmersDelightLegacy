@@ -1,0 +1,26 @@
+{
+  "ingredients": [
+    "ore:fdWitherRose"
+  ],
+  "tool": {
+    "tag": "forge:tools/knives"
+  },
+  "result": [
+    {
+      "item": "futuremc:dye",
+      "data": 3,
+      "count": 2
+    }
+  ],
+  "conditions": {
+    "ores": [
+      "fdWitherRose"
+    ],
+    "items": [
+      "futuremc:dye"
+    ],
+    "items_absent": [
+      "farmers_future_delight:black_dye"
+    ]
+  }
+}

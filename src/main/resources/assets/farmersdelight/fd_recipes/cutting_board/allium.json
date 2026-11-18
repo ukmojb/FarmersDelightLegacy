@@ -1,6 +1,9 @@
 {
   "ingredients": [
-    "minecraft:allium"
+    {
+      "item": "minecraft:red_flower",
+      "data": 2
+    }
   ],
   "tool": {
     "tag": "forge:tools/knives"

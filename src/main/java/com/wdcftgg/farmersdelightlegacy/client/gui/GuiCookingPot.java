@@ -45,27 +45,21 @@ public class GuiCookingPot extends GuiContainer {
     public void drawScreen(int mouseX, int mouseY, float partialTicks) {
         this.drawDefaultBackground();
         super.drawScreen(mouseX, mouseY, partialTicks);
-
-        Slot mealSlot = this.inventorySlots.inventorySlots.get(6);
-        int localMouseX = mouseX - this.guiLeft;
-        int localMouseY = mouseY - this.guiTop;
-        boolean hoveringMealSlot = localMouseX >= mealSlot.xPos && localMouseX < mealSlot.xPos + 16
-                && localMouseY >= mealSlot.yPos && localMouseY < mealSlot.yPos + 16;
-        if (hoveringMealSlot && mealSlot.getHasStack()) {
-            List<String> tooltipLines = this.getItemToolTip(mealSlot.getStack());
-            ItemStack container = this.tileEntityCookingPot.getContainer();
-            if (!container.isEmpty()) {
-                String message = new TextComponentTranslation("farmersdelight.container.cooking_pot.served_on", container.getDisplayName())
-                        .getFormattedText();
-                tooltipLines.add(message);
-            }
-            this.drawHoveringText(tooltipLines, mouseX, mouseY);
-            return;
-        }
-
         this.renderHoveredToolTip(mouseX, mouseY);
     }
 
+    void addMealTooltip(ItemStack stack, List<String> tooltipLines) {
+        Slot mealSlot = this.inventorySlots.getSlot(ContainerCookingPot.MEAL_DISPLAY_SLOT);
+        if (this.getSlotUnderMouse() != mealSlot || !mealSlot.getHasStack()
+                || stack != mealSlot.getStack() || !this.playerInventory.getItemStack().isEmpty()) {
+            return;
+        }
+        ItemStack container = this.tileEntityCookingPot.getContainer();
+        if (!container.isEmpty()) {
+            tooltipLines.add(new TextComponentTranslation("farmersdelight.container.cooking_pot.served_on",
+                    container.getDisplayName()).getFormattedText());
+        }
+    }
 
     @Override
     protected void drawGuiContainerBackgroundLayer(float partialTicks, int mouseX, int mouseY) {

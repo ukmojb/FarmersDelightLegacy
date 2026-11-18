@@ -1,0 +1,26 @@
+{
+  "ingredients": [
+    "ore:fdCornflower"
+  ],
+  "tool": {
+    "tag": "forge:tools/knives"
+  },
+  "result": [
+    {
+      "item": "futuremc:dye",
+      "data": 1,
+      "count": 2
+    }
+  ],
+  "conditions": {
+    "ores": [
+      "fdCornflower"
+    ],
+    "items": [
+      "futuremc:dye"
+    ],
+    "items_absent": [
+      "farmers_future_delight:blue_dye"
+    ]
+  }
+}

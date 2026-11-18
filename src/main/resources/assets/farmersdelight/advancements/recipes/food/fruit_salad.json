@@ -37,5 +37,16 @@
     "recipes": [
       "farmersdelight:fruit_salad"
     ]
-  }
+  },
+  "conditions": [
+    {
+      "type": "farmersdelight:ingredients_available",
+      "ores": [
+        "listAllberry"
+      ],
+      "items": [
+        "farmersdelight:fruit_salad"
+      ]
+    }
+  ]
 }

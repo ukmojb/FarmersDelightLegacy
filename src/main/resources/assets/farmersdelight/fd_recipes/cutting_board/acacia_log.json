@@ -1,6 +1,9 @@
 {
   "conditions": {
-    "block_not_registered": "futuremc:stripped_acacia_log"
+    "block_not_registered": [
+      "futuremc:stripped_acacia_log",
+      "farmers_future_delight:stripped_acacia_log"
+    ]
   },
   "ingredients": [
     {

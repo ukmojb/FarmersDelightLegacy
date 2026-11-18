@@ -2,10 +2,12 @@
   "type": "minecraft:crafting_shapeless",
   "ingredients": [
     {
-      "item": "farmersdelight:cooked_bacon"
+      "type": "forge:ore_dict",
+      "ore": "foodCookedBacon"
     },
     {
-      "item": "farmersdelight:cooked_bacon"
+      "type": "forge:ore_dict",
+      "ore": "foodCookedBacon"
     },
     {
       "item": "minecraft:bowl"

@@ -13,6 +13,7 @@ import net.minecraft.block.state.BlockFaceShape;
 import net.minecraft.block.state.BlockStateContainer;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Items;
 import net.minecraft.init.SoundEvents;
@@ -23,25 +24,29 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.*;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
+import net.minecraft.world.WorldServer;
 import net.minecraftforge.fml.common.registry.ForgeRegistries;
 
 import javax.annotation.Nullable;
 import java.util.Random;
+import java.util.List;
 
 public class BlockFeast extends Block implements ITileEntityProvider {
 
     public static final PropertyDirection FACING = PropertyDirection.create("facing", EnumFacing.Plane.HORIZONTAL);
     public static final PropertyInteger SERVINGS = PropertyInteger.create("servings", 0, 4);
 
-    private static final AxisAlignedBB[] FEAST_SHAPES = new AxisAlignedBB[]{
-            new AxisAlignedBB(0.125D, 0.0D, 0.125D, 0.875D, 0.0625D, 0.875D),
-            new AxisAlignedBB(0.125D, 0.0D, 0.125D, 0.875D, 0.1875D, 0.875D),
-            new AxisAlignedBB(0.125D, 0.0D, 0.125D, 0.875D, 0.375D, 0.875D),
-            new AxisAlignedBB(0.125D, 0.0D, 0.125D, 0.875D, 0.5D, 0.875D),
-            new AxisAlignedBB(0.125D, 0.0D, 0.125D, 0.875D, 0.625D, 0.875D)
+    private static final FoodShape[] FEAST_SHAPES = {
+            new FoodShape(FoodShape.box(2, 0, 2, 14, 2, 14)),
+            new FoodShape(FoodShape.box(2, 0, 2, 14, 2, 14)),
+            new FoodShape(FoodShape.box(2, 0, 2, 14, 4, 14)),
+            new FoodShape(FoodShape.box(2, 0, 2, 14, 6, 14)),
+            new FoodShape(FoodShape.box(2, 0, 2, 14, 8, 14))
     };
 
     private final int maxServings;
@@ -124,14 +129,14 @@ public class BlockFeast extends Block implements ITileEntityProvider {
                 }
                 return true;
             }
-            if (!playerIn.capabilities.isCreativeMode) {
-                heldStack.shrink(1);
-            }
         }
 
         if (!worldIn.isRemote) {
             if (!heldStack.isEmpty() && StatList.getObjectUseStats(heldStack.getItem()) != null) {
                 playerIn.addStat(StatList.getObjectUseStats(heldStack.getItem()));
+            }
+            if (requiredServingItem != null && !requiredServingItem.isEmpty() && !playerIn.capabilities.isCreativeMode) {
+                heldStack.shrink(1);
             }
             if (!playerIn.addItemStackToInventory(result)) {
                 playerIn.dropItem(result, false);
@@ -142,6 +147,11 @@ public class BlockFeast extends Block implements ITileEntityProvider {
                 worldIn.setBlockToAir(pos);
             }
             worldIn.playSound(null, pos, ModSounds.foodTakePortion, SoundCategory.BLOCKS, 1.0F, 1.0F);
+            if (hasServingParticles() && worldIn instanceof WorldServer) {
+                ((WorldServer) worldIn).spawnParticle(EnumParticleTypes.BLOCK_CRACK,
+                        pos.getX() + 0.5D, pos.getY() + 0.5D, pos.getZ() + 0.5D,
+                        3, 0.1D, 0.1D, 0.1D, 0.001D, Block.getStateId(state));
+            }
         }
 
         return true;
@@ -176,7 +186,7 @@ public class BlockFeast extends Block implements ITileEntityProvider {
 
     @Override
     public IBlockState getActualState(IBlockState state, IBlockAccess worldIn, BlockPos pos) {
-        int servings = this.maxServings;
+        int servings = state.getValue(getServingsProperty());
         TileEntity tileEntity = worldIn.getTileEntity(pos);
         if (tileEntity instanceof TileEntityFeast) {
             servings = clampServings(((TileEntityFeast) tileEntity).getServings());
@@ -253,11 +263,27 @@ public class BlockFeast extends Block implements ITileEntityProvider {
 
     @Override
     public AxisAlignedBB getBoundingBox(IBlockState state, IBlockAccess source, BlockPos pos) {
-        int servings = state.getValue(getServingsProperty());
-        if (this.maxServings <= 4) {
-            return FEAST_SHAPES[Math.max(0, Math.min(4, servings))];
-        }
-        return servings > 0 ? FEAST_SHAPES[4] : FEAST_SHAPES[0];
+        return getShape(getActualState(state, source, pos)).getBounds();
+    }
+
+    protected FoodShape getShape(IBlockState state) {
+        return FEAST_SHAPES[Math.min(4, state.getValue(getServingsProperty()))];
+    }
+
+    protected boolean hasServingParticles() {
+        return true;
+    }
+
+    @Override
+    public void addCollisionBoxToList(IBlockState state, World world, BlockPos pos, AxisAlignedBB entityBox,
+                                      List<AxisAlignedBB> boxes, @Nullable Entity entity, boolean actualState) {
+        getShape(actualState ? state : getActualState(state, world, pos)).addCollisionBoxes(pos, entityBox, boxes);
+    }
+
+    @Nullable
+    @Override
+    public RayTraceResult collisionRayTrace(IBlockState state, World world, BlockPos pos, Vec3d start, Vec3d end) {
+        return getShape(getActualState(state, world, pos)).rayTrace(pos, start, end);
     }
 
     @Override

@@ -1,0 +1,19 @@
+{
+  "conditions": {},
+  "ingredients": [
+    {
+      "item": "minecraft:hopper_minecart"
+    }
+  ],
+  "tool": "ore:toolHoe",
+  "result": [
+    {
+      "item": "minecraft:minecart",
+      "count": 1
+    },
+    {
+      "item": "minecraft:hopper",
+      "count": 1
+    }
+  ]
+}

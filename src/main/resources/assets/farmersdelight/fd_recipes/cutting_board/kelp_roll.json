@@ -10,5 +10,11 @@
       "item": "farmersdelight:kelp_roll_slice",
       "count": 3
     }
-  ]
+  ],
+  "conditions": {
+    "items": [
+      "farmersdelight:kelp_roll",
+      "farmersdelight:kelp_roll_slice"
+    ]
+  }
 }

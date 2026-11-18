@@ -1,11 +1,14 @@
 {
   "ingredients": [
-    "ore:listAllmushroom",
-    "ore:listAllmushroom",
-    "farmersdelight:rice",
-    "ore:mushroomRiceIngredients"
+    "minecraft:brown_mushroom",
+    "minecraft:red_mushroom",
+    "ore:cropRice",
+    [
+      "minecraft:carrot",
+      "minecraft:potato"
+    ]
   ],
-  "experience": 1.0,
+  "experience": 1,
   "result": {
     "item": "farmersdelight:mushroom_rice",
     "count": 1

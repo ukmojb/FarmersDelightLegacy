@@ -5,6 +5,12 @@
     {
       "type": "forge:mod_loaded",
       "modid": "suikecherry"
+    },
+    {
+      "type": "farmersdelight:ingredients_available",
+      "items": [
+        "farmersdelight:cherry_cabinet"
+      ]
     }
   ],
   "group": "fd_cabinet",

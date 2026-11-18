@@ -1,7 +1,7 @@
 package com.wdcftgg.farmersdelightlegacy.common.item;
 
-import com.wdcftgg.farmersdelightlegacy.common.network.ModNetworkHandler;
-import com.wdcftgg.farmersdelightlegacy.common.network.PacketOpenCanvasSignEditor;
+import com.wdcftgg.farmersdelightlegacy.common.block.sign.CanvasSignInteractionHelper;
+import com.wdcftgg.farmersdelightlegacy.common.compat.FluidloggingCompat;
 import com.wdcftgg.farmersdelightlegacy.common.tile.TileEntityCanvasSign;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockStandingSign;
@@ -9,11 +9,9 @@ import net.minecraft.block.BlockWallSign;
 import net.minecraft.block.SoundType;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemBlock;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.tileentity.TileEntitySign;
 import net.minecraft.util.EnumActionResult;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
@@ -63,16 +61,19 @@ public class ItemCanvasSign extends ItemBlock {
             return EnumActionResult.SUCCESS;
         }
 
-        worldIn.setBlockState(placePos, placedState, 11);
+        if (!FluidloggingCompat.placeBlock(worldIn, placePos, placedState, 11)) {
+            return EnumActionResult.FAIL;
+        }
         TileEntity tileEntity = worldIn.getTileEntity(placePos);
-        if (tileEntity instanceof TileEntityCanvasSign && !setTileEntityNBT(worldIn, player, placePos, stack) && player instanceof EntityPlayerMP) {
-            ((TileEntitySign) tileEntity).setPlayer(player);
-            ModNetworkHandler.INSTANCE.sendTo(new PacketOpenCanvasSignEditor(placePos), (EntityPlayerMP) player);
+        if (tileEntity instanceof TileEntityCanvasSign && !setTileEntityNBT(worldIn, player, placePos, stack)) {
+            CanvasSignInteractionHelper.openEditor(worldIn, placePos, player);
         }
 
         SoundType soundType = placedState.getBlock().getSoundType(placedState, worldIn, placePos, player);
         worldIn.playSound(null, placePos, soundType.getPlaceSound(), SoundCategory.BLOCKS, (soundType.getVolume() + 1.0F) / 2.0F, soundType.getPitch() * 0.8F);
-        stack.shrink(1);
+        if (!player.capabilities.isCreativeMode) {
+            stack.shrink(1);
+        }
         return EnumActionResult.SUCCESS;
     }
 }

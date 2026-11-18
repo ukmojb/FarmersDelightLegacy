@@ -2,10 +2,10 @@
   "ingredients": [
     "minecraft:rotten_flesh",
     "minecraft:dye@15",
-    "ore:dogPrey",
-    "farmersdelight:rice"
+    "ore:listAllmeatraw",
+    "ore:cropRice"
   ],
-  "experience": 1.0,
+  "experience": 1,
   "result": {
     "item": "farmersdelight:dog_food",
     "count": 1

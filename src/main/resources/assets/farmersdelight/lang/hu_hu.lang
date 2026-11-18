@@ -281,9 +281,7 @@ item.farmersdelight.vegetable_noodles.name=Zöldséges tészta
 item.farmersdelight.vegetable_soup.name=Zöldségleves
 item.farmersdelight.wheat_dough.name=Búzatészta
 itemGroup.farmersdelight=Farmer's Delight
-
 item.farmersdelight.pumpkin_pie_slice.name=Tokos piteszelet
-
 farmersdelight.advancement.craft_knife.desc=Készíts egy kést, hogy extra dolgokat gyűjthess a növényekből és állatokból
 farmersdelight.advancement.craft_knife=Vadászat és gyűjtögetés
 farmersdelight.advancement.eat_comfort_food.desc=A meleg tál ételek folyamatosan gyógyítanak, függetlenül attól, hogy mennyire vagy éhes!
@@ -341,3 +339,15 @@ farmersdelight.subtitles.cutting_board.remove_item=Item removed from board
 farmersdelight.subtitles.cutting_board.carve_tool=Tool carved on board
 farmersdelight.subtitles.food.take_portion=Portion served
 farmersdelight.subtitles.food.slice=Food sliced
+tile.farmersdelight.wooden_basket.name=Kosár
+subtitles.farmersdelight.block.cooking_pot.boil=Kondér forr
+subtitles.farmersdelight.block.cutting_board.knife_cut=Kés vág
+subtitles.farmersdelight.block.stove.crackle=Tűzhely pattog
+subtitles.farmersdelight.block.skillet.sizzle=Serpenyő sistereg
+subtitles.farmersdelight.block.skillet.add_food=Serpenyő sziszeg
+subtitles.farmersdelight.block.cabinet.open=Szekrény nyílik
+subtitles.farmersdelight.block.cabinet.close=Szerkény csukódik
+subtitles.farmersdelight.block.tomatoes.pick_tomatoes=Paradicsom pattan
+subtitles.farmersdelight.entity.rotten_tomato.throw=Rohadt paradicsom repül
+subtitles.farmersdelight.entity.rotten_tomato.hit=Rohadt paradicsom csattan
+entity.rotten_tomato.name=Romlott paradicsom

@@ -198,9 +198,7 @@ item.farmersdelight.vegetable_noodles.name=Vihannesnuudelit
 item.farmersdelight.vegetable_soup.name=Kasviskeitto
 item.farmersdelight.wheat_dough.name=Vehnätaikina
 itemGroup.farmersdelight=Farmer's Delight
-
 item.farmersdelight.pumpkin_pie_slice.name=Viipale kurpitsapiirakkaa
-
 farmersdelight.advancement.craft_knife.desc=Valmista veitsi saadaksesi uusia osia kasveista ja eläimistä
 farmersdelight.advancement.craft_knife=Metsästä ja kerää
 farmersdelight.advancement.drink_hot_cocoa.desc=Poista haitallinen vaikutus juomalla pullollinen kaakaota
@@ -254,3 +252,10 @@ farmersdelight.subtitles.cutting_board.remove_item=Item removed from board
 farmersdelight.subtitles.cutting_board.carve_tool=Tool carved on board
 farmersdelight.subtitles.food.take_portion=Portion served
 farmersdelight.subtitles.food.slice=Food sliced
+tile.farmersdelight.wooden_basket.name=Kori
+subtitles.farmersdelight.block.cooking_pot.boil=Kattila kiehuu
+subtitles.farmersdelight.block.cutting_board.knife_cut=Veitsi leikkaa
+subtitles.farmersdelight.block.stove.crackle=Liesi rätisee
+subtitles.farmersdelight.block.skillet.sizzle=Paistinpannu kärisee
+subtitles.farmersdelight.block.skillet.add_food=Paistinpannu sihisee
+subtitles.farmersdelight.block.tomatoes.pick_tomatoes=Tomaatit popsahtavat

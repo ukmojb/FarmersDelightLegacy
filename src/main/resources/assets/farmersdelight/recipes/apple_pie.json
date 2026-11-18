@@ -8,7 +8,8 @@
   ],
   "key": {
     "#": {
-      "item": "minecraft:wheat"
+      "type": "forge:ore_dict",
+      "ore": "cropWheat"
     },
     "O": {
       "item": "farmersdelight:pie_crust"

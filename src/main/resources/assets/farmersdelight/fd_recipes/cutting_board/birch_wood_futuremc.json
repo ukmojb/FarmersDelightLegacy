@@ -1,0 +1,24 @@
+{
+  "conditions": {
+    "items": [
+      "futuremc:birch_wood",
+      "futuremc:stripped_birch_wood"
+    ]
+  },
+  "ingredients": [
+    {
+      "item": "futuremc:birch_wood"
+    }
+  ],
+  "tool": "ore:toolAxe",
+  "result": [
+    {
+      "item": "futuremc:stripped_birch_wood",
+      "count": 1
+    },
+    {
+      "item": "farmersdelight:tree_bark",
+      "count": 1
+    }
+  ]
+}

@@ -1,6 +1,9 @@
 {
   "ingredients": [
-    "minecraft:oxeye_daisy"
+    {
+      "item": "minecraft:red_flower",
+      "data": 8
+    }
   ],
   "tool": {
     "tag": "forge:tools/knives"

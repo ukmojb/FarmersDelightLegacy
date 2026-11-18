@@ -1,15 +1,38 @@
 {
   "type": "minecraft:crafting_shapeless",
   "ingredients": [
-    { "type": "forge:ore_dict", "ore": "cropOnion" },
-    { "type": "forge:ore_dict", "ore": "listAllEgg" },
-    { "item": "minecraft:bread" },
-    { "item": "minecraft:carrot" },
-    { "item": "minecraft:cooked_chicken" },
-    { "item": "minecraft:baked_potato" },
-    { "item": "minecraft:carrot" },
-    { "item": "minecraft:bowl" },
-    { "item": "minecraft:baked_potato" }
+    {
+      "type": "forge:ore_dict",
+      "ore": "cropOnion"
+    },
+    {
+      "type": "forge:ore_dict",
+      "ore": "listAllEgg"
+    },
+    {
+      "type": "forge:ore_dict",
+      "ore": "foodBread"
+    },
+    {
+      "type": "forge:ore_dict",
+      "ore": "cropCarrot"
+    },
+    {
+      "item": "minecraft:cooked_chicken"
+    },
+    {
+      "item": "minecraft:baked_potato"
+    },
+    {
+      "type": "forge:ore_dict",
+      "ore": "cropCarrot"
+    },
+    {
+      "item": "minecraft:bowl"
+    },
+    {
+      "item": "minecraft:baked_potato"
+    }
   ],
   "result": {
     "item": "farmersdelight:roast_chicken_block"

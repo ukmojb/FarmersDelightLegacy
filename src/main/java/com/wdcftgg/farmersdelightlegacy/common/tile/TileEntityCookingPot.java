@@ -4,6 +4,8 @@ import com.wdcftgg.farmersdelightlegacy.FarmersDelightLegacy;
 import com.wdcftgg.farmersdelightlegacy.common.block.BlockCookingPot;
 import com.wdcftgg.farmersdelightlegacy.common.block.BlockFeast;
 import com.wdcftgg.farmersdelightlegacy.common.recipe.CookingPotRecipe;
+import com.wdcftgg.farmersdelightlegacy.common.recipe.CookingExperience;
+import com.wdcftgg.farmersdelightlegacy.common.inventory.CookingPotItemHandler;
 import com.wdcftgg.farmersdelightlegacy.common.recipe.manager.CookingPotRecipeManager;
 import com.wdcftgg.farmersdelightlegacy.common.util.CookingPotParticleDispatcher;
 import com.wdcftgg.farmersdelightlegacy.common.util.HeatSourceHelper;
@@ -24,8 +26,14 @@ import net.minecraft.network.play.server.SPacketUpdateTileEntity;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ITickable;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextComponentTranslation;
+import net.minecraft.util.text.TextComponentString;
+import net.minecraft.world.World;
+import net.minecraftforge.common.capabilities.Capability;
+import net.minecraftforge.items.CapabilityItemHandler;
+import net.minecraftforge.items.IItemHandler;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -42,15 +50,17 @@ public class TileEntityCookingPot extends TileEntity implements IInventory, ISid
     public static final String TAG_MEAL_CONTAINER = "MealContainer";
     public static final String TAG_USE_DEFAULT_CONTAINER = "UseDefaultMealContainer";
     private static final int[] TOP_SLOTS = new int[]{0, 1, 2, 3, 4, 5};
-    private static final int[] SIDE_SLOTS = new int[]{CONTAINER_SLOT};
-    private static final int[] BOTTOM_SLOTS = new int[]{OUTPUT_SLOT};
+    private static final int[] SIDE_SLOTS = new int[]{CONTAINER_SLOT, OUTPUT_SLOT};
 
     private final List<ItemStack> itemStacks;
     private int cookTime;
     private int cookTimeTotal = 200;
     private ItemStack mealContainerStack = ItemStack.EMPTY;
     private boolean useDefaultMealContainer = true;
-    private float storedExperience;
+    private final CookingExperience cookingExperience = new CookingExperience();
+    private String customName = "";
+    private final IItemHandler inputHandler = new CookingPotItemHandler(this, EnumFacing.UP);
+    private final IItemHandler outputHandler = new CookingPotItemHandler(this, EnumFacing.DOWN);
 
     public TileEntityCookingPot() {
         this.itemStacks = new ArrayList<>(SLOT_COUNT);
@@ -181,24 +191,29 @@ public class TileEntityCookingPot extends TileEntity implements IInventory, ISid
         }
         this.mealContainerStack = ItemStack.EMPTY;
         this.useDefaultMealContainer = true;
-        this.storedExperience = 0.0F;
+        this.cookingExperience.clear();
         this.cookTime = 0;
         this.cookTimeTotal = 200;
     }
 
     @Override
     public String getName() {
-        return FarmersDelightLegacy.MOD_ID + ".container.cooking_pot";
+        return hasCustomName() ? customName : FarmersDelightLegacy.MOD_ID + ".container.cooking_pot";
     }
 
     @Override
     public boolean hasCustomName() {
-        return false;
+        return !customName.isEmpty();
+    }
+
+    public void setCustomName(String name) {
+        this.customName = name;
+        markDirty();
     }
 
     @Override
     public ITextComponent getDisplayName() {
-        return new TextComponentTranslation(this.getName());
+        return hasCustomName() ? new TextComponentString(customName) : new TextComponentTranslation(this.getName());
     }
 
     @Override
@@ -218,12 +233,13 @@ public class TileEntityCookingPot extends TileEntity implements IInventory, ISid
         int previousCookTime = this.cookTime;
 
         CookingPotRecipe recipe = this.hasInput() ? CookingPotRecipeManager.findRecipe(getInputStacks()) : null;
-        if (isHeated() && recipe != null && canCook(recipe)) {
+        ItemStack result = recipe != null ? recipe.assemble(getInputStacks()) : ItemStack.EMPTY;
+        if (isHeated() && recipe != null && canCook(result)) {
             this.cookTimeTotal = Math.max(1, recipe.getCookTime());
             this.cookTime++;
             if (this.cookTime >= this.cookTimeTotal) {
                 this.cookTime = 0;
-                processCooking(recipe);
+                processCooking(recipe, result);
                 didInventoryChange = true;
             }
         } else if (this.cookTime > 0) {
@@ -293,7 +309,7 @@ public class TileEntityCookingPot extends TileEntity implements IInventory, ISid
     private List<ItemStack> getInputStacks() {
         List<ItemStack> inputStacks = new ArrayList<>(INPUT_SLOT_COUNT);
         for (int i = 0; i < INPUT_SLOT_COUNT; i++) {
-            inputStacks.add(this.itemStacks.get(i));
+            inputStacks.add(this.itemStacks.get(i).copy());
         }
         return inputStacks;
     }
@@ -303,16 +319,15 @@ public class TileEntityCookingPot extends TileEntity implements IInventory, ISid
             return false;
         }
         CookingPotRecipe recipe = hasInput() ? CookingPotRecipeManager.findRecipe(getInputStacks()) : null;
-        return recipe != null && canCook(recipe) && isHeated();
+        return recipe != null && canCook(recipe.assemble(getInputStacks())) && isHeated();
     }
 
     public boolean hasCookedMeal() {
         return !this.itemStacks.get(MEAL_DISPLAY_SLOT).isEmpty();
     }
 
-    private boolean canCook(CookingPotRecipe recipe) {
-        ItemStack resultStack = recipe.getResultStack();
-        if (resultStack.isEmpty()) {
+    private boolean canCook(ItemStack resultStack) {
+        if (resultStack.isEmpty() || resultStack.getCount() > getInventoryStackLimit()) {
             return false;
         }
 
@@ -321,7 +336,7 @@ public class TileEntityCookingPot extends TileEntity implements IInventory, ISid
             return true;
         }
 
-        if (!ItemStack.areItemsEqual(outputStack, resultStack)) {
+        if (!ItemStack.areItemsEqual(outputStack, resultStack) || !ItemStack.areItemStackTagsEqual(outputStack, resultStack)) {
             return false;
         }
 
@@ -329,8 +344,12 @@ public class TileEntityCookingPot extends TileEntity implements IInventory, ISid
         return mergedCount <= this.getInventoryStackLimit();
     }
 
-    private void processCooking(CookingPotRecipe recipe) {
-        ItemStack resultStack = recipe.getResultStack();
+    private void processCooking(CookingPotRecipe recipe, ItemStack resultStack) {
+        CookingPotRecipe.IngredientEntry[] matched = recipe.matchIngredients(this.itemStacks.subList(0, INPUT_SLOT_COUNT));
+        if (matched == null) {
+            com.wdcftgg.farmersdelightlegacy.FarmersDelightLegacy.LOGGER.error("Cooking inputs no longer match recipe {}", recipe.getRecipeId());
+            return;
+        }
         ItemStack outputStack = this.itemStacks.get(MEAL_DISPLAY_SLOT);
         if (outputStack.isEmpty()) {
             this.itemStacks.set(MEAL_DISPLAY_SLOT, resultStack.copy());
@@ -341,24 +360,11 @@ public class TileEntityCookingPot extends TileEntity implements IInventory, ISid
         ItemStack configuredContainer = recipe.getOutputContainer();
         this.mealContainerStack = configuredContainer.isEmpty() ? getMealCraftingRemainder(resultStack) : configuredContainer.copy();
         this.useDefaultMealContainer = !recipe.hasContainerDefinition();
-        this.storedExperience += recipe.getExperience() * resultStack.getCount();
+        this.cookingExperience.record(recipe);
 
-        List<CookingPotRecipe.IngredientEntry> remainingIngredients = new ArrayList<>(recipe.getIngredients());
         for (int slot = 0; slot < INPUT_SLOT_COUNT; slot++) {
-            ItemStack inputStack = this.itemStacks.get(slot);
-            if (inputStack.isEmpty()) {
-                continue;
-            }
-
-            int matchedIndex = -1;
-            for (int index = 0; index < remainingIngredients.size(); index++) {
-                if (remainingIngredients.get(index).matches(inputStack)) {
-                    matchedIndex = index;
-                    break;
-                }
-            }
-            if (matchedIndex >= 0) {
-                consumeIngredientAtSlot(remainingIngredients.remove(matchedIndex), slot);
+            if (matched[slot] != null) {
+                consumeIngredientAtSlot(matched[slot], slot);
             }
         }
     }
@@ -392,15 +398,23 @@ public class TileEntityCookingPot extends TileEntity implements IInventory, ISid
         return false;
     }
 
-    private ItemStack getIngredientRemainder(ItemStack consumedStack) {
+    public static ItemStack getIngredientRemainder(ItemStack consumedStack) {
         if (consumedStack.isEmpty()) {
             return ItemStack.EMPTY;
         }
         ItemStack containerItem = consumedStack.getItem().getContainerItem(consumedStack);
-        if (containerItem.isEmpty()) {
-            return ItemStack.EMPTY;
+        if (!containerItem.isEmpty()) {
+            return containerItem.copy();
         }
-        return containerItem.copy();
+        if (consumedStack.getItem() == Items.MUSHROOM_STEW || consumedStack.getItem() == Items.RABBIT_STEW
+                || consumedStack.getItem() == Items.BEETROOT_SOUP) {
+            return new ItemStack(Items.BOWL);
+        }
+        if (consumedStack.getItem() == Items.POTIONITEM || consumedStack.getItem() == Items.SPLASH_POTION
+                || consumedStack.getItem() == Items.LINGERING_POTION || consumedStack.getItem() == Items.EXPERIENCE_BOTTLE) {
+            return new ItemStack(Items.GLASS_BOTTLE);
+        }
+        return ItemStack.EMPTY;
     }
 
     private void ejectIngredientRemainder(ItemStack remainderStack) {
@@ -431,7 +445,7 @@ public class TileEntityCookingPot extends TileEntity implements IInventory, ISid
             return transferableCount > 0;
         }
 
-        if (!ItemStack.areItemsEqual(outputStack, mealStack)) {
+        if (!ItemStack.areItemsEqual(outputStack, mealStack) || !ItemStack.areItemStackTagsEqual(outputStack, mealStack)) {
             return false;
         }
 
@@ -466,7 +480,7 @@ public class TileEntityCookingPot extends TileEntity implements IInventory, ISid
             containerInputStack.shrink(transferCount);
             this.itemStacks.set(OUTPUT_SLOT, mealStack.splitStack(transferCount));
         } else {
-            if (!ItemStack.areItemsEqual(outputStack, mealStack)) {
+            if (!ItemStack.areItemsEqual(outputStack, mealStack) || !ItemStack.areItemStackTagsEqual(outputStack, mealStack)) {
                 return false;
             }
             transferCount = Math.min(mealStack.getCount(), containerInputStack.getCount());
@@ -508,48 +522,25 @@ public class TileEntityCookingPot extends TileEntity implements IInventory, ISid
     }
 
     public void awardExperience(EntityPlayer player, int servingsTaken) {
-        if (this.world == null || this.world.isRemote || player == null || servingsTaken <= 0 || this.storedExperience <= 0.0F) {
+        if (player == null || servingsTaken <= 0) {
             return;
         }
+        dropExperience(player.posX, player.posY + 0.5D, player.posZ);
+    }
 
-        int pendingAfter = getPendingServings();
-        int pendingBefore = pendingAfter + servingsTaken;
-        if (pendingBefore <= 0) {
+    public void dropExperience(double x, double y, double z) {
+        if (this.world == null || this.world.isRemote) {
             return;
         }
-
-        float expPerServing = this.storedExperience / pendingBefore;
-        float expToDrop = Math.max(0.0F, expPerServing * servingsTaken);
-        this.storedExperience = Math.max(0.0F, this.storedExperience - expToDrop);
-
-        int whole = (int) Math.floor(expToDrop);
-        float fraction = expToDrop - whole;
-        if (fraction > 0.0F && this.world.rand.nextFloat() < fraction) {
-            whole++;
-        }
+        int whole = this.cookingExperience.claim(this.world.rand);
         while (whole > 0) {
             int orbValue = EntityXPOrb.getXPSplit(whole);
             whole -= orbValue;
             this.world.spawnEntity(new EntityXPOrb(this.world,
-                    player.posX,
-                    player.posY + 0.5D,
-                    player.posZ,
+                    x, y, z,
                     orbValue));
         }
-    }
-
-    private int getPendingServings() {
-        int pending = 0;
-        ItemStack mealDisplay = this.itemStacks.get(MEAL_DISPLAY_SLOT);
-        if (!mealDisplay.isEmpty()) {
-            pending += mealDisplay.getCount();
-        }
-
-        ItemStack output = this.itemStacks.get(OUTPUT_SLOT);
-        if (!output.isEmpty()) {
-            pending += output.getCount();
-        }
-        return pending;
+        markDirty();
     }
 
     public List<ItemStack> getDroppableInventoryWithoutMeal() {
@@ -570,11 +561,23 @@ public class TileEntityCookingPot extends TileEntity implements IInventory, ISid
         return this.itemStacks.get(MEAL_DISPLAY_SLOT).copy();
     }
 
+    public void writeToItem(ItemStack stack) {
+        writeMealToItem(stack, getStoredMealStack(), getContainer(), isUsingDefaultMealContainer());
+        if (hasCustomName()) {
+            stack.setStackDisplayName(customName);
+        }
+    }
+
+    public void readFromItem(ItemStack stack) {
+        setCustomName(stack.hasDisplayName() ? stack.getDisplayName() : "");
+        applyStoredMealFromStack(getMealFromItem(stack), getContainerFromItem(stack), useDefaultContainerFromItem(stack));
+    }
+
     public void applyStoredMealFromStack(ItemStack mealStack, ItemStack containerStack, boolean useDefaultContainer) {
         this.itemStacks.set(MEAL_DISPLAY_SLOT, mealStack.isEmpty() ? ItemStack.EMPTY : mealStack.copy());
         this.mealContainerStack = containerStack.isEmpty() ? ItemStack.EMPTY : containerStack.copy();
         this.useDefaultMealContainer = useDefaultContainer;
-        this.storedExperience = 0.0F;
+        this.cookingExperience.clear();
         this.markDirty();
     }
 
@@ -716,7 +719,6 @@ public class TileEntityCookingPot extends TileEntity implements IInventory, ISid
             return ItemStack.EMPTY;
         }
 
-        // 上游语义：多数餐食默认使用碗分装。
         return new ItemStack(Items.BOWL);
     }
 
@@ -761,6 +763,7 @@ public class TileEntityCookingPot extends TileEntity implements IInventory, ISid
         return stack.getItem() == Items.BOWL
                 || stack.getItem() == Items.GLASS_BOTTLE
                 || stack.getItem() == Items.BUCKET
+                || com.wdcftgg.farmersdelightlegacy.common.registry.ItemCategories.contains("fdServingContainers", stack)
                 || isContainerValid(stack);
     }
 
@@ -770,29 +773,44 @@ public class TileEntityCookingPot extends TileEntity implements IInventory, ISid
 
     @Override
     public int[] getSlotsForFace(EnumFacing side) {
-        if (side == EnumFacing.UP) {
+        if (side == null || side == EnumFacing.UP) {
             return TOP_SLOTS;
-        }
-        if (side == EnumFacing.DOWN) {
-            return BOTTOM_SLOTS;
         }
         return SIDE_SLOTS;
     }
 
     @Override
     public boolean canInsertItem(int index, ItemStack itemStackIn, EnumFacing direction) {
-        if (direction == EnumFacing.UP) {
+        if (direction == null || direction == EnumFacing.UP) {
             return index >= 0 && index < INPUT_SLOT_COUNT && this.isItemValidForSlot(index, itemStackIn);
-        }
-        if (direction == EnumFacing.DOWN) {
-            return false;
         }
         return index == CONTAINER_SLOT && this.isServingContainer(itemStackIn);
     }
 
     @Override
     public boolean canExtractItem(int index, ItemStack stack, EnumFacing direction) {
-        return direction == EnumFacing.DOWN && index == OUTPUT_SLOT;
+        return direction == null || direction == EnumFacing.UP
+                ? index >= 0 && index < INPUT_SLOT_COUNT : index == OUTPUT_SLOT;
+    }
+
+    @Override
+    public boolean hasCapability(Capability<?> capability, EnumFacing facing) {
+        return capability == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY || super.hasCapability(capability, facing);
+    }
+
+    @Override
+    public <T> T getCapability(Capability<T> capability, EnumFacing facing) {
+        if (capability == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY) {
+            return CapabilityItemHandler.ITEM_HANDLER_CAPABILITY.cast(
+                    facing == null || facing == EnumFacing.UP ? inputHandler : outputHandler);
+        }
+        return super.getCapability(capability, facing);
+    }
+
+    @Override
+    public boolean shouldRefresh(World world, BlockPos pos,
+                                 IBlockState oldState, IBlockState newState) {
+        return oldState.getBlock() != newState.getBlock();
     }
 
     @Override
@@ -809,9 +827,14 @@ public class TileEntityCookingPot extends TileEntity implements IInventory, ISid
             }
         }
         compound.setTag("Items", itemList);
+        if (hasCustomName()) {
+            compound.setString("CustomName", customName);
+        } else {
+            compound.removeTag("CustomName");
+        }
         compound.setInteger("CookTime", this.cookTime);
         compound.setInteger("CookTimeTotal", this.cookTimeTotal);
-        compound.setFloat("StoredExperience", this.storedExperience);
+        this.cookingExperience.writeToNBT(compound);
         compound.setBoolean("UseDefaultMealContainer", this.useDefaultMealContainer);
         if (!this.mealContainerStack.isEmpty()) {
             compound.setTag("MealContainer", this.mealContainerStack.writeToNBT(new NBTTagCompound()));
@@ -823,6 +846,7 @@ public class TileEntityCookingPot extends TileEntity implements IInventory, ISid
     public void readFromNBT(NBTTagCompound compound) {
         super.readFromNBT(compound);
         this.clear();
+        this.customName = compound.getString("CustomName");
         NBTTagList itemList = compound.getTagList("Items", 10);
         for (int i = 0; i < itemList.tagCount(); i++) {
             NBTTagCompound stackTag = itemList.getCompoundTagAt(i);
@@ -833,7 +857,7 @@ public class TileEntityCookingPot extends TileEntity implements IInventory, ISid
         }
         this.cookTime = compound.getInteger("CookTime");
         this.cookTimeTotal = compound.getInteger("CookTimeTotal");
-        this.storedExperience = compound.hasKey("StoredExperience", 5) ? compound.getFloat("StoredExperience") : 0.0F;
+        this.cookingExperience.readFromNBT(compound);
         this.useDefaultMealContainer = !compound.hasKey("UseDefaultMealContainer") || compound.getBoolean("UseDefaultMealContainer");
         if (compound.hasKey("MealContainer", 10)) {
             this.mealContainerStack = new ItemStack(compound.getCompoundTag("MealContainer"));

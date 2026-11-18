@@ -8,8 +8,6 @@ import net.minecraft.item.crafting.Ingredient;
 import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.oredict.OreDictionary;
 
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -31,66 +29,50 @@ public final class CampfireCookingCompat {
     }
 
     private static void registerCampfireRecipes(List<CampfireCookingRecipe> recipes) {
-        if (!Loader.isModLoaded(CAMPFIRE_MOD_ID)) {
-            return;
-        }
-
-        try {
-            Class<?> handlerClass = Class.forName("git.jbredwards.campfire.common.recipe.campfire.CampfireRecipeHandler");
-            Method createRecipeMethod = handlerClass.getMethod("createRecipe", List.class, ItemStack.class, int.class, float.class);
-            int registeredCount = 0;
-            for (CampfireCookingRecipe recipe : recipes) {
-                List<ItemStack> inputs = expandInputs(recipe);
-                if (inputs.isEmpty() || recipe.getResultStack().isEmpty()) {
-                    continue;
-                }
-                createRecipeMethod.invoke(null, inputs, recipe.getResultStack(), recipe.getCookingTime(), DEFAULT_EXPERIENCE);
-                registeredCount++;
-            }
-            FarmersDelightLegacy.LOGGER.info("Registered {} Farmers Delight campfire recipes for Campfire mod.", registeredCount);
-        } catch (ReflectiveOperationException exception) {
-            FarmersDelightLegacy.LOGGER.error("Failed to register Campfire mod cooking recipes.", exception);
+        if (Loader.isModLoaded(CAMPFIRE_MOD_ID)) {
+            CampfireRecipes.register(recipes);
         }
     }
 
     private static void registerFutureMcRecipes(List<CampfireCookingRecipe> recipes) {
-        if (!Loader.isModLoaded(FUTURE_MC_MOD_ID)) {
-            return;
-        }
-
-        try {
-            Class<?> recipesClass = Class.forName("thedarkcolour.futuremc.recipe.campfire.CampfireRecipes");
-            Object recipesInstance = recipesClass.getField("INSTANCE").get(null);
-            Class<?> recipeClass = Class.forName("thedarkcolour.futuremc.recipe.campfire.CampfireRecipe");
-            Constructor<?> recipeConstructor = recipeClass.getConstructor(Ingredient.class, ItemStack.class, int.class);
-            Method getRecipesMethod = recipesClass.getMethod("getRecipes");
-            @SuppressWarnings("unchecked")
-            List<Object> futureMcRecipes = (List<Object>) getRecipesMethod.invoke(recipesInstance);
-            int registeredCount = 0;
-
-            for (CampfireCookingRecipe recipe : recipes) {
-                List<ItemStack> inputs = expandInputs(recipe);
-                ItemStack output = recipe.getResultStack();
-                if (inputs.isEmpty() || output.isEmpty()) {
-                    continue;
-                }
-                Ingredient ingredient = Ingredient.fromStacks(inputs.toArray(new ItemStack[0]));
-                Object futureMcRecipe = recipeConstructor.newInstance(ingredient, output, recipe.getCookingTime());
-                futureMcRecipes.add(futureMcRecipe);
-                registeredCount++;
-            }
-            FarmersDelightLegacy.LOGGER.info("Registered {} Farmers Delight campfire recipes for Future MC campfire.", registeredCount);
-        } catch (ReflectiveOperationException exception) {
-            FarmersDelightLegacy.LOGGER.error("Failed to register Future MC campfire cooking recipes.", exception);
+        if (Loader.isModLoaded(FUTURE_MC_MOD_ID)) {
+            FutureMcRecipes.register(recipes);
         }
     }
 
-    private static List<ItemStack> expandInputs(CampfireCookingRecipe recipe) {
+    private static final class CampfireRecipes {
+        private static void register(List<CampfireCookingRecipe> recipes) {
+            for (CampfireCookingRecipe recipe : recipes) {
+                List<ItemStack> inputs = expandInputs(recipe);
+                if (!inputs.isEmpty()) {
+                    git.jbredwards.campfire.common.recipe.campfire.CampfireRecipeHandler.createRecipe(
+                            inputs, recipe.getResultStack(), recipe.getCookingTime(), DEFAULT_EXPERIENCE);
+                }
+            }
+            FarmersDelightLegacy.LOGGER.info("Registered Farmers Delight cooking recipes for Campfire.");
+        }
+    }
+
+    private static final class FutureMcRecipes {
+        private static void register(List<CampfireCookingRecipe> recipes) {
+            for (CampfireCookingRecipe recipe : recipes) {
+                List<ItemStack> inputs = expandInputs(recipe);
+                if (!inputs.isEmpty()) {
+                    thedarkcolour.futuremc.recipe.campfire.CampfireRecipes.INSTANCE.addRecipe(
+                            Ingredient.fromStacks(inputs.toArray(new ItemStack[0])),
+                            recipe.getResultStack(), recipe.getCookingTime());
+                }
+            }
+            FarmersDelightLegacy.LOGGER.info("Registered Farmers Delight cooking recipes for Future MC.");
+        }
+    }
+
+    static List<ItemStack> expandInputs(CampfireCookingRecipe recipe) {
         List<ItemStack> inputs = new ArrayList<>();
         Set<String> seenKeys = new HashSet<>();
         for (CampfireCookingRecipe.IngredientEntry entry : recipe.getIngredients()) {
             if (entry.getItem() != null) {
-                ItemStack stack = new ItemStack(entry.getItem(), 1, entry.getMetadata() == OreDictionary.WILDCARD_VALUE ? OreDictionary.WILDCARD_VALUE : entry.getMetadata());
+                ItemStack stack = new ItemStack(entry.getItem(), 1, entry.getMetadata());
                 addUnique(inputs, seenKeys, stack);
                 continue;
             }

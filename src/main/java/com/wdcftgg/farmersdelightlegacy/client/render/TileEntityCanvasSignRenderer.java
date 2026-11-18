@@ -1,7 +1,6 @@
 package com.wdcftgg.farmersdelightlegacy.client.render;
 
 import com.wdcftgg.farmersdelightlegacy.FarmersDelightLegacy;
-import com.wdcftgg.farmersdelightlegacy.common.Configuration;
 import com.wdcftgg.farmersdelightlegacy.common.block.sign.BlockCanvasHangingSign;
 import com.wdcftgg.farmersdelightlegacy.common.block.sign.BlockCanvasStandingSign;
 import com.wdcftgg.farmersdelightlegacy.common.block.sign.BlockCanvasWallHangingSign;
@@ -11,9 +10,12 @@ import net.minecraft.block.Block;
 import net.minecraft.block.BlockStandingSign;
 import net.minecraft.block.BlockWallSign;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.model.ModelSign;
 import net.minecraft.client.renderer.GlStateManager;
+import net.minecraft.client.renderer.OpenGlHelper;
+import net.minecraft.item.EnumDyeColor;
 import net.minecraft.client.renderer.tileentity.TileEntitySpecialRenderer;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ResourceLocation;
@@ -25,6 +27,8 @@ public class TileEntityCanvasSignRenderer extends TileEntitySpecialRenderer<Tile
     private static final ResourceLocation DEFAULT_TEXTURE = new ResourceLocation(FarmersDelightLegacy.MOD_ID, "textures/entity/signs/canvas.png");
     private static final float HANGING_TEXT_SCALE = 0.0125F;
     private static final float STANDING_TEXT_SCALE = 0.010416667F;
+    private static final float OUTLINE_RADIUS = 1.0F;
+    private static final float OUTLINE_SAMPLE_STEP = 0.5F;
     private final ModelSign signModel = new ModelSign();
     private final ModelCanvasHangingSign hangingSignModel = new ModelCanvasHangingSign();
 
@@ -80,7 +84,16 @@ public class TileEntityCanvasSignRenderer extends TileEntitySpecialRenderer<Tile
         }
 
         GlStateManager.rotate(rotation, 0.0F, 1.0F, 0.0F);
-        bindTexture(resolveTexture(block));
+        if (destroyStage >= 0) {
+            bindTexture(DESTROY_STAGES[destroyStage]);
+            GlStateManager.matrixMode(GL11.GL_TEXTURE);
+            GlStateManager.pushMatrix();
+            GlStateManager.scale(4.0F, 2.0F, 1.0F);
+            GlStateManager.translate(0.0625F, 0.0625F, 0.0625F);
+            GlStateManager.matrixMode(GL11.GL_MODELVIEW);
+        } else {
+            bindTexture(resolveTexture(block));
+        }
 
         GlStateManager.pushMatrix();
         if (anyHangingSign) {
@@ -96,7 +109,14 @@ public class TileEntityCanvasSignRenderer extends TileEntitySpecialRenderer<Tile
         }
         GlStateManager.popMatrix();
 
-        renderSignText(te, anyHangingSign, block);
+        if (destroyStage >= 0) {
+            GlStateManager.matrixMode(GL11.GL_TEXTURE);
+            GlStateManager.popMatrix();
+            GlStateManager.matrixMode(GL11.GL_MODELVIEW);
+        } else {
+            renderSignText(te, anyHangingSign, true);
+            renderSignText(te, anyHangingSign, false);
+        }
         GlStateManager.popMatrix();
     }
 
@@ -116,9 +136,10 @@ public class TileEntityCanvasSignRenderer extends TileEntitySpecialRenderer<Tile
         return DEFAULT_TEXTURE;
     }
 
-    private void renderSignText(TileEntityCanvasSign te, boolean hangingSign, Block block) {
+    private void renderSignText(TileEntityCanvasSign te, boolean hangingSign, boolean front) {
         FontRenderer fontRenderer = this.getFontRenderer();
-        if (hangingSign && te.isHangingTextOnBack()) {
+        GlStateManager.pushMatrix();
+        if (!front) {
             GlStateManager.rotate(180.0F, 0.0F, 1.0F, 0.0F);
         }
         if (hangingSign) {
@@ -132,44 +153,78 @@ public class TileEntityCanvasSignRenderer extends TileEntitySpecialRenderer<Tile
         }
         GlStateManager.depthMask(false);
 
-        for (int line = 0; line < te.signText.length; ++line) {
-            ITextComponent textComponent = te.signText[line];
-            String lineText = textComponent == null ? "" : textComponent.getUnformattedText();
-            if (line == te.lineBeingEdited) {
-                lineText = "> " + lineText + " <";
-            }
-            int centeredX = -fontRenderer.getStringWidth(lineText) / 2;
-            fontRenderer.drawString(lineText, centeredX, line * 10 - te.signText.length * 5, getTextColor(block));
+        ITextComponent[] text = te.getText(front);
+        int baseColor = getTextColor(te.getColor(front));
+        boolean glowing = te.isGlowing(front);
+        int textColor = glowing ? baseColor : darken(baseColor, 0.6D);
+        int outlineColor = baseColor == 0 ? 0xF0EBCC : darken(baseColor, 0.4D);
+        net.minecraft.entity.Entity camera = Minecraft.getMinecraft().getRenderViewEntity();
+        boolean outline = glowing && (baseColor == 0 || camera != null && camera.getDistanceSq(te.getPos()) < 256.0D);
+        float previousX = OpenGlHelper.lastBrightnessX;
+        float previousY = OpenGlHelper.lastBrightnessY;
+        GlStateManager.disableLighting();
+        if (glowing) {
+            OpenGlHelper.setLightmapTextureCoords(OpenGlHelper.lightmapTexUnit, 240.0F, 240.0F);
         }
+        for (int line = 0; line < text.length; ++line) {
+            String lineText = fontRenderer.trimStringToWidth(text[line].getUnformattedText(), hangingSign ? 60 : 90);
+            int centeredX = -fontRenderer.getStringWidth(lineText) / 2;
+            int lineY = line * 9 - (hangingSign ? 18 : 17);
+            if (outline) {
+                renderTextOutline(fontRenderer, lineText, centeredX, lineY, outlineColor);
+                GlStateManager.translate(0.0F, 0.0F, -0.01F);
+            }
+            fontRenderer.drawString(lineText, centeredX, lineY, textColor);
+            if (outline) {
+                GlStateManager.translate(0.0F, 0.0F, 0.01F);
+            }
+        }
+        OpenGlHelper.setLightmapTextureCoords(OpenGlHelper.lightmapTexUnit, previousX, previousY);
+        GlStateManager.enableLighting();
 
         GlStateManager.depthMask(true);
         GlStateManager.color(1.0F, 1.0F, 1.0F, 1.0F);
         GL11.glNormal3f(0.0F, 0.0F, -1.0F);
+        GlStateManager.popMatrix();
     }
 
-    private int getTextColor(Block block) {
-        return Configuration.isCanvasSignDarkBackground(getCanvasColorName(block)) ? 0xFFFFFF : 0;
+    private static void renderTextOutline(FontRenderer font, String text, int x, int y, int color) {
+        if (text.isEmpty()) {
+            return;
+        }
+        for (float offsetX = -OUTLINE_RADIUS; offsetX <= OUTLINE_RADIUS; offsetX += OUTLINE_SAMPLE_STEP) {
+            for (float offsetY = -OUTLINE_RADIUS; offsetY <= OUTLINE_RADIUS; offsetY += OUTLINE_SAMPLE_STEP) {
+                if (offsetX != 0.0F || offsetY != 0.0F) {
+                    font.drawString(text, x + offsetX, y + offsetY, color, false);
+                }
+            }
+        }
     }
 
-    private String getCanvasColorName(Block block) {
-        if (block == null || block.getRegistryName() == null) {
-            return "";
+    public static int getTextColor(EnumDyeColor color) {
+        switch (color) {
+            case WHITE: return 0xFFFFFF;
+            case ORANGE: return 0xFF681F;
+            case MAGENTA: return 0xFF00FF;
+            case LIGHT_BLUE: return 0x9AC0CD;
+            case YELLOW: return 0xFFFF00;
+            case LIME: return 0xBFFF00;
+            case PINK: return 0xFF69B4;
+            case GRAY: return 0x808080;
+            case SILVER: return 0xD3D3D3;
+            case CYAN: return 0x00FFFF;
+            case PURPLE: return 0xA020F0;
+            case BLUE: return 0x0000FF;
+            case BROWN: return 0x8B4513;
+            case GREEN: return 0x00FF00;
+            case RED: return 0xFF0000;
+            default: return 0;
         }
+    }
 
-        String path = block.getRegistryName().getPath();
-        String[] baseNames = new String[]{"canvas_sign", "canvas_wall_sign", "hanging_canvas_sign", "wall_hanging_canvas_sign"};
-        for (String baseName : baseNames) {
-            if (baseName.equals(path)) {
-                return "";
-            }
-        }
-
-        String[] suffixes = new String[]{"_wall_hanging_canvas_sign", "_hanging_canvas_sign", "_canvas_wall_sign", "_canvas_sign"};
-        for (String suffix : suffixes) {
-            if (path.endsWith(suffix)) {
-                return path.substring(0, path.length() - suffix.length());
-            }
-        }
-        return "";
+    private static int darken(int color, double brightness) {
+        return (int) ((color >> 16 & 255) * brightness) << 16
+                | (int) ((color >> 8 & 255) * brightness) << 8
+                | (int) ((color & 255) * brightness);
     }
 }

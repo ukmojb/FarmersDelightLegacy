@@ -246,9 +246,7 @@ item.farmersdelight.vegetable_noodles.name=Ovoshi-etlet
 item.farmersdelight.vegetable_soup.name=Ovoshista
 item.farmersdelight.wheat_dough.name=Protopan
 itemGroup.farmersdelight=Glaudai fu Nunchangdjin
-
 item.farmersdelight.pumpkin_pie_slice.name=Slice o' Pumpkin Pie
-
 farmersdelight.advancement.craft_knife.desc=Maha aistio per bidra plusting ruti au dur kara
 farmersdelight.advancement.craft_knife=Vras au Bidra
 farmersdelight.advancement.eat_comfort_food.desc=Vapa stakline namting nasi shiknu razbengvona, awen li du ohare!
@@ -306,3 +304,15 @@ farmersdelight.subtitles.cutting_board.remove_item=Item removed from board
 farmersdelight.subtitles.cutting_board.carve_tool=Tool carved on board
 farmersdelight.subtitles.food.take_portion=Portion served
 farmersdelight.subtitles.food.slice=Food sliced
+tile.farmersdelight.wooden_basket.name=Lanz
+subtitles.farmersdelight.block.cooking_pot.boil=Kunjastakline ber
+subtitles.farmersdelight.block.cutting_board.knife_cut=Aistio tser
+subtitles.farmersdelight.block.stove.crackle=Honopol razkiva
+subtitles.farmersdelight.block.skillet.sizzle=Kunjapol razkiva
+subtitles.farmersdelight.block.skillet.add_food=Kunjapol tsish
+subtitles.farmersdelight.block.cabinet.open=Tingbaksu auki
+subtitles.farmersdelight.block.cabinet.close=Tingbaksu kini
+subtitles.farmersdelight.block.tomatoes.pick_tomatoes=Pomodoro lasa
+subtitles.farmersdelight.entity.rotten_tomato.throw=Flanpomodoro ljetta
+subtitles.farmersdelight.entity.rotten_tomato.hit=Flanpomodoro bamba
+entity.rotten_tomato.name=Flanpomodoro

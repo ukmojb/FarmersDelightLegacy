@@ -2,16 +2,24 @@
   "type": "minecraft:crafting_shapeless",
   "conditions": [
     {
-      "type": "forge:mod_loaded",
-      "modid": "nb"
+      "type": "farmersdelight:ingredients_available",
+      "ores": [
+        "fdCrimsonFungus",
+        "fdWarpedFungus"
+      ],
+      "items": [
+        "farmersdelight:nether_salad"
+      ]
     }
   ],
   "ingredients": [
     {
-      "item": "nb:crimson_fungus"
+      "type": "forge:ore_dict",
+      "ore": "fdCrimsonFungus"
     },
     {
-      "item": "nb:warped_fungus"
+      "type": "forge:ore_dict",
+      "ore": "fdWarpedFungus"
     },
     {
       "item": "minecraft:bowl"

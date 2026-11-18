@@ -2,14 +2,16 @@
   "type": "minecraft:crafting_shapeless",
   "ingredients": [
     {
-      "item": "minecraft:bread"
-    },
-    {
-      "item": "farmersdelight:cooked_bacon"
+      "type": "forge:ore_dict",
+      "ore": "foodBread"
     },
     {
       "type": "forge:ore_dict",
-      "ore": "listAllveggie"
+      "ore": "foodCookedBacon"
+    },
+    {
+      "type": "forge:ore_dict",
+      "ore": "foodLeafyGreen"
     },
     {
       "type": "forge:ore_dict",

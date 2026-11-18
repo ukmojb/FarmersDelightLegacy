@@ -3,8 +3,10 @@ package com.wdcftgg.farmersdelightlegacy.common.util;
 import com.wdcftgg.farmersdelightlegacy.api.heat.HeatSourceApi;
 import com.wdcftgg.farmersdelightlegacy.api.heat.HeatSourceOffsetApi;
 import com.wdcftgg.farmersdelightlegacy.common.block.BlockStove;
+import com.wdcftgg.farmersdelightlegacy.common.registry.BlockCategories;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
+import net.minecraft.block.properties.IProperty;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.init.Blocks;
 import net.minecraft.tileentity.TileEntityHopper;
@@ -30,6 +32,12 @@ public final class HeatSourceHelper {
             return false;
         }
 
+        if (BlockCategories.contains("fdHeatSources", state)) {
+            IProperty<?> lit = state.getBlock().getBlockState().getProperty("lit");
+            IProperty<?> waterlogged = state.getBlock().getBlockState().getProperty("waterlogged");
+            return (lit == null || Boolean.TRUE.equals(state.getProperties().get(lit)))
+                    && (waterlogged == null || !Boolean.TRUE.equals(state.getProperties().get(waterlogged)));
+        }
         return isBuiltInDirectHeatSource(state);
     }
 
@@ -39,8 +47,7 @@ public final class HeatSourceHelper {
         }
 
         IBlockState state = world.getBlockState(pos);
-        Block block = state.getBlock();
-        if (block == Blocks.FIRE || block == Blocks.LAVA || block == Blocks.FLOWING_LAVA) {
+        if (BlockCategories.contains("fdTrayHeatSources", state)) {
             return true;
         }
 
@@ -54,7 +61,7 @@ public final class HeatSourceHelper {
     }
 
     public static boolean hasVisualSupportForCookware(World world, BlockPos cookwarePos) {
-        BlockPos supportPos = resolveCookwareHeatSourcePos(world, cookwarePos);
+        BlockPos supportPos = cookwarePos == null ? null : cookwarePos.down();
         return isVisualSupportHeatSource(world, supportPos);
     }
 
@@ -69,7 +76,7 @@ public final class HeatSourceHelper {
         }
 
         IBlockState firstBelowState = world.getBlockState(firstBelowPos);
-        if (shouldOffsetCookwareHeatCheck(world, firstBelowPos, firstBelowState)) {
+        if (!isDirectHeatSource(world, firstBelowPos) && shouldOffsetCookwareHeatCheck(world, firstBelowPos, firstBelowState)) {
             return firstBelowPos.down();
         }
 
@@ -81,7 +88,8 @@ public final class HeatSourceHelper {
             return false;
         }
 
-        if (state.getBlock() == Blocks.HOPPER || world.getTileEntity(pos) instanceof TileEntityHopper) {
+        if (state.getBlock() == Blocks.HOPPER || world.getTileEntity(pos) instanceof TileEntityHopper
+                || BlockCategories.contains("fdHeatConductors", state)) {
             return true;
         }
 

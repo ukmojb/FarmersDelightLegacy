@@ -1,11 +1,11 @@
 {
   "ingredients": [
-    "ore:cropSweetBerry",
+    "ore:cropGlowBerry",
     "ore:listAllmilk",
     "ore:listAllEgg",
     "minecraft:sugar"
   ],
-  "experience": 1.0,
+  "experience": 1,
   "result": {
     "item": "farmersdelight:glow_berry_custard",
     "count": 1
@@ -13,5 +13,13 @@
   "container": {
     "item": "minecraft:glass_bottle",
     "count": 1
+  },
+  "conditions": {
+    "ores": [
+      "cropGlowBerry"
+    ],
+    "items": [
+      "farmersdelight:glow_berry_custard"
+    ]
   }
 }

@@ -1,10 +1,11 @@
 package com.wdcftgg.farmersdelightlegacy.common.block;
 
-import com.wdcftgg.farmersdelightlegacy.common.Configuration;
+import com.wdcftgg.farmersdelightlegacy.common.compat.FluidloggingCompat;
 import com.wdcftgg.farmersdelightlegacy.common.registry.ModBlocks;
 import net.minecraft.block.Block;
-import net.minecraft.block.BlockCrops;
 import net.minecraft.block.BlockFarmland;
+import net.minecraft.block.BlockFenceGate;
+import net.minecraft.block.BlockTrapDoor;
 import net.minecraft.block.SoundType;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
@@ -17,6 +18,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 import net.minecraftforge.common.EnumPlantType;
+import net.minecraftforge.common.FarmlandWaterManager;
 import net.minecraftforge.common.IPlantable;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
@@ -33,25 +35,41 @@ public class BlockRichSoilFarmland extends BlockFarmland {
     }
 
     @Override
-    public void updateTick(World worldIn, BlockPos pos, IBlockState state, Random rand) {
+    public void randomTick(World worldIn, BlockPos pos, IBlockState state, Random rand) {
+        if (worldIn.isRemote) {
+            return;
+        }
         int moisture = state.getValue(MOISTURE);
         if (!this.hasWater(worldIn, pos) && !worldIn.isRainingAt(pos.up())) {
             if (moisture > 0) {
-                setRichSoilFarmlandMoisture(worldIn, pos, moisture - 1);
+                worldIn.setBlockState(pos, state.withProperty(MOISTURE, moisture - 1), 2);
             }
         } else if (moisture < 7) {
-            setRichSoilFarmlandMoisture(worldIn, pos, 7);
+            worldIn.setBlockState(pos, state.withProperty(MOISTURE, 7), 2);
+        } else {
+            BlockRichSoil.tryBoostingPlantsAboveAndBelow(worldIn, pos, rand);
         }
+    }
 
-        this.tryBoostCropGrowth(worldIn, pos, state, rand);
+    @Override
+    public void updateTick(World worldIn, BlockPos pos, IBlockState state, Random rand) {
+        if (!worldIn.isRemote && !canRemainFarmland(worldIn, pos)) {
+            turnToRichSoil(worldIn, pos);
+        }
     }
 
     @Override
     public void neighborChanged(IBlockState state, World worldIn, BlockPos pos, Block blockIn, BlockPos fromPos) {
+        if (!worldIn.isRemote && !canRemainFarmland(worldIn, pos)) {
+            worldIn.scheduleUpdate(pos, this, 1);
+        }
     }
 
     @Override
     public void onBlockAdded(World worldIn, BlockPos pos, IBlockState state) {
+        if (!worldIn.isRemote && !canRemainFarmland(worldIn, pos)) {
+            turnToRichSoil(worldIn, pos);
+        }
     }
 
     @Override
@@ -72,88 +90,28 @@ public class BlockRichSoilFarmland extends BlockFarmland {
 
     private boolean hasWater(World worldIn, BlockPos pos) {
         for (BlockPos blockPos : BlockPos.getAllInBoxMutable(pos.add(-4, 0, -4), pos.add(4, 1, 4))) {
-            if (worldIn.getBlockState(blockPos).getMaterial() == net.minecraft.block.material.Material.WATER) {
+            if (FluidloggingCompat.containsWater(worldIn, blockPos)) {
                 return true;
             }
         }
-        return false;
+        return FarmlandWaterManager.hasBlockWaterTicket(worldIn, pos);
     }
 
-    private boolean hasCrops(World worldIn, BlockPos pos) {
-        IBlockState cropState = worldIn.getBlockState(pos.up());
-        Block block = cropState.getBlock();
-        if (!(block instanceof IPlantable)) {
-            return false;
-        }
-        return this.canSustainPlant(worldIn.getBlockState(pos), worldIn, pos, net.minecraft.util.EnumFacing.UP, (IPlantable) block);
-    }
-
-    private void tryBoostCropGrowth(World worldIn, BlockPos farmlandPos, IBlockState farmlandState, Random rand) {
-        if (worldIn.isRemote) {
-            return;
-        }
-
-        if (farmlandState.getBlock() != this) {
-            return;
-        }
-
-        if (farmlandState.getValue(MOISTURE) <= 0) {
-            return;
-        }
-
-        BlockPos cropPos = farmlandPos.up();
-        IBlockState cropState = worldIn.getBlockState(cropPos);
-        Block cropBlock = cropState.getBlock();
-        if (!(cropBlock instanceof net.minecraft.block.IGrowable)) {
-            return;
-        }
-
-        net.minecraft.block.IGrowable growable = (net.minecraft.block.IGrowable) cropBlock;
-        if (!growable.canGrow(worldIn, cropPos, cropState, false)) {
-            return;
-        }
-
-        double boostChance = Configuration.richSoilBoostChance;
-        if (boostChance <= 0.0D) {
-            return;
-        }
-        if (this.hasAdjacentRichSoil(worldIn, farmlandPos)) {
-            boostChance = Math.min(1.0D, boostChance * 2.0D);
-        }
-        if (rand.nextFloat() > boostChance) {
-            return;
-        }
-
-        if (cropBlock instanceof BlockCrops) {
-            ((BlockCrops) cropBlock).grow(worldIn, rand, cropPos, cropState);
-            return;
-        }
-
-        if (growable.canUseBonemeal(worldIn, rand, cropPos, cropState)) {
-            growable.grow(worldIn, rand, cropPos, cropState);
-        }
-    }
-
-    private boolean hasAdjacentRichSoil(World worldIn, BlockPos pos) {
-        return worldIn.getBlockState(pos.north()).getBlock() == ModBlocks.RICH_SOIL
-                || worldIn.getBlockState(pos.south()).getBlock() == ModBlocks.RICH_SOIL
-                || worldIn.getBlockState(pos.west()).getBlock() == ModBlocks.RICH_SOIL
-                || worldIn.getBlockState(pos.east()).getBlock() == ModBlocks.RICH_SOIL;
+    private boolean canRemainFarmland(World world, BlockPos pos) {
+        IBlockState above = world.getBlockState(pos.up());
+        Block block = above.getBlock();
+        return !above.getMaterial().isSolid() || block instanceof BlockFenceGate || block instanceof BlockTrapDoor
+                || block == Blocks.MELON_BLOCK || block == Blocks.PUMPKIN;
     }
 
     private void turnToRichSoil(World worldIn, BlockPos pos) {
         worldIn.setBlockState(pos, ModBlocks.RICH_SOIL.getDefaultState());
-        AxisAlignedBB soilBox = FULL_BLOCK_AABB.offset(pos);
+        AxisAlignedBB soilBox = new AxisAlignedBB(0.0D, 0.9375D, 0.0D, 1.0D, 1.0D, 1.0D).offset(pos);
 
         for (Entity entity : worldIn.getEntitiesWithinAABBExcludingEntity(null, soilBox)) {
-            entity.setPosition(entity.posX, entity.posY + 1.0D, entity.posZ);
+            double offset = Math.min(soilBox.maxY - soilBox.minY, soilBox.maxY - entity.getEntityBoundingBox().minY);
+            entity.setPositionAndUpdate(entity.posX, entity.posY + offset + 0.001D, entity.posZ);
         }
-    }
-
-    private void setRichSoilFarmlandMoisture(World worldIn, BlockPos pos, int moisture) {
-        int clampedMoisture = Math.max(0, Math.min(7, moisture));
-        IBlockState richFarmlandState = ModBlocks.RICH_SOIL_FARMLAND.getDefaultState().withProperty(MOISTURE, clampedMoisture);
-        worldIn.setBlockState(pos, richFarmlandState, 2);
     }
 
     @Override
@@ -175,6 +133,7 @@ public class BlockRichSoilFarmland extends BlockFarmland {
 
     @Override
     public boolean isFertile(World world, BlockPos pos) {
-        return true;
+        IBlockState state = world.getBlockState(pos);
+        return state.getBlock() == this && state.getValue(MOISTURE) > 0;
     }
 }

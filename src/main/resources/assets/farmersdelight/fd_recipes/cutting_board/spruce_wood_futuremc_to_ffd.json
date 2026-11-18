@@ -1,0 +1,27 @@
+{
+  "conditions": {
+    "items": [
+      "futuremc:spruce_wood",
+      "farmers_future_delight:stripped_spruce_wood"
+    ],
+    "items_absent": [
+      "futuremc:stripped_spruce_wood"
+    ]
+  },
+  "ingredients": [
+    {
+      "item": "futuremc:spruce_wood"
+    }
+  ],
+  "tool": "ore:toolAxe",
+  "result": [
+    {
+      "item": "farmers_future_delight:stripped_spruce_wood",
+      "count": 1
+    },
+    {
+      "item": "farmersdelight:tree_bark",
+      "count": 1
+    }
+  ]
+}

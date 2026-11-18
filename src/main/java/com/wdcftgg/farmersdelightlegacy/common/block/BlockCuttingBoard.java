@@ -1,16 +1,19 @@
 package com.wdcftgg.farmersdelightlegacy.common.block;
 
+import com.wdcftgg.farmersdelightlegacy.common.compat.FluidloggingCompat;
 import com.wdcftgg.farmersdelightlegacy.FarmersDelightLegacy;
 import com.wdcftgg.farmersdelightlegacy.api.knife.IKnifeItem;
 import com.wdcftgg.farmersdelightlegacy.common.advancement.ModAdvancements;
 import com.wdcftgg.farmersdelightlegacy.common.recipe.manager.CuttingBoardRecipeManager;
+import com.wdcftgg.farmersdelightlegacy.common.recipe.ToolAction;
+import com.wdcftgg.farmersdelightlegacy.common.item.ItemKnife;
 import com.wdcftgg.farmersdelightlegacy.common.registry.ModSounds;
+import com.wdcftgg.farmersdelightlegacy.common.registry.ItemCategories;
 import com.wdcftgg.farmersdelightlegacy.common.tile.TileEntityCuttingBoard;
 import net.minecraft.block.BlockHorizontal;
 import net.minecraft.block.ITileEntityProvider;
 import net.minecraft.block.SoundType;
 import net.minecraft.block.material.Material;
-import net.minecraft.block.properties.IProperty;
 import net.minecraft.block.state.BlockFaceShape;
 import net.minecraft.block.state.BlockStateContainer;
 import net.minecraft.block.state.IBlockState;
@@ -19,11 +22,16 @@ import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.inventory.InventoryHelper;
+import net.minecraft.init.SoundEvents;
+import net.minecraft.stats.StatBase;
+import net.minecraft.stats.StatList;
 import net.minecraft.item.*;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.*;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.text.TextComponentString;
+import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
@@ -58,7 +66,7 @@ public class BlockCuttingBoard extends BlockHorizontal implements ITileEntityPro
 
     @Override
     protected BlockStateContainer createBlockState() {
-        return new BlockStateContainer(this, new IProperty[]{FACING});
+        return FluidloggingCompat.createBlockState(this, FACING);
     }
 
     @Override
@@ -83,6 +91,9 @@ public class BlockCuttingBoard extends BlockHorizontal implements ITileEntityPro
 
     @Override
     public boolean onBlockActivated(World worldIn, BlockPos pos, IBlockState state, EntityPlayer playerIn, EnumHand hand, EnumFacing facing, float hitX, float hitY, float hitZ) {
+        if (hand != EnumHand.MAIN_HAND) {
+            return true;
+        }
         TileEntity tileEntity = worldIn.getTileEntity(pos);
         if (!(tileEntity instanceof TileEntityCuttingBoard)) {
             return false;
@@ -90,16 +101,11 @@ public class BlockCuttingBoard extends BlockHorizontal implements ITileEntityPro
         TileEntityCuttingBoard cuttingBoard = (TileEntityCuttingBoard) tileEntity;
         ItemStack heldStack = playerIn.getHeldItem(hand);
 
-        if (cuttingBoard.isEmpty()) {
-            if (heldStack.isEmpty() || CuttingBoardRecipeManager.isUsedAsRecipeTool(heldStack)) {
-                return false;
-            }
-
+        if (cuttingBoard.canAddItem(heldStack)) {
             if (!worldIn.isRemote) {
-                ItemStack storedStack = heldStack.copy();
-                storedStack.setCount(1);
-                if (cuttingBoard.setStoredItem(storedStack) && !playerIn.capabilities.isCreativeMode) {
-                    heldStack.shrink(1);
+                ItemStack remainder = cuttingBoard.addItem(heldStack);
+                if (!playerIn.capabilities.isCreativeMode) {
+                    playerIn.setHeldItem(EnumHand.MAIN_HAND, remainder);
                 }
                 worldIn.playSound(null, pos, ModSounds.cuttingBoardPlace, SoundCategory.BLOCKS, 1.0F, 0.8F);
             }
@@ -107,16 +113,20 @@ public class BlockCuttingBoard extends BlockHorizontal implements ITileEntityPro
         }
 
         if (heldStack.isEmpty() && hand == EnumHand.MAIN_HAND) {
-            if (CuttingBoardRecipeManager.hasRecipe(cuttingBoard.getStoredItem(), ItemStack.EMPTY)) {
+            if (cuttingBoard.isEmpty()) {
+                return true;
+            }
+            if (!cuttingBoard.isItemCarvingBoard()
+                    && CuttingBoardRecipeManager.hasRecipe(cuttingBoard.getStoredItem(), ItemStack.EMPTY)) {
                 if (!worldIn.isRemote) {
                     processStoredItem(worldIn, pos, state, playerIn, cuttingBoard, ItemStack.EMPTY);
                 }
                 return true;
             }
-
             if (!worldIn.isRemote) {
                 ItemStack removedStack = cuttingBoard.removeStoredItem();
-                if (!removedStack.isEmpty() && !playerIn.inventory.addItemStackToInventory(removedStack)) {
+                if (!playerIn.capabilities.isCreativeMode && !removedStack.isEmpty()
+                        && !playerIn.inventory.addItemStackToInventory(removedStack)) {
                     playerIn.dropItem(removedStack, false);
                 }
                 worldIn.playSound(null, pos, ModSounds.cuttingBoardRemove, SoundCategory.BLOCKS, 0.25F, 0.5F);
@@ -125,7 +135,7 @@ public class BlockCuttingBoard extends BlockHorizontal implements ITileEntityPro
         }
 
         if (!heldStack.isEmpty()) {
-            if (CuttingBoardRecipeManager.hasRecipe(cuttingBoard.getStoredItem(), heldStack)) {
+            if (!cuttingBoard.isItemCarvingBoard() && CuttingBoardRecipeManager.hasRecipe(cuttingBoard.getStoredItem(), heldStack)) {
                 if (!worldIn.isRemote) {
                     processStoredItem(worldIn, pos, state, playerIn, cuttingBoard, heldStack);
                 }
@@ -143,7 +153,8 @@ public class BlockCuttingBoard extends BlockHorizontal implements ITileEntityPro
     }
 
     public static boolean processStoredItemFromDispenser(World world, BlockPos pos, IBlockState state, TileEntityCuttingBoard cuttingBoard, ItemStack toolStack) {
-        if (cuttingBoard == null || cuttingBoard.isEmpty() || !CuttingBoardRecipeManager.hasRecipe(cuttingBoard.getStoredItem(), toolStack)) {
+        if (cuttingBoard == null || cuttingBoard.isEmpty() || cuttingBoard.isItemCarvingBoard()
+                || !CuttingBoardRecipeManager.hasRecipe(cuttingBoard.getStoredItem(), toolStack)) {
             return false;
         }
         if (!canToolProcessStoredItem(world, pos, state, null, cuttingBoard, toolStack)) {
@@ -158,6 +169,7 @@ public class BlockCuttingBoard extends BlockHorizontal implements ITileEntityPro
             return;
         }
         ItemStack particleStack = cuttingBoard.getStoredItem();
+        net.minecraft.util.SoundEvent sound = CuttingBoardRecipeManager.getRecipeSound(particleStack, toolStack);
         List<ItemStack> craftedStacks = cuttingBoard.processStoredItem(toolStack);
         EnumFacing dropFacing = state.getValue(FACING).rotateYCCW();
         for (ItemStack craftedStack : craftedStacks) {
@@ -175,14 +187,44 @@ public class BlockCuttingBoard extends BlockHorizontal implements ITileEntityPro
             drop.motionZ = dropFacing.getZOffset() * 0.2D;
             world.spawnEntity(drop);
         }
+        playProcessingSound(world, pos, player, sound, toolStack, particleStack);
         if (damageTool && !toolStack.isEmpty()) {
+            if (player != null) {
+                StatBase usedStat = StatList.getObjectUseStats(toolStack.getItem());
+                if (usedStat != null) {
+                    player.addStat(usedStat);
+                }
+            }
             damageTool(world, player, toolStack);
         }
-        world.playSound(null, pos, ModSounds.CUTTING_BOARD_KNIFE, SoundCategory.BLOCKS, 0.9F, 1.0F);
         spawnCuttingParticles(world, pos, particleStack, 5);
         if (player instanceof EntityPlayerMP) {
             ModAdvancements.USE_CUTTING_BOARD.trigger((EntityPlayerMP) player);
+            player.sendStatusMessage(cuttingBoard.isEmpty() ? new TextComponentString("")
+                    : new TextComponentTranslation("farmersdelight.block.cutting_board.remaining_items",
+                    cuttingBoard.getStoredItem().getCount()), true);
         }
+    }
+
+    private static void playProcessingSound(World world, BlockPos pos, EntityPlayer player, SoundEvent sound,
+                                            ItemStack tool, ItemStack input) {
+        float volume = 1.0F;
+        float pitch = 1.0F;
+        if (sound == null) {
+            if (new ToolAction("shears_dig").matches(tool)) {
+                sound = SoundEvents.ENTITY_SHEEP_SHEAR;
+            } else if (ItemKnife.isKnife(tool)) {
+                sound = ModSounds.CUTTING_BOARD_KNIFE;
+                volume = 0.8F;
+            } else {
+                sound = input.getItem() instanceof ItemBlock
+                        ? ((ItemBlock) input.getItem()).getBlock().getSoundType(
+                                ((ItemBlock) input.getItem()).getBlock().getDefaultState(), world, pos, player).getBreakSound()
+                        : SoundEvents.BLOCK_WOOD_BREAK;
+                pitch = 0.8F;
+            }
+        }
+        world.playSound(null, pos, sound, SoundCategory.BLOCKS, volume, pitch);
     }
 
     private static void damageTool(World world, EntityPlayer player, ItemStack toolStack) {
@@ -240,7 +282,9 @@ public class BlockCuttingBoard extends BlockHorizontal implements ITileEntityPro
     @Override
     public void neighborChanged(IBlockState state, World worldIn, BlockPos pos, net.minecraft.block.Block blockIn, BlockPos fromPos) {
         if (fromPos.getY() == pos.getY() - 1 && !worldIn.getBlockState(pos.down()).isSideSolid(worldIn, pos.down(), EnumFacing.UP)) {
-            worldIn.destroyBlock(pos, true);
+            worldIn.playEvent(2001, pos, net.minecraft.block.Block.getStateId(state));
+            dropBlockAsItem(worldIn, pos, state, 0);
+            FluidloggingCompat.removeBlock(worldIn, pos);
             return;
         }
         super.neighborChanged(state, worldIn, pos, blockIn, fromPos);
@@ -270,7 +314,7 @@ public class BlockCuttingBoard extends BlockHorizontal implements ITileEntityPro
     public int getComparatorInputOverride(IBlockState state, World worldIn, BlockPos pos) {
         TileEntity tileEntity = worldIn.getTileEntity(pos);
         if (tileEntity instanceof TileEntityCuttingBoard) {
-            return ((TileEntityCuttingBoard) tileEntity).isEmpty() ? 0 : 15;
+            return ((TileEntityCuttingBoard) tileEntity).getComparatorSignal();
         }
         return 0;
     }
@@ -316,7 +360,8 @@ public class BlockCuttingBoard extends BlockHorizontal implements ITileEntityPro
         return stack.getItem() instanceof ItemTool
                 || stack.getItem() instanceof ItemSword
                 || stack.getItem() instanceof ItemHoe
-                || stack.getItem() instanceof ItemShears;
+                || stack.getItem() instanceof ItemShears
+                || ItemCategories.contains("fdTrident", stack);
     }
 
     @Mod.EventBusSubscriber(modid = FarmersDelightLegacy.MOD_ID)
@@ -355,7 +400,7 @@ public class BlockCuttingBoard extends BlockHorizontal implements ITileEntityPro
                 ItemStack toPlace = player.capabilities.isCreativeMode ? heldStack.copy() : heldStack;
                 if (cuttingBoard.carveToolOnBoard(toPlace)) {
                     if (!player.capabilities.isCreativeMode) {
-                        heldStack.shrink(1);
+                        player.setHeldItem(EnumHand.MAIN_HAND, ItemStack.EMPTY);
                     }
                     world.playSound(null, pos, ModSounds.cuttingBoardCarve, SoundCategory.BLOCKS, 1.0F, 0.8F);
                 }

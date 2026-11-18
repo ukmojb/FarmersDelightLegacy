@@ -10,5 +10,11 @@
       "item": "farmersdelight:sweet_berry_cheesecake_slice",
       "count": 4
     }
-  ]
+  ],
+  "conditions": {
+    "items": [
+      "farmersdelight:sweet_berry_cheesecake",
+      "farmersdelight:sweet_berry_cheesecake_slice"
+    ]
+  }
 }

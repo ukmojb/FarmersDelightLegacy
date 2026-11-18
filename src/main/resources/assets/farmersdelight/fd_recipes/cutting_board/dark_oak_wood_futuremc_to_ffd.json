@@ -1,0 +1,27 @@
+{
+  "conditions": {
+    "items": [
+      "futuremc:dark_oak_wood",
+      "farmers_future_delight:stripped_dark_oak_wood"
+    ],
+    "items_absent": [
+      "futuremc:stripped_dark_oak_wood"
+    ]
+  },
+  "ingredients": [
+    {
+      "item": "futuremc:dark_oak_wood"
+    }
+  ],
+  "tool": "ore:toolAxe",
+  "result": [
+    {
+      "item": "farmers_future_delight:stripped_dark_oak_wood",
+      "count": 1
+    },
+    {
+      "item": "farmersdelight:tree_bark",
+      "count": 1
+    }
+  ]
+}

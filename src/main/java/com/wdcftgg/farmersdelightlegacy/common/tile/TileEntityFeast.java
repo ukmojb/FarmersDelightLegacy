@@ -56,7 +56,7 @@ public class TileEntityFeast extends TileEntity {
             state = updatedState;
         }
 
-        // Feast 的 servings 需要同步到方块状态，保证掉落和显示都使用同一份数据。
+        this.world.checkLight(this.pos);
         this.world.notifyBlockUpdate(this.pos, state, state, 3);
     }
 
@@ -99,6 +99,7 @@ public class TileEntityFeast extends TileEntity {
     public void markDirty() {
         super.markDirty();
         if (this.world != null) {
+            this.world.checkLight(this.pos);
             IBlockState state = this.world.getBlockState(this.pos);
             this.world.notifyBlockUpdate(this.pos, state, state, 3);
         }

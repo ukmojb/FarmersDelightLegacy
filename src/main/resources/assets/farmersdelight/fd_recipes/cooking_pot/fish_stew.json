@@ -1,10 +1,10 @@
 {
   "ingredients": [
-    "ore:listAllfishraw",
+    "ore:fdSafeRawFish",
     "farmersdelight:tomato_sauce",
     "ore:cropOnion"
   ],
-  "experience": 1.0,
+  "experience": 1,
   "result": {
     "item": "farmersdelight:fish_stew",
     "count": 1

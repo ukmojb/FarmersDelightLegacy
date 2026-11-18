@@ -29,5 +29,13 @@
         ]
       }
     }
-  }
+  },
+  "conditions": [
+    {
+      "type": "farmersdelight:ingredients_available",
+      "items": [
+        "farmersdelight:netherite_knife"
+      ]
+    }
+  ]
 }

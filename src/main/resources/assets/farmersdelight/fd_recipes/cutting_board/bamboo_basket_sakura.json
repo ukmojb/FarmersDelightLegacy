@@ -1,0 +1,34 @@
+{
+  "ingredients": [
+    "farmersdelight:bamboo_basket"
+  ],
+  "tool": [
+    {
+      "type": "farmersdelight:item_ability",
+      "action": "axe_dig"
+    },
+    {
+      "tag": "minecraft:axes"
+    }
+  ],
+  "result": [
+    {
+      "item": "farmersdelight:canvas",
+      "count": 1
+    },
+    {
+      "item": "sakura:bamboo",
+      "count": 1
+    }
+  ],
+  "conditions": {
+    "items": [
+      "sakura:bamboo",
+      "farmersdelight:bamboo_basket"
+    ],
+    "items_absent": [
+      "farmers_future_delight:bamboo",
+      "futuremc:bamboo"
+    ]
+  }
+}

@@ -1,6 +1,12 @@
 {
   "conditions": {
-    "mod_loaded": "nb"
+    "items": [
+      "nb:warped_stem",
+      "nb:warped_planks"
+    ],
+    "items_absent": [
+      "farmers_future_delight:stripped_warped_stem"
+    ]
   },
   "ingredients": [
     {

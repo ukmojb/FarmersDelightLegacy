@@ -1,6 +1,7 @@
 package com.wdcftgg.farmersdelightlegacy.common.item.enchantment;
 
 import com.wdcftgg.farmersdelightlegacy.common.item.ItemKnife;
+import com.wdcftgg.farmersdelightlegacy.common.registry.ItemCategories;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.EnumEnchantmentType;
 import net.minecraft.entity.EntityLivingBase;
@@ -36,7 +37,7 @@ public class EnchantmentBackstabbing extends Enchantment {
 
     @Override
     public boolean canApplyAtEnchantingTable(ItemStack stack) {
-        return ItemKnife.isKnife(stack);
+        return ItemKnife.isKnife(stack) || ItemCategories.contains("fdEnchantableKnife", stack);
     }
 
     @Override

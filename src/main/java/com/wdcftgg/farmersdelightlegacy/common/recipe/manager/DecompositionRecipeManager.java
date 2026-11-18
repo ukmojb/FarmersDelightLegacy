@@ -1,9 +1,10 @@
 package com.wdcftgg.farmersdelightlegacy.common.recipe.manager;
 
+import com.wdcftgg.farmersdelightlegacy.common.compat.FluidloggingCompat;
 import com.wdcftgg.farmersdelightlegacy.common.registry.ModBlocks;
+import com.wdcftgg.farmersdelightlegacy.common.registry.BlockCategories;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockDirt;
-import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.ItemStack;
@@ -33,7 +34,7 @@ public final class DecompositionRecipeManager {
         defaultsRegistered = true;
 
         registerBaseCondition("farmersdelight:sky_light", (world, compostPos) -> getMaxNearbySkyLight(world, compostPos) > 12 ? 0.1F : 0.05F);
-        registerBaseCondition("farmersdelight:water", (world, compostPos) -> hasNearbyMaterial(world, compostPos, Material.WATER) ? 0.1F : 0.0F);
+        registerBaseCondition("farmersdelight:water", (world, compostPos) -> hasNearbyWater(world, compostPos) ? 0.1F : 0.0F);
 
         registerAccelerator("farmersdelight:brown_mushroom", blockMatcher(Blocks.BROWN_MUSHROOM, 0.02F), new ItemStack(Blocks.BROWN_MUSHROOM));
         registerAccelerator("farmersdelight:red_mushroom", blockMatcher(Blocks.RED_MUSHROOM, 0.02F), new ItemStack(Blocks.RED_MUSHROOM));
@@ -49,6 +50,16 @@ public final class DecompositionRecipeManager {
         registerAccelerator("farmersdelight:rich_soil_farmland", blockMatcher(ModBlocks.RICH_SOIL_FARMLAND, 0.02F), new ItemStack(ModBlocks.RICH_SOIL_FARMLAND));
         registerAccelerator("farmersdelight:brown_mushroom_colony", blockMatcher(ModBlocks.BROWN_MUSHROOM_COLONY, 0.02F), new ItemStack(ModBlocks.BROWN_MUSHROOM_COLONY));
         registerAccelerator("farmersdelight:red_mushroom_colony", blockMatcher(ModBlocks.RED_MUSHROOM_COLONY, 0.02F), new ItemStack(ModBlocks.RED_MUSHROOM_COLONY));
+        registerAccelerator("farmersdelight:compost_activators", (world, compostPos, testPos, state) ->
+                BlockCategories.contains("fdCompostActivators", state) && !isDefaultActivator(state) ? 0.02F : 0.0F, ItemStack.EMPTY);
+    }
+
+    private static boolean isDefaultActivator(IBlockState state) {
+        Block block = state.getBlock();
+        return block == Blocks.BROWN_MUSHROOM || block == Blocks.RED_MUSHROOM || block == Blocks.MYCELIUM
+                || block == Blocks.DIRT && state.getValue(BlockDirt.VARIANT) == BlockDirt.DirtType.PODZOL
+                || block == ModBlocks.ORGANIC_COMPOST || block == ModBlocks.RICH_SOIL || block == ModBlocks.RICH_SOIL_FARMLAND
+                || block == ModBlocks.BROWN_MUSHROOM_COLONY || block == ModBlocks.RED_MUSHROOM_COLONY;
     }
 
     public static void registerBaseCondition(String key, DecompositionCondition condition) {
@@ -141,9 +152,9 @@ public final class DecompositionRecipeManager {
         return maxSkyLight;
     }
 
-    private static boolean hasNearbyMaterial(World world, BlockPos compostPos, Material material) {
+    private static boolean hasNearbyWater(World world, BlockPos compostPos) {
         for (BlockPos testPos : BlockPos.getAllInBoxMutable(compostPos.add(-1, -1, -1), compostPos.add(1, 1, 1))) {
-            if (world.getBlockState(testPos).getMaterial() == material) {
+            if (FluidloggingCompat.containsWater(world, testPos)) {
                 return true;
             }
         }

@@ -23,7 +23,7 @@ if (propertyBool('publish_to_maven')) {
 
                 // Custom artifact:
                 // If you want to publish a different artifact to the one outputted when building normally
-                // Create a different gradle task (Jar task), in extra.gradle
+                // Create a different gradle task (Jar task), in build.gradle
                 // Remove the 'from components.java' line above
                 // Add this line (change the task name):
                 // artifacts task_name

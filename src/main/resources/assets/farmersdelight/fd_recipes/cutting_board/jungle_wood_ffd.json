@@ -1,0 +1,24 @@
+{
+  "conditions": {
+    "items": [
+      "farmers_future_delight:jungle_wood",
+      "farmers_future_delight:stripped_jungle_wood"
+    ]
+  },
+  "ingredients": [
+    {
+      "item": "farmers_future_delight:jungle_wood"
+    }
+  ],
+  "tool": "ore:toolAxe",
+  "result": [
+    {
+      "item": "farmers_future_delight:stripped_jungle_wood",
+      "count": 1
+    },
+    {
+      "item": "farmersdelight:tree_bark",
+      "count": 1
+    }
+  ]
+}

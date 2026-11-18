@@ -4,8 +4,13 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.wdcftgg.farmersdelightlegacy.FarmersDelightLegacy;
+import com.wdcftgg.farmersdelightlegacy.common.recipe.condition.IngredientsAvailableCondition;
 import com.wdcftgg.farmersdelightlegacy.common.Configuration;
 import com.wdcftgg.farmersdelightlegacy.common.item.ItemKnife;
+import com.wdcftgg.farmersdelightlegacy.common.recipe.CookingPotRecipe.IngredientEntry;
+import com.wdcftgg.farmersdelightlegacy.common.recipe.ToolAction;
+import com.wdcftgg.farmersdelightlegacy.common.registry.ModSounds;
+import net.minecraft.util.SoundEvent;
 import com.wdcftgg.farmersdelightlegacy.common.util.RecipeResourceScanner;
 import com.wdcftgg.farmersdelightlegacy.common.registry.ModOreDictionary;
 import net.minecraft.enchantment.EnchantmentHelper;
@@ -16,6 +21,8 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.common.registry.ForgeRegistries;
+import net.minecraftforge.common.crafting.CraftingHelper;
+import net.minecraftforge.common.crafting.JsonContext;
 import net.minecraftforge.oredict.OreDictionary;
 
 import java.util.*;
@@ -28,6 +35,8 @@ public final class CuttingBoardRecipeManager {
     private static final List<CuttingRecipeEntry> RECIPES = new ArrayList<>();
     private static final Map<String, CuttingRecipeEntry> SCRIPT_RECIPES = new LinkedHashMap<>();
     private static final List<ItemStack> REMOVED_BUILT_IN_OUTPUT_STACKS = new ArrayList<>();
+    private static final Set<String> REMOVED_BUILT_IN_IDS = new HashSet<>();
+    private static final List<java.util.function.Predicate<CuttingBoardRecipeView>> REMOVED_BUILT_IN_PREDICATES = new ArrayList<>();
     private static boolean loaded;
 
     private CuttingBoardRecipeManager() {
@@ -78,12 +87,7 @@ public final class CuttingBoardRecipeManager {
         ensureLoaded();
         List<CuttingBoardRecipeView> result = new ArrayList<>();
         for (CuttingRecipeEntry recipeEntry : getAllRecipeEntries()) {
-            result.add(new CuttingBoardRecipeView(
-                    recipeEntry.recipeId,
-                    recipeEntry.inputMatcher.asStacks(),
-                    recipeEntry.toolMatcher.asStacks(),
-                    recipeEntry.getDisplayResults(),
-                    recipeEntry.getDisplayResultChances()));
+            result.add(recipeEntry.view());
         }
         return result;
     }
@@ -194,6 +198,61 @@ public final class CuttingBoardRecipeManager {
         }
     }
 
+    public static boolean removeRecipe(String key) {
+        ensureLoaded();
+        REMOVED_BUILT_IN_IDS.add(key);
+        boolean removed = unregisterScriptRecipe(key);
+        return RECIPES.removeIf(recipe -> recipe.recipeId.equals(key)) || removed;
+    }
+
+    public static int removeRecipes(java.util.function.Predicate<CuttingBoardRecipeView> predicate) {
+        ensureLoaded();
+        REMOVED_BUILT_IN_PREDICATES.add(predicate);
+        int before = RECIPES.size() + SCRIPT_RECIPES.size();
+        RECIPES.removeIf(recipe -> predicate.test(recipe.view()));
+        synchronized (SCRIPT_RECIPES) {
+            SCRIPT_RECIPES.values().removeIf(recipe -> predicate.test(recipe.view()));
+        }
+        return before - RECIPES.size() - SCRIPT_RECIPES.size();
+    }
+
+    public static boolean registerScriptRecipe(String key, IngredientMatcher input, IngredientMatcher tool,
+                                               ItemStack[] outputs, float[] chances, SoundEvent sound) {
+        return registerScriptRecipe(key, input, tool, outputs, chances, sound, "");
+    }
+
+    public static boolean registerScriptRecipe(String key, IngredientMatcher input, IngredientMatcher tool,
+                                               ItemStack[] outputs, float[] chances, SoundEvent sound, String group) {
+        if (key == null || key.isEmpty() || input == null || tool == null || !input.isValid() || !tool.isValid()
+                || outputs == null || outputs.length == 0 || group == null || (chances != null && chances.length != outputs.length)) {
+            FarmersDelightLegacy.LOGGER.error("Invalid cutting recipe: {}", key);
+            return false;
+        }
+        List<ResultEntry> results = new ArrayList<>();
+        for (int index = 0; index < outputs.length; index++) {
+            float chance = chances == null ? 1.0F : chances[index];
+            if (outputs[index] == null || outputs[index].isEmpty() || !Float.isFinite(chance) || chance < 0 || chance > 1) {
+                FarmersDelightLegacy.LOGGER.error("Invalid cutting recipe output or probability: {}", key);
+                return false;
+            }
+            results.add(new ResultEntry(outputs[index], chance));
+        }
+        synchronized (SCRIPT_RECIPES) {
+            SCRIPT_RECIPES.put(key, new CuttingRecipeEntry(key, input, tool, results, sound, group));
+        }
+        return true;
+    }
+
+    public static SoundEvent getRecipeSound(ItemStack input, ItemStack tool) {
+        ensureLoaded();
+        for (CuttingRecipeEntry recipe : getAllRecipeEntries()) {
+            if (recipe.matches(input, tool)) {
+                return recipe.sound;
+            }
+        }
+        throw new IllegalArgumentException("No cutting recipe matches the supplied input and tool");
+    }
+
     public static int removeRecipesByOutput(ItemStack outputStack) {
         ensureLoaded();
         if (outputStack.isEmpty()) {
@@ -225,15 +284,23 @@ public final class CuttingBoardRecipeManager {
 
     public static final class CuttingBoardRecipeView {
         private final String recipeId;
+        private final String group;
         private final List<ItemStack> inputOptions;
         private final List<ItemStack> toolOptions;
         private final List<ItemStack> resultStacks;
         private final List<Float> resultChances;
+        private final IngredientMatcher input;
+        private final IngredientMatcher tool;
+        private final SoundEvent sound;
 
-        private CuttingBoardRecipeView(String recipeId, List<ItemStack> inputOptions, List<ItemStack> toolOptions, List<ItemStack> resultStacks, List<Float> resultChances) {
+        private CuttingBoardRecipeView(String recipeId, IngredientMatcher input, IngredientMatcher tool, List<ItemStack> resultStacks, List<Float> resultChances, SoundEvent sound, String group) {
             this.recipeId = recipeId;
-            this.inputOptions = copyStacks(inputOptions);
-            this.toolOptions = copyStacks(toolOptions);
+            this.group = group;
+            this.input = input;
+            this.tool = tool;
+            this.sound = sound;
+            this.inputOptions = input.asStacks();
+            this.toolOptions = tool.asStacks();
             this.resultStacks = copyStacks(resultStacks);
             this.resultChances = new ArrayList<>(resultChances);
         }
@@ -241,6 +308,14 @@ public final class CuttingBoardRecipeManager {
         public String getRecipeId() {
             return recipeId;
         }
+
+        public IngredientMatcher getInput() { return input; }
+
+        public IngredientMatcher getTool() { return tool; }
+
+        public SoundEvent getSound() { return sound; }
+
+        public String getGroup() { return group; }
 
         public List<ItemStack> getInputOptions() {
             return copyStacks(inputOptions);
@@ -284,7 +359,21 @@ public final class CuttingBoardRecipeManager {
                 || hasRemovedBuiltInOutput(resultEntries)) {
             return;
         }
-        RECIPES.add(new CuttingRecipeEntry(recipeId, inputMatcher, toolMatcher, resultEntries));
+        SoundEvent sound = null;
+        if (recipeJson.has("sound")) {
+            ResourceLocation soundId = new ResourceLocation(recipeJson.get("sound").getAsString());
+            sound = ForgeRegistries.SOUND_EVENTS.getValue(soundId);
+            if (sound == null) {
+                FarmersDelightLegacy.LOGGER.error("Unknown cutting recipe sound {} in {}", soundId, recipeId);
+                return;
+            }
+        }
+        CuttingRecipeEntry recipe = new CuttingRecipeEntry(recipeId, inputMatcher, toolMatcher, resultEntries, sound,
+                recipeJson.has("group") ? recipeJson.get("group").getAsString() : "");
+        if (!REMOVED_BUILT_IN_IDS.contains(recipeId)
+                && REMOVED_BUILT_IN_PREDICATES.stream().noneMatch(predicate -> predicate.test(recipe.view()))) {
+            RECIPES.add(recipe);
+        }
     }
 
     private static void addRemovedBuiltInOutputStack(ItemStack outputStack) {
@@ -319,7 +408,8 @@ public final class CuttingBoardRecipeManager {
         return matchesModCondition(conditionsObject.get("mod_loaded"), true)
                 && matchesModCondition(conditionsObject.get("mod_not_loaded"), false)
                 && matchesBlockRegistrationCondition(conditionsObject.get("block_registered"), true)
-                && matchesBlockRegistrationCondition(conditionsObject.get("block_not_registered"), false);
+                && matchesBlockRegistrationCondition(conditionsObject.get("block_not_registered"), false)
+                && IngredientsAvailableCondition.matches(conditionsObject);
     }
 
     private static boolean matchesModCondition(JsonElement conditionElement, boolean expectedLoaded) {
@@ -355,7 +445,8 @@ public final class CuttingBoardRecipeManager {
     private static boolean isBlockRegistered(String blockId) {
         try {
             return ForgeRegistries.BLOCKS.containsKey(new ResourceLocation(blockId));
-        } catch (IllegalArgumentException ignored) {
+        } catch (IllegalArgumentException exception) {
+            FarmersDelightLegacy.LOGGER.error("Invalid cutting recipe block condition: {}", blockId, exception);
             return false;
         }
     }
@@ -489,7 +580,10 @@ public final class CuttingBoardRecipeManager {
             chance = clampChance((float) resultObject.get("probability").getAsDouble());
         }
 
-        return new ResultEntry(new ItemStack(resultItem, count, metadata), chance);
+        ItemStack result = resultObject.has("nbt")
+                ? CraftingHelper.getItemStack(resultObject, new JsonContext(defaultNamespace))
+                : new ItemStack(resultItem, count, metadata);
+        return new ResultEntry(result, chance);
     }
 
     private static float clampChance(float chance) {
@@ -522,15 +616,31 @@ public final class CuttingBoardRecipeManager {
     private static final class CuttingRecipeEntry {
 
         private final String recipeId;
+        private final String group;
         private final IngredientMatcher inputMatcher;
         private final IngredientMatcher toolMatcher;
         private final List<ResultEntry> resultEntries;
+        private final SoundEvent sound;
 
         private CuttingRecipeEntry(String recipeId, IngredientMatcher inputMatcher, IngredientMatcher toolMatcher, List<ResultEntry> resultEntries) {
+            this(recipeId, inputMatcher, toolMatcher, resultEntries, null);
+        }
+
+        private CuttingRecipeEntry(String recipeId, IngredientMatcher inputMatcher, IngredientMatcher toolMatcher, List<ResultEntry> resultEntries, SoundEvent sound) {
+            this(recipeId, inputMatcher, toolMatcher, resultEntries, sound, "");
+        }
+
+        private CuttingRecipeEntry(String recipeId, IngredientMatcher inputMatcher, IngredientMatcher toolMatcher, List<ResultEntry> resultEntries, SoundEvent sound, String group) {
             this.recipeId = recipeId;
+            this.group = group;
             this.inputMatcher = inputMatcher;
             this.toolMatcher = toolMatcher;
             this.resultEntries = new ArrayList<>(resultEntries);
+            this.sound = sound;
+        }
+
+        private CuttingBoardRecipeView view() {
+            return new CuttingBoardRecipeView(recipeId, inputMatcher, toolMatcher, getDisplayResults(), getDisplayResultChances(), sound, group);
         }
 
         private boolean matches(ItemStack inputStack, ItemStack toolStack) {
@@ -594,11 +704,12 @@ public final class CuttingBoardRecipeManager {
         }
     }
 
-    private static final class IngredientMatcher {
+    public static final class IngredientMatcher {
 
         private final List<ItemStack> itemStacks;
         private final List<String> oreDictNames;
         private final boolean noToolRequired;
+        private final List<IngredientEntry> customIngredients = new ArrayList<>();
 
         private IngredientMatcher(List<ItemStack> itemStacks, List<String> oreDictNames, boolean noToolRequired) {
             this.itemStacks = itemStacks;
@@ -610,7 +721,7 @@ public final class CuttingBoardRecipeManager {
             return new IngredientMatcher(Collections.<ItemStack>emptyList(), Collections.<String>emptyList(), false);
         }
 
-        private static IngredientMatcher noTool() {
+        public static IngredientMatcher noTool() {
             return new IngredientMatcher(Collections.<ItemStack>emptyList(), Collections.<String>emptyList(), true);
         }
 
@@ -625,7 +736,7 @@ public final class CuttingBoardRecipeManager {
             return new IngredientMatcher(itemStacks, oreDictNames, false);
         }
 
-        private static IngredientMatcher fromTokens(String[] tokens, String defaultNamespace) {
+        public static IngredientMatcher fromTokens(String[] tokens, String defaultNamespace) {
             if (tokens == null || tokens.length == 0) {
                 return invalid();
             }
@@ -637,6 +748,20 @@ public final class CuttingBoardRecipeManager {
             }
             return new IngredientMatcher(itemStacks, oreDictNames, false);
         }
+
+        public static IngredientMatcher fromIngredients(List<IngredientEntry> ingredients) {
+            IngredientMatcher matcher = invalid();
+            matcher.customIngredients.addAll(ingredients);
+            return matcher;
+        }
+
+        public List<ItemStack> getItemStacks() { return copyStacks(itemStacks); }
+
+        public List<String> getOreDictNames() { return new ArrayList<>(oreDictNames); }
+
+        public List<IngredientEntry> getCustomIngredients() { return new ArrayList<>(customIngredients); }
+
+        public boolean isNoToolRequired() { return noToolRequired; }
 
         private static IngredientMatcher fromStacks(ItemStack[] stacks, boolean noToolRequired) {
             if (noToolRequired) {
@@ -672,6 +797,20 @@ public final class CuttingBoardRecipeManager {
                 return invalid();
             }
 
+            if (element.isJsonObject() && element.getAsJsonObject().has("action")) {
+                ToolAction action = new ToolAction(element.getAsJsonObject().get("action").getAsString());
+                return fromIngredients(Collections.singletonList(IngredientEntry.forCustom(action, null, action.getDisplayStacks())));
+            }
+            if (element.isJsonArray()) {
+                IngredientMatcher combined = new IngredientMatcher(new ArrayList<>(), new ArrayList<>(), false);
+                for (JsonElement child : element.getAsJsonArray()) {
+                    IngredientMatcher part = fromJson(child, defaultNamespace);
+                    combined.itemStacks.addAll(part.itemStacks);
+                    combined.oreDictNames.addAll(part.oreDictNames);
+                    combined.customIngredients.addAll(part.customIngredients);
+                }
+                return combined;
+            }
             List<ItemStack> itemStacks = new ArrayList<>();
             List<String> oreDictNames = new ArrayList<>();
             collectTokens(element, itemStacks, oreDictNames, defaultNamespace);
@@ -749,12 +888,17 @@ public final class CuttingBoardRecipeManager {
         }
 
         private boolean isValid() {
-            return noToolRequired || !itemStacks.isEmpty() || !oreDictNames.isEmpty();
+            return noToolRequired || !itemStacks.isEmpty() || !oreDictNames.isEmpty() || !customIngredients.isEmpty();
         }
 
-        private boolean matches(ItemStack stack) {
+        public boolean matches(ItemStack stack) {
             if (stack.isEmpty()) {
                 return false;
+            }
+            for (IngredientEntry ingredient : customIngredients) {
+                if (ingredient.matches(stack)) {
+                    return true;
+                }
             }
             for (ItemStack candidate : itemStacks) {
                 if (candidate.getItem() == stack.getItem()) {
@@ -783,7 +927,7 @@ public final class CuttingBoardRecipeManager {
             return false;
         }
 
-        private boolean matchesTool(ItemStack stack) {
+        public boolean matchesTool(ItemStack stack) {
             if (noToolRequired) {
                 return stack.isEmpty();
             }
@@ -793,6 +937,11 @@ public final class CuttingBoardRecipeManager {
 
             if (matchesDirectItem(stack)) {
                 return true;
+            }
+            for (IngredientEntry ingredient : customIngredients) {
+                if (ingredient.matches(stack)) {
+                    return true;
+                }
             }
 
             for (String oreName : oreDictNames) {
@@ -839,11 +988,14 @@ public final class CuttingBoardRecipeManager {
             return candidateMeta == target.getMetadata();
         }
 
-        private List<ItemStack> asStacks() {
+        public List<ItemStack> asStacks() {
             if (noToolRequired) {
                 return Collections.emptyList();
             }
             List<ItemStack> result = new ArrayList<>();
+            for (IngredientEntry ingredient : customIngredients) {
+                result.addAll(ingredient.getDisplayStacks());
+            }
             for (ItemStack itemStack : itemStacks) {
                 int metadata = itemStack.getMetadata();
                 if (metadata == OreDictionary.WILDCARD_VALUE) {
@@ -923,10 +1075,9 @@ public final class CuttingBoardRecipeManager {
                 try {
                     metadata = Integer.parseInt(metadataToken);
                     hasMetadata = true;
-                } catch (NumberFormatException ignored) {
-                    itemPath = token;
-                    metadata = 0;
-                    hasMetadata = false;
+                } catch (NumberFormatException exception) {
+                    FarmersDelightLegacy.LOGGER.error("Invalid item metadata in cutting recipe: {}", token, exception);
+                    return null;
                 }
             }
         }
@@ -955,7 +1106,11 @@ public final class CuttingBoardRecipeManager {
         synchronized (SCRIPT_RECIPES) {
             result.addAll(SCRIPT_RECIPES.values());
         }
-        result.addAll(RECIPES);
+        for (CuttingRecipeEntry recipe : RECIPES) {
+            if (!SCRIPT_RECIPES.containsKey(recipe.recipeId)) {
+                result.add(recipe);
+            }
+        }
         return result;
     }
 }

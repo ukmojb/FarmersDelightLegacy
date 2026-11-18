@@ -9,13 +9,15 @@ import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
+import net.minecraft.world.IBlockAccess;
+import net.minecraftforge.common.EnumPlantType;
 import net.minecraftforge.common.IPlantable;
 
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
-public class ItemPlantableFood extends ItemFoodTooltip {
+public class ItemPlantableFood extends ItemFoodTooltip implements IPlantable {
 
     private final Block cropBlock;
     private final Set<Block> validSoils;
@@ -24,6 +26,16 @@ public class ItemPlantableFood extends ItemFoodTooltip {
         super(amount, saturation, false);
         this.cropBlock = cropBlock;
         this.validSoils = new HashSet<>(Arrays.asList(validSoils));
+    }
+
+    @Override
+    public EnumPlantType getPlantType(IBlockAccess world, BlockPos pos) {
+        return EnumPlantType.Crop;
+    }
+
+    @Override
+    public IBlockState getPlant(IBlockAccess world, BlockPos pos) {
+        return cropBlock.getDefaultState();
     }
 
     @Override

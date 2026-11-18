@@ -2,6 +2,6 @@
   "parent": "farmersdelight:block/template_canvas_wall_sign",
   "textures": {
     "texture": "farmersdelight:item/light_gray_canvas_sign",
-    "particle": "farmersdelight:item/light_gray_canvas_sign"
+    "particle": "minecraft:blocks/planks_spruce"
   }
 }

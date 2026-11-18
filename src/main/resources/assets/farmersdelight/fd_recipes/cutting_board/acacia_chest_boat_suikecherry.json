@@ -1,0 +1,24 @@
+{
+  "conditions": {
+    "items": [
+      "suikecherry:acacia_chest_boat",
+      "minecraft:acacia_boat"
+    ]
+  },
+  "ingredients": [
+    {
+      "item": "suikecherry:acacia_chest_boat"
+    }
+  ],
+  "tool": "ore:toolHoe",
+  "result": [
+    {
+      "item": "minecraft:acacia_boat",
+      "count": 1
+    },
+    {
+      "item": "minecraft:chest",
+      "count": 1
+    }
+  ]
+}

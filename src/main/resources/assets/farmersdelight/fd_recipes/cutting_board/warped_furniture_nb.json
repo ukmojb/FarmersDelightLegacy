@@ -1,0 +1,24 @@
+{
+  "conditions": {
+    "items": [
+      "nb:warped_planks"
+    ],
+    "items_absent": [
+      "farmers_future_delight:warped_planks"
+    ]
+  },
+  "ingredients": [
+    "ore:fdFurniturewarped"
+  ],
+  "tool": [
+    "ore:toolAxe",
+    { "action": "axe_dig" }
+  ],
+  "result": [
+    {
+      "item": "nb:warped_planks",
+      "count": 1,
+      "chance": 0.75
+    }
+  ]
+}

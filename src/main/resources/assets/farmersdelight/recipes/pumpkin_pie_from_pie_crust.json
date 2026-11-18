@@ -1,4 +1,4 @@
-﻿{
+{
   "type": "minecraft:crafting_shaped",
   "group": "fd_pumpkin_pie",
   "pattern": [
@@ -14,7 +14,8 @@
       "item": "farmersdelight:pumpkin_slice"
     },
     "e": {
-      "item": "minecraft:egg"
+      "type": "forge:ore_dict",
+      "ore": "listAllEgg"
     },
     "s": {
       "item": "minecraft:sugar"

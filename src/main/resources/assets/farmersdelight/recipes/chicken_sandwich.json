@@ -2,17 +2,20 @@
   "type": "minecraft:crafting_shapeless",
   "ingredients": [
     {
-      "item": "minecraft:bread"
-    },
-    {
-      "item": "minecraft:cooked_chicken"
+      "type": "forge:ore_dict",
+      "ore": "foodBread"
     },
     {
       "type": "forge:ore_dict",
-      "ore": "listAllveggie"
+      "ore": "listAllchickencooked"
     },
     {
-      "item": "minecraft:carrot"
+      "type": "forge:ore_dict",
+      "ore": "foodLeafyGreen"
+    },
+    {
+      "type": "forge:ore_dict",
+      "ore": "cropCarrot"
     }
   ],
   "result": {

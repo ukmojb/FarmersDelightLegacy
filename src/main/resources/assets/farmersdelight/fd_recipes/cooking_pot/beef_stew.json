@@ -1,11 +1,11 @@
 {
   "ingredients": [
     "ore:listAllbeefraw",
-    "minecraft:carrot",
-    "minecraft:potato"
+    "ore:cropCarrot",
+    "ore:cropPotato"
   ],
   "cookingtime": 200,
-  "experience": 1.0,
+  "experience": 1,
   "result": {
     "item": "farmersdelight:beef_stew",
     "count": 1

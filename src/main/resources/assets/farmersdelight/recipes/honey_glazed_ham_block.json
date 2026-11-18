@@ -3,31 +3,39 @@
   "category": "misc",
   "conditions": [
     {
-      "type": "forge:not",
-      "value": {
-        "type": "forge:mod_loaded",
-        "modid": "futuremc"
-      }
+      "type": "farmersdelight:ingredients_available",
+      "ores": [
+        "foodHoney",
+        "listAllberry"
+      ],
+      "items": [
+        "farmersdelight:honey_glazed_ham_block"
+      ]
     }
   ],
   "ingredients": [
     {
-      "item": "minecraft:apple"
+      "type": "forge:ore_dict",
+      "ore": "listAllberry"
     },
     {
-      "item": "minecraft:sugar"
+      "type": "forge:ore_dict",
+      "ore": "foodHoney"
     },
     {
-      "item": "minecraft:apple"
+      "type": "forge:ore_dict",
+      "ore": "listAllberry"
     },
     {
-      "item": "minecraft:apple"
+      "type": "forge:ore_dict",
+      "ore": "listAllberry"
     },
     {
       "item": "farmersdelight:smoked_ham"
     },
     {
-      "item": "minecraft:apple"
+      "type": "forge:ore_dict",
+      "ore": "listAllberry"
     },
     {
       "item": "farmersdelight:cooked_rice"

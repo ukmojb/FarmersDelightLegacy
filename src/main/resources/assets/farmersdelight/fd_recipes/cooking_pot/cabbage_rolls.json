@@ -1,7 +1,12 @@
 {
   "ingredients": [
     "ore:cropCabbage",
-    "ore:cabbageRoolIngredients"
+    [
+      "ore:listAllmeatraw",
+      "ore:fdSafeRawFish",
+      "ore:listAllveggie",
+      "ore:listAllmushroom"
+    ]
   ],
   "cookingtime": 100,
   "experience": 0.35,

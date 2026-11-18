@@ -3,8 +3,11 @@ package com.wdcftgg.farmersdelightlegacy.common.world;
 import com.wdcftgg.farmersdelightlegacy.common.Configuration;
 import com.wdcftgg.farmersdelightlegacy.common.block.BlockMushroomColony;
 import com.wdcftgg.farmersdelightlegacy.common.block.BlockWildRice;
+import com.wdcftgg.farmersdelightlegacy.common.compat.FluidloggingCompat;
 import com.wdcftgg.farmersdelightlegacy.common.compat.fluidlogged.BlockFluidloggedWildRice;
+import com.wdcftgg.farmersdelightlegacy.common.compat.VillageNamesVillageCompat;
 import com.wdcftgg.farmersdelightlegacy.common.registry.ModBlocks;
+import com.wdcftgg.farmersdelightlegacy.common.registry.BlockCategories;
 import net.minecraft.block.*;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.init.Blocks;
@@ -19,7 +22,6 @@ import net.minecraftforge.common.BiomeDictionary;
 import net.minecraftforge.fml.common.IWorldGenerator;
 import net.minecraftforge.fml.common.Loader;
 
-import java.lang.reflect.Method;
 import java.util.*;
 
 public class WildCropWorldGenerator implements IWorldGenerator {
@@ -43,8 +45,11 @@ public class WildCropWorldGenerator implements IWorldGenerator {
         }
         generateMushroomColonies(world, random, chunkX, chunkZ, biome, true);
         generateMushroomColonies(world, random, chunkX, chunkZ, biome, false);
-        generateVillageFarmCrops(world, random, chunkX, chunkZ, chunkGenerator);
-        generateVillageNamesFarmCrops(world, random, chunkX, chunkZ);
+        if (Loader.isModLoaded("villagenames")) {
+            VillageNamesVillageCompat.replaceVillageFarmCrops(world, random, chunkX, chunkZ);
+        } else {
+            generateVillageFarmCrops(world, random, chunkX, chunkZ, chunkGenerator);
+        }
     }
 
     private void generateVillageFarmCrops(World world, Random random, int chunkX, int chunkZ, IChunkGenerator chunkGenerator) {
@@ -59,18 +64,6 @@ public class WildCropWorldGenerator implements IWorldGenerator {
             for (int localZ = 0; localZ < 16; localZ++) {
                 replaceVillageFarmColumn(world, startX + localX, startZ + localZ, chunkGenerator, visitedPositions);
             }
-        }
-    }
-
-    private void generateVillageNamesFarmCrops(World world, Random random, int chunkX, int chunkZ) {
-        if (!Configuration.generateVillageFarmFDCrops || !Loader.isModLoaded("villagenames")) {
-            return;
-        }
-        try {
-            Class<?> compatClass = Class.forName("com.wdcftgg.farmersdelightlegacy.common.compat.VillageNamesVillageCompat");
-            Method method = compatClass.getMethod("replaceVillageFarmCrops", World.class, Random.class, int.class, int.class);
-            method.invoke(null, world, random, chunkX, chunkZ);
-        } catch (ReflectiveOperationException | LinkageError ignored) {
         }
     }
 
@@ -92,8 +85,7 @@ public class WildCropWorldGenerator implements IWorldGenerator {
                 continue;
             }
 
-            int replacementChoice = getVillageFarmReplacementChoice(world, cropBlockPositions);
-            replaceVillageFarmCropBlock(world, cropBlockPositions, replacementChoice);
+            VillageCropRules.replace(world, cropBlockPositions);
         }
     }
 
@@ -129,15 +121,6 @@ public class WildCropWorldGenerator implements IWorldGenerator {
         return cropBlockPositions;
     }
 
-    private void replaceVillageFarmCropBlock(World world, List<BlockPos> cropBlockPositions, int replacementChoice) {
-        for (BlockPos cropPos : cropBlockPositions) {
-            IBlockState cropState = world.getBlockState(cropPos);
-            IBlockState replacementState = getVillageFarmReplacement(replacementChoice, cropState);
-            if (replacementState != null && canVillageReplacementStay(world, cropPos, replacementState)) {
-                world.setBlockState(cropPos, replacementState, 2);
-            }
-        }
-    }
 
     private boolean isVillageFarmCrop(IBlockState state) {
         Block block = state.getBlock();
@@ -163,66 +146,6 @@ public class WildCropWorldGenerator implements IWorldGenerator {
         return farmCropCount >= 4;
     }
 
-    private int getVillageFarmReplacementChoice(World world, List<BlockPos> cropBlockPositions) {
-        BlockPos anchorPos = cropBlockPositions.get(0);
-        for (BlockPos cropPos : cropBlockPositions) {
-            if (cropPos.getX() < anchorPos.getX()
-                    || cropPos.getX() == anchorPos.getX() && cropPos.getZ() < anchorPos.getZ()
-                    || cropPos.getX() == anchorPos.getX() && cropPos.getZ() == anchorPos.getZ() && cropPos.getY() < anchorPos.getY()) {
-                anchorPos = cropPos;
-            }
-        }
-
-        long blockSeed = world.getSeed();
-        blockSeed ^= anchorPos.getX() * 341873128712L;
-        blockSeed ^= anchorPos.getZ() * 132897987541L;
-        blockSeed ^= anchorPos.getY() * 42317861L;
-        return (int) Math.floorMod(blockSeed, 7L);
-    }
-
-    private IBlockState getVillageFarmReplacement(int choice, IBlockState sourceState) {
-        int sourceAge = getVillageCropAge(sourceState);
-        if (choice == 0) {
-            return getCropState(Blocks.WHEAT, sourceAge);
-        }
-        if (choice == 1) {
-            return getCropState(Blocks.CARROTS, sourceAge);
-        }
-        if (choice == 2) {
-            return getCropState(Blocks.POTATOES, sourceAge);
-        }
-        if (choice == 3) {
-            return getCropState(Blocks.BEETROOTS, sourceAge);
-        }
-        if (choice == 4) {
-            return getCropState(ModBlocks.CABBAGES, sourceAge);
-        }
-        if (choice == 5) {
-            return getCropState(ModBlocks.ONIONS, sourceAge);
-        }
-        return getCropState(ModBlocks.BUDDING_TOMATOES, sourceAge);
-    }
-
-    private IBlockState getCropState(Block cropBlock, int sourceAge) {
-        BlockCrops crop = (BlockCrops) cropBlock;
-        return crop.withAge(Math.min(sourceAge, crop.getMaxAge()));
-    }
-
-    private boolean canVillageReplacementStay(World world, BlockPos cropPos, IBlockState replacementState) {
-        Block block = replacementState.getBlock();
-        if (block instanceof BlockBush) {
-            return ((BlockBush) block).canBlockStay(world, cropPos, replacementState);
-        }
-        return block.canPlaceBlockAt(world, cropPos);
-    }
-
-    private int getVillageCropAge(IBlockState sourceState) {
-        Block block = sourceState.getBlock();
-        if (block instanceof BlockCrops) {
-            return block.getMetaFromState(sourceState) & 7;
-        }
-        return 0;
-    }
 
     private void generateWildCabbages(World world, Random random, int chunkX, int chunkZ, Biome biome, ResourceLocation biomeId, int dimension) {
         if (!canGenerateWildCrop(Configuration.wildCabbagesGeneration, biomeId, dimension)) {
@@ -329,8 +252,9 @@ public class WildCropWorldGenerator implements IWorldGenerator {
             return;
         }
 
-        if (Loader.isModLoaded("fluidlogged_api")) {
-            generateWildRiceWithFluidlogged(world, random, chunkX, chunkZ);
+        boolean ffd = FluidloggingCompat.usesFutureDelightWaterlogging(ModBlocks.WILD_RICE.getDefaultState());
+        if (ffd || Loader.isModLoaded("fluidlogged_api")) {
+            generateWildRiceInWater(world, random, chunkX, chunkZ, ffd);
             return;
         }
 
@@ -342,7 +266,7 @@ public class WildCropWorldGenerator implements IWorldGenerator {
     }
 
 
-    private void generateWildRiceWithFluidlogged(World world, Random random, int chunkX, int chunkZ) {
+    private void generateWildRiceInWater(World world, Random random, int chunkX, int chunkZ, boolean ffd) {
         BlockPos origin = randomSurfaceOrigin(world, random, chunkX, chunkZ);
         for (int i = 0; i < 96; i++) {
             BlockPos pos = origin.add(randomOffset(random, 8), randomOffset(random, 4), randomOffset(random, 8));
@@ -353,8 +277,10 @@ public class WildCropWorldGenerator implements IWorldGenerator {
             if (!ModBlocks.WILD_RICE.canPlaceBlockAt(world, pos)) {
                 continue;
             }
-            if (!BlockFluidloggedWildRice.placeInWorld(world, pos)) {
-                continue;
+            if (ffd) {
+                FluidloggingCompat.placeBlock(world, pos, ModBlocks.WILD_RICE.getDefaultState(), 2);
+            } else {
+                BlockFluidloggedWildRice.placeInWorld(world, pos);
             }
         }
     }
@@ -366,7 +292,7 @@ public class WildCropWorldGenerator implements IWorldGenerator {
             if (!world.isAirBlock(pos) || !world.isAirBlock(pos.up())) {
                 continue;
             }
-            if (!hasAdjacentWater(world, pos.down()) || !ModBlocks.WILD_RICE.canPlaceBlockAt(world, pos)) {
+            if (!FluidloggingCompat.hasAdjacentWater(world, pos.down()) || !ModBlocks.WILD_RICE.canPlaceBlockAt(world, pos)) {
                 continue;
             }
 
@@ -445,15 +371,6 @@ public class WildCropWorldGenerator implements IWorldGenerator {
             BlockPos pos = origin.add(randomOffset(random, spread), randomOffset(random, ySpread + 1), randomOffset(random, spread));
             secondaryPlacer.place(world, random, pos);
         }
-    }
-
-    private boolean hasAdjacentWater(World world, BlockPos soilPos) {
-        for (EnumFacing facing : EnumFacing.Plane.HORIZONTAL) {
-            if (world.getBlockState(soilPos.offset(facing)).getMaterial() == net.minecraft.block.material.Material.WATER) {
-                return true;
-            }
-        }
-        return false;
     }
 
     private BlockPos randomSurfaceOrigin(World world, Random random, int chunkX, int chunkZ) {
@@ -553,23 +470,15 @@ public class WildCropWorldGenerator implements IWorldGenerator {
     }
 
     private boolean isDirtLike(IBlockState state) {
-        Block block = state.getBlock();
-        return block == Blocks.DIRT || block == Blocks.GRASS;
+        return BlockCategories.contains("fdDirt", state);
     }
 
     private boolean isSandLike(IBlockState state) {
-        return state.getBlock() == Blocks.SAND;
+        return BlockCategories.contains("fdSand", state);
     }
 
     private boolean isTomatoSoil(IBlockState state) {
-        if (isDirtLike(state)) {
-            return true;
-        }
-        if (state.getBlock() == Blocks.SAND) {
-            BlockSand.EnumType type = state.getValue(BlockSand.VARIANT);
-            return type == BlockSand.EnumType.SAND || type == BlockSand.EnumType.RED_SAND;
-        }
-        return false;
+        return BlockCategories.contains("fdTerrain", state);
     }
 
     private interface PatchPlacer {

@@ -246,9 +246,7 @@ item.farmersdelight.vegetable_noodles.name=Fideos de verduras
 item.farmersdelight.vegetable_soup.name=Sopa de verduras
 item.farmersdelight.wheat_dough.name=Masa de trigo
 itemGroup.farmersdelight=Farmer's Delight
-
 item.farmersdelight.pumpkin_pie_slice.name=Rebanada de pastel de calabaza
-
 farmersdelight.advancement.craft_knife.desc=Crea un Cuchillo para obtener más bienes de las plantas y los animales
 farmersdelight.advancement.craft_knife=Caza y recolección
 farmersdelight.advancement.eat_comfort_food.desc=Las sopas y los guisos son estupendos para alejar el frío y las enfermedades.
@@ -306,3 +304,15 @@ farmersdelight.subtitles.cutting_board.remove_item=Item removed from board
 farmersdelight.subtitles.cutting_board.carve_tool=Tool carved on board
 farmersdelight.subtitles.food.take_portion=Portion served
 farmersdelight.subtitles.food.slice=Food sliced
+tile.farmersdelight.wooden_basket.name=Cesta
+subtitles.farmersdelight.block.cooking_pot.boil=Burbujas de olla hirviendo
+subtitles.farmersdelight.block.cutting_board.knife_cut=Cortes de cuchillo
+subtitles.farmersdelight.block.stove.crackle=Crujidos de la parrilla
+subtitles.farmersdelight.block.skillet.sizzle=Sartén chispando
+subtitles.farmersdelight.block.skillet.add_food=Sartén siseando
+subtitles.farmersdelight.block.cabinet.open=Despensa abriéndose
+subtitles.farmersdelight.block.cabinet.close=Despensa cerrándose
+subtitles.farmersdelight.block.tomatoes.pick_tomatoes=Tomate estrellándose
+subtitles.farmersdelight.entity.rotten_tomato.throw=Tomate podrido arrojado
+subtitles.farmersdelight.entity.rotten_tomato.hit=Tomate podrido estrellándose
+entity.rotten_tomato.name=Tomate podrido

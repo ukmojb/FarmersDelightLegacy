@@ -1,10 +1,11 @@
 package com.wdcftgg.farmersdelightlegacy.common.item;
 
 import com.wdcftgg.farmersdelightlegacy.common.Configuration;
+import com.wdcftgg.farmersdelightlegacy.common.network.PacketStarParticles;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.entity.EntityList;
 import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.passive.*;
+import net.minecraft.entity.passive.AbstractHorse;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.MobEffects;
 import net.minecraft.init.SoundEvents;
@@ -13,7 +14,6 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.potion.Potion;
 import net.minecraft.potion.PotionEffect;
 import net.minecraft.util.EnumHand;
-import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.text.TextComponentTranslation;
@@ -31,51 +31,28 @@ public class ItemHorseFeed extends Item {
             new PotionEffect(MobEffects.JUMP_BOOST, 6000, 0)
     );
 
-    public ItemHorseFeed() {
-    }
-
     @Override
     public boolean itemInteractionForEntity(ItemStack stack, EntityPlayer playerIn, EntityLivingBase target, EnumHand hand) {
-        if (!canFeedHorseFeedToTarget(target)) {
+        ResourceLocation entityId = EntityList.getKey(target);
+        if (stack.isEmpty() || playerIn.isSpectator() || playerIn.getCooldownTracker().hasCooldown(this)
+                || entityId == null || !Arrays.asList(Configuration.horseFeedUsers).contains(entityId.toString())
+                || !target.isEntityAlive() || target instanceof AbstractHorse && !((AbstractHorse) target).isTame()) {
             return false;
         }
-
-        AbstractHorse horse = (AbstractHorse) target;
-        if (!horse.isEntityAlive()) {
-            return false;
+        if (target.world.isRemote) {
+            return true;
         }
-
-        horse.setHealth(horse.getMaxHealth());
+        target.setHealth(target.getMaxHealth());
         for (PotionEffect effect : FEEDING_EFFECTS) {
-            horse.addPotionEffect(new PotionEffect(effect));
+            target.addPotionEffect(new PotionEffect(effect));
         }
-
         if (!playerIn.capabilities.isCreativeMode) {
             stack.shrink(1);
         }
-
-        World world = horse.world;
-        world.playSound(null, horse.posX, horse.posY, horse.posZ, SoundEvents.ENTITY_HORSE_EAT, SoundCategory.PLAYERS, 0.8F, 0.8F);
-        for (int i = 0; i < 5; ++i) {
-            world.spawnParticle(EnumParticleTypes.VILLAGER_HAPPY,
-                    horse.posX + (world.rand.nextDouble() - 0.5D),
-                    horse.posY + 0.5D + world.rand.nextDouble() * 0.5D,
-                    horse.posZ + (world.rand.nextDouble() - 0.5D),
-                    0.0D,
-                    0.02D,
-                    0.0D);
-        }
-
+        target.world.playSound(null, target.posX, target.posY, target.posZ,
+                SoundEvents.ENTITY_HORSE_EAT, SoundCategory.PLAYERS, 0.8F, 0.8F);
+        PacketStarParticles.send(target);
         return true;
-    }
-
-    private static boolean canFeedHorseFeedToTarget(EntityLivingBase target) {
-        if (target instanceof EntityHorse || target instanceof EntityDonkey
-                || target instanceof EntityMule || target instanceof EntityLlama) {
-            return true;
-        }
-        ResourceLocation entityId = EntityList.getKey(target);
-        return entityId != null && "trader_llama".equals(entityId.getPath()) && target instanceof AbstractHorse;
     }
 
     @Override
@@ -88,6 +65,9 @@ public class ItemHorseFeed extends Item {
         for (PotionEffect effect : FEEDING_EFFECTS) {
             String duration = Potion.getPotionDurationString(effect, 1.0F);
             String effectName = new TextComponentTranslation(effect.getEffectName()).getFormattedText();
+            if (effect.getAmplifier() > 0) {
+                effectName += " " + new TextComponentTranslation("potion.potency." + effect.getAmplifier()).getFormattedText();
+            }
             TextComponentTranslation effectTooltip = new TextComponentTranslation("farmersdelight.tooltip.food.effect",
                     effectName, duration);
             effectTooltip.getStyle().setColor(TextFormatting.BLUE);

@@ -1,5 +1,8 @@
 package com.wdcftgg.farmersdelightlegacy.common.block;
 
+import com.wdcftgg.farmersdelightlegacy.common.registry.BlockCategories;
+import com.wdcftgg.farmersdelightlegacy.common.compat.FluidloggingCompat;
+
 import com.wdcftgg.farmersdelightlegacy.FarmersDelightLegacy;
 import net.minecraft.block.*;
 import net.minecraft.block.material.Material;
@@ -13,7 +16,6 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.stats.StatList;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.EnumFacing;
 import net.minecraft.util.NonNullList;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.AxisAlignedBB;
@@ -44,13 +46,13 @@ public class BlockWildRice extends BlockBush implements IGrowable {
 
     @Override
     protected boolean canSustainBush(IBlockState state) {
-        Block block = state.getBlock();
-        return block == Blocks.GRASS || block == Blocks.DIRT || block == Blocks.SAND || block == Blocks.FARMLAND;
+        return BlockCategories.contains("fdTerrain", state);
     }
 
     @Override
     public boolean canPlaceBlockAt(World worldIn, BlockPos pos) {
-        return super.canPlaceBlockAt(worldIn, pos)
+        return worldIn.getBlockState(pos).getBlock().isReplaceable(worldIn, pos)
+                && canSustainBush(worldIn.getBlockState(pos.down()))
                 && worldIn.isAirBlock(pos.up())
                 && this.hasNearbyWater(worldIn, pos.down());
     }
@@ -77,16 +79,21 @@ public class BlockWildRice extends BlockBush implements IGrowable {
 
     @Override
     public void neighborChanged(IBlockState state, World worldIn, BlockPos pos, Block blockIn, BlockPos fromPos) {
+        checkAndDropBlock(worldIn, pos, state);
+    }
+
+    @Override
+    protected void checkAndDropBlock(World worldIn, BlockPos pos, IBlockState state) {
         if (!this.canBlockStay(worldIn, pos, state)) {
             if (!worldIn.isRemote) {
                 this.spawnUpstreamDrop(worldIn, pos, state, ItemStack.EMPTY);
             }
-            worldIn.setBlockToAir(pos);
+            FluidloggingCompat.removeBlock(worldIn, pos);
             if (state.getValue(HALF) == BlockDoublePlant.EnumBlockHalf.LOWER && worldIn.getBlockState(pos.up()).getBlock() == this) {
-                worldIn.setBlockToAir(pos.up());
+                FluidloggingCompat.removeBlock(worldIn, pos.up());
             }
             if (state.getValue(HALF) == BlockDoublePlant.EnumBlockHalf.UPPER && worldIn.getBlockState(pos.down()).getBlock() == this) {
-                worldIn.setBlockToAir(pos.down());
+                FluidloggingCompat.removeBlock(worldIn, pos.down());
             }
         }
     }
@@ -180,12 +187,7 @@ public class BlockWildRice extends BlockBush implements IGrowable {
     }
 
     private boolean hasNearbyWater(World worldIn, BlockPos soilPos) {
-        for (EnumFacing facing : EnumFacing.Plane.HORIZONTAL) {
-            if (worldIn.getBlockState(soilPos.offset(facing)).getMaterial() == Material.WATER) {
-                return true;
-            }
-        }
-        return worldIn.getBlockState(soilPos).getMaterial() == Material.WATER;
+        return FluidloggingCompat.hasAdjacentWater(worldIn, soilPos) || FluidloggingCompat.containsWater(worldIn, soilPos);
     }
 
     private boolean hasCounterpart(IBlockAccess world, BlockPos pos, IBlockState state) {

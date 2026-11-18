@@ -101,6 +101,7 @@ final class CraftTweakerCompatHelper {
 
     static List<CookingPotRecipe.IngredientEntry> toCookingPotIngredients(IIngredient[] ingredients) {
         if (ingredients == null || ingredients.length == 0) {
+            crafttweaker.CraftTweakerAPI.logError("Cooking recipe requires 1 to 6 ingredients");
             return null;
         }
 
@@ -108,11 +109,38 @@ final class CraftTweakerCompatHelper {
         for (IIngredient ingredient : ingredients) {
             CookingPotRecipe.IngredientEntry ingredientEntry = toCookingPotIngredient(ingredient);
             if (ingredientEntry == null) {
+                crafttweaker.CraftTweakerAPI.logError("Cooking recipe contains a null ingredient");
                 return null;
             }
             ingredientEntries.add(ingredientEntry);
         }
         return ingredientEntries;
+    }
+
+    static com.wdcftgg.farmersdelightlegacy.common.recipe.manager.CuttingBoardRecipeManager.IngredientMatcher
+            toCuttingIngredients(IIngredient[] ingredients, boolean tool) {
+        if (tool && ingredients == null) {
+            ingredients = new IIngredient[]{ZenToolIngredient.ore("toolKnife")};
+        }
+        if (tool && ingredients.length == 0) {
+            return com.wdcftgg.farmersdelightlegacy.common.recipe.manager.CuttingBoardRecipeManager.IngredientMatcher.noTool();
+        }
+        if (ingredients == null || ingredients.length == 0) {
+            crafttweaker.CraftTweakerAPI.logError("Cutting recipe requires an input ingredient");
+            return null;
+        }
+        List<CookingPotRecipe.IngredientEntry> entries = new ArrayList<>();
+        for (IIngredient ingredient : ingredients) {
+            if (ingredient == null) {
+                crafttweaker.CraftTweakerAPI.logError("Cutting recipe contains a null ingredient");
+                return null;
+            }
+            if (tool && ingredient instanceof IOreDictEntry) {
+                ingredient = ZenToolIngredient.ore(((IOreDictEntry) ingredient).getName());
+            }
+            entries.add(toCookingPotIngredient(ingredient));
+        }
+        return com.wdcftgg.farmersdelightlegacy.common.recipe.manager.CuttingBoardRecipeManager.IngredientMatcher.fromIngredients(entries);
     }
 
     static List<HuntingDropOutput> toDropOutputs(IItemStack[] outputStacks, float[] chances, float[] bonuses) {
@@ -203,38 +231,11 @@ final class CraftTweakerCompatHelper {
             return null;
         }
 
-        String token = toStrictIngredientToken(ingredient);
-        if (token != null && !token.isEmpty() && !ingredient.hasNewTransformers() && !ingredient.hasTransformers()) {
-            return createCookingPotTokenIngredient(token);
-        }
-
         List<ItemStack> displayStacks = getIngredientDisplayStacks(ingredient);
-        if (displayStacks.isEmpty()) {
-            return null;
-        }
         return CookingPotRecipe.IngredientEntry.forCustom(
-                stack -> ingredient.matches(CraftTweakerMC.getIItemStack(stack)),
+                new ScriptIngredientMatcher(ingredient),
                 ingredient.hasNewTransformers() ? stack -> getIngredientTransformRemainder(ingredient, stack) : null,
                 displayStacks);
-    }
-
-    private static CookingPotRecipe.IngredientEntry createCookingPotTokenIngredient(String token) {
-        if (token.startsWith("ore:")) {
-            String oreName = token.substring(4);
-            return oreName.isEmpty() ? null : CookingPotRecipe.IngredientEntry.forOreDict(oreName);
-        }
-
-        ParsedItemToken parsedItemToken = parseItemToken(token);
-        if (parsedItemToken.itemId == null || parsedItemToken.itemId.isEmpty()) {
-            return null;
-        }
-
-        Item item = itemOf(parsedItemToken.itemId);
-        if (item == null) {
-            return null;
-        }
-        int metadata = parsedItemToken.hasMetadata ? parsedItemToken.metadata : OreDictionary.WILDCARD_VALUE;
-        return CookingPotRecipe.IngredientEntry.forItem(item, metadata);
     }
 
     private static List<ItemStack> getIngredientDisplayStacks(IIngredient ingredient) {
@@ -282,7 +283,8 @@ final class CraftTweakerCompatHelper {
         try {
             ResourceLocation blockLocation = new ResourceLocation(blockId);
             return ForgeRegistries.BLOCKS.containsKey(blockLocation) ? ForgeRegistries.BLOCKS.getValue(blockLocation) : null;
-        } catch (IllegalArgumentException ignored) {
+        } catch (IllegalArgumentException exception) {
+            crafttweaker.CraftTweakerAPI.logError("Invalid block ID: " + blockId, exception);
             return null;
         }
     }
@@ -309,8 +311,9 @@ final class CraftTweakerCompatHelper {
 
         try {
             return new ParsedItemToken(itemId.substring(0, separatorIndex), Math.max(0, Integer.parseInt(metadataToken)), true);
-        } catch (NumberFormatException ignored) {
-            return new ParsedItemToken(itemId, 0, false);
+        } catch (NumberFormatException exception) {
+            crafttweaker.CraftTweakerAPI.logError("Invalid item metadata: " + itemId, exception);
+            return new ParsedItemToken(null, 0, false);
         }
     }
 

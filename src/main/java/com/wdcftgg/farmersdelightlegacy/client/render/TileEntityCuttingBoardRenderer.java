@@ -2,18 +2,23 @@ package com.wdcftgg.farmersdelightlegacy.client.render;
 
 import com.wdcftgg.farmersdelightlegacy.common.block.BlockCuttingBoard;
 import com.wdcftgg.farmersdelightlegacy.common.tile.TileEntityCuttingBoard;
+import com.wdcftgg.farmersdelightlegacy.common.registry.ItemCategories;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.block.model.IBakedModel;
 import net.minecraft.client.renderer.block.model.ItemCameraTransforms;
 import net.minecraft.client.renderer.tileentity.TileEntitySpecialRenderer;
-import net.minecraft.item.ItemBlock;
 import net.minecraft.item.ItemHoe;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemPickaxe;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumFacing;
+import net.minecraft.util.math.MathHelper;
+
+import java.util.Random;
 
 public class TileEntityCuttingBoardRenderer extends TileEntitySpecialRenderer<TileEntityCuttingBoard> {
+    private final Random random = new Random();
 
     @Override
     public void render(TileEntityCuttingBoard te, double x, double y, double z, float partialTicks, int destroyStage, float alpha) {
@@ -28,19 +33,26 @@ public class TileEntityCuttingBoardRenderer extends TileEntitySpecialRenderer<Ti
         }
 
         IBakedModel bakedModel = Minecraft.getMinecraft().getRenderItem().getItemModelWithOverrides(stack, te.getWorld(), null);
-        boolean isBlockItem = stack.getItem() instanceof ItemBlock;
         boolean isGui3d = bakedModel != null && bakedModel.isGui3d();
 
-        GlStateManager.pushMatrix();
-        if (te.isItemCarvingBoard()) {
-            renderCarvedItemPose(x, y, z, facing, stack);
-        } else if (isBlockItem && isGui3d) {
-            renderBlockPose(x, y, z, facing);
-        } else {
-            renderLayingItemPose(x, y, z, facing);
+        random.setSeed(Item.getIdFromItem(stack.getItem()) + stack.getItemDamage());
+        int modelCount = stack.getCount() > 1
+                ? 1 + MathHelper.ceil(stack.getCount() / (float) stack.getMaxStackSize() * 4) : 1;
+        for (int index = 0; index < modelCount; index++) {
+            double offsetX = modelCount == 1 ? 0 : (random.nextFloat() * 2 - 1) * 0.075;
+            double offsetZ = modelCount == 1 ? 0 : (random.nextFloat() * 2 - 1) * 0.075;
+            double offsetY = 0.03 * (index + 1);
+            GlStateManager.pushMatrix();
+            if (te.isItemCarvingBoard()) {
+                renderCarvedItemPose(x, y, z, facing, stack);
+            } else if (isGui3d && !ItemCategories.contains("fdFlatOnCuttingBoard", stack)) {
+                renderBlockPose(x + offsetX, y + offsetY, z + offsetZ, facing);
+            } else {
+                renderLayingItemPose(x + offsetX, y + offsetY, z + offsetZ, facing);
+            }
+            Minecraft.getMinecraft().getRenderItem().renderItem(stack, ItemCameraTransforms.TransformType.FIXED);
+            GlStateManager.popMatrix();
         }
-        Minecraft.getMinecraft().getRenderItem().renderItem(stack, ItemCameraTransforms.TransformType.FIXED);
-        GlStateManager.popMatrix();
     }
 
     private void renderLayingItemPose(double x, double y, double z, EnumFacing facing) {
@@ -63,6 +75,8 @@ public class TileEntityCuttingBoardRenderer extends TileEntitySpecialRenderer<Ti
         float poseAngle;
         if (stack.getItem() instanceof ItemPickaxe || stack.getItem() instanceof ItemHoe) {
             poseAngle = 225.0F;
+        } else if (ItemCategories.contains("fdTrident", stack)) {
+            poseAngle = 135.0F;
         } else {
             poseAngle = 180.0F;
         }

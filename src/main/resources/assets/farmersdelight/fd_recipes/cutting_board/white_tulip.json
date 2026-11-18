@@ -1,6 +1,9 @@
 {
   "ingredients": [
-    "minecraft:white_tulip"
+    {
+      "item": "minecraft:red_flower",
+      "data": 6
+    }
   ],
   "tool": {
     "tag": "forge:tools/knives"

@@ -217,9 +217,7 @@ item.farmersdelight.vegetable_noodles.name=Sebzeli Erişte
 item.farmersdelight.vegetable_soup.name=Sebzeli Çorba
 item.farmersdelight.wheat_dough.name=Buğday Hamuru
 itemGroup.farmersdelight=Çiftçi'nin Keyfi
-
 item.farmersdelight.pumpkin_pie_slice.name=Balkabagi turtasi dilimi
-
 farmersdelight.advancement.craft_knife.desc=Bitki ve hayvanlardan ekstra ürün toplamak için bir Bıçak yapın
 farmersdelight.advancement.craft_knife=Avla ve Topla
 farmersdelight.advancement.eat_comfort_food.desc=Sıcak bir kasedeki yemekler, ne kadar aç olursanız olun, sürekli olarak iyileşmenizi sağlar!
@@ -277,3 +275,15 @@ farmersdelight.subtitles.cutting_board.remove_item=Item removed from board
 farmersdelight.subtitles.cutting_board.carve_tool=Tool carved on board
 farmersdelight.subtitles.food.take_portion=Portion served
 farmersdelight.subtitles.food.slice=Food sliced
+tile.farmersdelight.wooden_basket.name=Sepet
+subtitles.farmersdelight.block.cooking_pot.boil=Tencere kaynatıyor
+subtitles.farmersdelight.block.cutting_board.knife_cut=Bıçak kesti
+subtitles.farmersdelight.block.stove.crackle=Soba çıtırdıyor
+subtitles.farmersdelight.block.skillet.sizzle=Tava cızırdıyor
+subtitles.farmersdelight.block.skillet.add_food=Tava tıslıyor
+subtitles.farmersdelight.block.cabinet.open=Kiler açıldı
+subtitles.farmersdelight.block.cabinet.close=Kiler kapandı
+subtitles.farmersdelight.block.tomatoes.pick_tomatoes=Domates toplandı
+subtitles.farmersdelight.entity.rotten_tomato.throw=Çürük Domates uçuyor
+subtitles.farmersdelight.entity.rotten_tomato.hit=Çürük Domates çarptı
+entity.rotten_tomato.name=Çürük Domates

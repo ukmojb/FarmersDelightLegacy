@@ -10,7 +10,8 @@
       "ore": "listAllmilk"
     },
     "w": {
-      "item": "minecraft:wheat"
+      "type": "forge:ore_dict",
+      "ore": "cropWheat"
     }
   },
   "result": {

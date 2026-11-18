@@ -1,6 +1,12 @@
 {
   "conditions": {
-    "mod_loaded": "nb"
+    "items": [
+      "nb:crimson_stem",
+      "nb:crimson_planks"
+    ],
+    "items_absent": [
+      "farmers_future_delight:stripped_crimson_stem"
+    ]
   },
   "ingredients": [
     {

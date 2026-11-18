@@ -10,8 +10,14 @@ import net.minecraft.network.NetworkManager;
 import net.minecraft.network.play.server.SPacketUpdateTileEntity;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextComponentTranslation;
+import net.minecraft.world.World;
+import net.minecraftforge.common.capabilities.Capability;
+import net.minecraftforge.items.CapabilityItemHandler;
+import net.minecraftforge.items.IItemHandler;
+import net.minecraftforge.items.wrapper.InvWrapper;
 
 import java.util.Collections;
 import java.util.List;
@@ -23,6 +29,7 @@ public class TileEntityCuttingBoard extends TileEntity implements ISidedInventor
 
     private ItemStack storedItem = ItemStack.EMPTY;
     private boolean itemCarvingBoard;
+    private final IItemHandler itemHandler = new InvWrapper(this);
 
     public boolean isEmpty() {
         return this.storedItem.isEmpty();
@@ -33,16 +40,45 @@ public class TileEntityCuttingBoard extends TileEntity implements ISidedInventor
     }
 
     public boolean setStoredItem(ItemStack stack) {
-        if (!this.storedItem.isEmpty() || stack.isEmpty()) {
+        if (!this.storedItem.isEmpty() || stack.isEmpty()
+                || stack.getCount() > Math.min(getInventoryStackLimit(), stack.getMaxStackSize())) {
             return false;
         }
 
-        ItemStack placed = stack.copy();
-        placed.setCount(1);
-        this.storedItem = placed;
+        this.storedItem = stack.copy();
         this.itemCarvingBoard = false;
         markDirty();
         return true;
+    }
+
+    public boolean canAddItem(ItemStack stack) {
+        return !itemCarvingBoard && !stack.isEmpty()
+                && itemHandler.insertItem(INPUT_SLOT, stack, true).getCount() < stack.getCount();
+    }
+
+    public ItemStack addItem(ItemStack stack) {
+        return itemCarvingBoard ? stack.copy() : itemHandler.insertItem(INPUT_SLOT, stack.copy(), false);
+    }
+
+    public int getComparatorSignal() {
+        if (storedItem.isEmpty()) {
+            return 0;
+        }
+        return (int) Math.floor(14.0F * storedItem.getCount()
+                / Math.min(getInventoryStackLimit(), storedItem.getMaxStackSize())) + 1;
+    }
+
+    @Override
+    public boolean hasCapability(Capability<?> capability, EnumFacing facing) {
+        return capability == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY || super.hasCapability(capability, facing);
+    }
+
+    @Override
+    public <T> T getCapability(Capability<T> capability, EnumFacing facing) {
+        if (capability == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY) {
+            return CapabilityItemHandler.ITEM_HANDLER_CAPABILITY.cast(itemHandler);
+        }
+        return super.getCapability(capability, facing);
     }
 
     public boolean carveToolOnBoard(ItemStack stack) {
@@ -108,7 +144,12 @@ public class TileEntityCuttingBoard extends TileEntity implements ISidedInventor
             return ItemStack.EMPTY;
         }
 
-        return removeStoredItem();
+        ItemStack removed = this.storedItem.splitStack(count);
+        if (this.storedItem.isEmpty()) {
+            this.itemCarvingBoard = false;
+        }
+        markDirty();
+        return removed;
     }
 
     @Override
@@ -126,7 +167,7 @@ public class TileEntityCuttingBoard extends TileEntity implements ISidedInventor
             this.storedItem = ItemStack.EMPTY;
         } else {
             this.storedItem = stack.copy();
-            this.storedItem.setCount(1);
+            this.storedItem.setCount(Math.min(stack.getCount(), Math.min(getInventoryStackLimit(), stack.getMaxStackSize())));
         }
         this.itemCarvingBoard = false;
         markDirty();
@@ -134,7 +175,7 @@ public class TileEntityCuttingBoard extends TileEntity implements ISidedInventor
 
     @Override
     public int getInventoryStackLimit() {
-        return 1;
+        return 64;
     }
 
     @Override
@@ -154,9 +195,7 @@ public class TileEntityCuttingBoard extends TileEntity implements ISidedInventor
 
     @Override
     public boolean isItemValidForSlot(int index, ItemStack stack) {
-        return index == INPUT_SLOT
-                && !stack.isEmpty()
-                && !CuttingBoardRecipeManager.isUsedAsRecipeTool(stack);
+        return index == INPUT_SLOT && !stack.isEmpty() && !itemCarvingBoard;
     }
 
     @Override
@@ -204,12 +243,18 @@ public class TileEntityCuttingBoard extends TileEntity implements ISidedInventor
 
     @Override
     public boolean canInsertItem(int index, ItemStack itemStackIn, EnumFacing direction) {
-        return this.storedItem.isEmpty() && this.isItemValidForSlot(index, itemStackIn);
+        return this.isItemValidForSlot(index, itemStackIn) && canAddItem(itemStackIn);
     }
 
     @Override
     public boolean canExtractItem(int index, ItemStack stack, EnumFacing direction) {
-        return false;
+        return index == INPUT_SLOT;
+    }
+
+    @Override
+    public boolean shouldRefresh(World world, BlockPos pos,
+                                 IBlockState oldState, IBlockState newState) {
+        return oldState.getBlock() != newState.getBlock();
     }
 
     @Override
@@ -262,6 +307,7 @@ public class TileEntityCuttingBoard extends TileEntity implements ISidedInventor
         if (this.world != null) {
             IBlockState state = this.world.getBlockState(this.pos);
             this.world.notifyBlockUpdate(this.pos, state, state, 3);
+            this.world.updateComparatorOutputLevel(this.pos, state.getBlock());
         }
     }
 }

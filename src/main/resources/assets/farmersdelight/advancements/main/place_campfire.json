@@ -8,7 +8,11 @@
       "translate": "farmersdelight.advancement.place_campfire"
     },
     "description": {
-      "translate": "farmersdelight.advancement.place_campfire.desc"
+      "translate": "farmersdelight.advancement.place_campfire.desc",
+      "extra": [
+        { "text": "\n" },
+        { "translate": "farmersdelight.advancement.place_campfire.legacy" }
+      ]
     },
     "frame": "task",
     "show_toast": true,
@@ -17,10 +21,7 @@
   },
   "criteria": {
     "stove": {
-      "trigger": "minecraft:placed_block",
-      "conditions": {
-        "block": "farmersdelight:stove"
-      }
+      "trigger": "farmersdelight:place_campfire"
     }
   }
 }

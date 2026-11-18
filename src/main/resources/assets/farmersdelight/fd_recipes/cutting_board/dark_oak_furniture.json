@@ -1,0 +1,17 @@
+{
+  "ingredients": [
+    "ore:fdFurnituredark_oak"
+  ],
+  "tool": [
+    "ore:toolAxe",
+    { "action": "axe_dig" }
+  ],
+  "result": [
+    {
+      "item": "minecraft:planks",
+      "count": 1,
+      "data": 5,
+      "chance": 0.75
+    }
+  ]
+}

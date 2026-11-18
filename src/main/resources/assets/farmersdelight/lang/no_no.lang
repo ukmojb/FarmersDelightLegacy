@@ -198,9 +198,7 @@ item.farmersdelight.vegetable_noodles.name=Grønnsaksnuddler
 item.farmersdelight.vegetable_soup.name=Grønnsakssuppe
 item.farmersdelight.wheat_dough.name=Hvetedeig
 itemGroup.farmersdelight=Farmer's Delight
-
 item.farmersdelight.pumpkin_pie_slice.name=Skive gresskarpai
-
 farmersdelight.advancement.craft_knife.desc=Lag en kniv for å samle flere gjenstander fra planter og dyr
 farmersdelight.advancement.craft_knife=Jakt og Sanking
 farmersdelight.advancement.drink_hot_cocoa.desc=Fjern en skadelig effekt ved å drikke en flaske Varm Kakao.
@@ -254,3 +252,10 @@ farmersdelight.subtitles.cutting_board.remove_item=Item removed from board
 farmersdelight.subtitles.cutting_board.carve_tool=Tool carved on board
 farmersdelight.subtitles.food.take_portion=Portion served
 farmersdelight.subtitles.food.slice=Food sliced
+tile.farmersdelight.wooden_basket.name=Kurv
+subtitles.farmersdelight.block.cooking_pot.boil=Kjele koker
+subtitles.farmersdelight.block.cutting_board.knife_cut=Kniv kutter
+subtitles.farmersdelight.block.stove.crackle=Komfyr knitrer
+subtitles.farmersdelight.block.skillet.sizzle=Stekepanne suser
+subtitles.farmersdelight.block.skillet.add_food=Skillet freser
+subtitles.farmersdelight.block.tomatoes.pick_tomatoes=Tomat plukkes

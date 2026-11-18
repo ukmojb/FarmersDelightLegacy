@@ -1,0 +1,21 @@
+{
+  "conditions": {
+    "items": [
+      "suikecherry:cherry_planks"
+    ]
+  },
+  "ingredients": [
+    "ore:fdFurniturecherry"
+  ],
+  "tool": [
+    "ore:toolAxe",
+    { "action": "axe_dig" }
+  ],
+  "result": [
+    {
+      "item": "suikecherry:cherry_planks",
+      "count": 1,
+      "chance": 0.75
+    }
+  ]
+}

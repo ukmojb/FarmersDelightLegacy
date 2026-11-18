@@ -1,6 +1,7 @@
 package com.wdcftgg.farmersdelightlegacy.common.block;
 
 import com.wdcftgg.farmersdelightlegacy.common.registry.ModItems;
+import com.wdcftgg.farmersdelightlegacy.common.compat.SereneSeasonsCompat;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockCrops;
 import net.minecraft.block.state.IBlockState;
@@ -10,6 +11,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 import net.minecraftforge.common.EnumPlantType;
+import net.minecraftforge.fml.common.Loader;
 
 import java.util.Random;
 
@@ -54,7 +56,25 @@ public class BlockOnion extends BlockCrops {
             worldIn.destroyBlock(pos, true);
             return;
         }
-        super.updateTick(worldIn, pos, state, rand);
+        if (isGrowingSeason(worldIn, pos)) {
+            super.updateTick(worldIn, pos, state, rand);
+        }
+    }
+
+    @Override
+    public boolean canGrow(World world, BlockPos pos, IBlockState state, boolean isClient) {
+        return super.canGrow(world, pos, state, isClient) && isGrowingSeason(world, pos);
+    }
+
+    @Override
+    public void grow(World world, BlockPos pos, IBlockState state) {
+        if (isGrowingSeason(world, pos)) {
+            super.grow(world, pos, state);
+        }
+    }
+
+    private boolean isGrowingSeason(World world, BlockPos pos) {
+        return !Loader.isModLoaded("sereneseasons") || SereneSeasonsCompat.canGrowOnion(world, pos);
     }
 
     @Override

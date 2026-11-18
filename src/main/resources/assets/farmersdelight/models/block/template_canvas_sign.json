@@ -1,7 +1,7 @@
 {
   "parent": "block/block",
   "textures": {
-    "particle": "#texture",
+    "particle": "minecraft:blocks/planks_spruce",
     "texture": "farmersdelight:item/canvas_sign"
   }
 }

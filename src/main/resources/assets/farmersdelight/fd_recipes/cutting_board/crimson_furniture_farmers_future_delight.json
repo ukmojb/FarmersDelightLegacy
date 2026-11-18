@@ -1,0 +1,21 @@
+{
+  "conditions": {
+    "items": [
+      "farmers_future_delight:crimson_planks"
+    ]
+  },
+  "ingredients": [
+    "ore:fdFurniturecrimson"
+  ],
+  "tool": [
+    "ore:toolAxe",
+    { "action": "axe_dig" }
+  ],
+  "result": [
+    {
+      "item": "farmers_future_delight:crimson_planks",
+      "count": 1,
+      "chance": 0.75
+    }
+  ]
+}

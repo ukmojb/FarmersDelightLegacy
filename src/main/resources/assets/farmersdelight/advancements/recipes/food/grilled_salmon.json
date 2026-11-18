@@ -28,5 +28,16 @@
     "recipes": [
       "farmersdelight:grilled_salmon"
     ]
-  }
+  },
+  "conditions": [
+    {
+      "type": "farmersdelight:ingredients_available",
+      "ores": [
+        "cropSweetBerry"
+      ],
+      "items": [
+        "farmersdelight:grilled_salmon"
+      ]
+    }
+  ]
 }

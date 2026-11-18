@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "key": {
+    "/": {
+      "item": "minecraft:stick"
+    },
+    "r": {
+      "item": "farmersdelight:rope"
+    }
+  },
+  "pattern": [
+    "/r/",
+    "/r/"
+  ],
+  "result": {
+    "count": 1,
+    "item": "farmersdelight:rope_fence_gate"
+  }
+}

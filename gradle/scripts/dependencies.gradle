@@ -46,41 +46,46 @@ dependencies {
     implementation rfg.deobf('mezz:jei:4.31.2')
 
     //稻米(含水方块)
-    implementation rfg.deobf("curse.maven:fluidlogged-api-485654:7581579")
+    compileOnly rfg.deobf("curse.maven:fluidlogged-api-485654:7581579")
 
     //樱花树
-    implementation rfg.deobf("curse.maven:Cherry_on_1.12.2-1122982:7760834")
+    compileOnly rfg.deobf("curse.maven:Cherry_on_1.12.2-1122982:7760834")
 
     //樱花树
-    implementation rfg.deobf("curse.maven:sakura-reforged-1461245:7883662")
-    runtimeOnly rfg.deobf("curse.maven:mysterious-mountain-lib-368098:3254750")
+    compileOnly rfg.deobf("curse.maven:sakura-reforged-1461245:7883662")
+    compileOnly rfg.deobf("curse.maven:mysterious-mountain-lib-368098:3254750")
 
     //下界更新移植
-    implementation rfg.deobf("curse.maven:unseens-nether-backport-1109447:7694245")
-    runtimeOnly rfg.deobf("curse.maven:nether-api-1306115:7216794")
+    compileOnly rfg.deobf("curse.maven:unseens-nether-backport-1109447:7694245")
+    compileOnly rfg.deobf("curse.maven:nether-api-1306115:7216794")
 
     //未来的 MC
-    implementation rfg.deobf("curse.maven:future-mc-310059:6162819")
-    runtimeOnly 'com.teamwizardry.librarianlib:LibrarianLib-Continuous:4.22-2.0'
+    compileOnly rfg.deobf("curse.maven:future-mc-310059:6162819")
+    testImplementation rfg.deobf("curse.maven:future-mc-310059:6162819")
+    testRuntimeOnly 'com.teamwizardry.librarianlib:LibrarianLib-Continuous:4.22-2.0'
+
+    // Farmer's Future Delight
+    implementation rfg.deobf(files('libs/farmers-future-delight-1.6.0.jar'))
 
     //营火
-    implementation rfg.deobf("curse.maven:campfire-719464:4533381")
+    compileOnly rfg.deobf("curse.maven:campfire-719464:4533381")
 
     //掠夺者
-    implementation rfg.deobf("curse.maven:raids-backport-977633:7890943")
-    runtimeOnly rfg.deobf("curse.maven:atlas-lib-463826:7845224")
+    compileOnly rfg.deobf("curse.maven:raids-backport-977633:7890943")
+    compileOnly rfg.deobf("curse.maven:atlas-lib-463826:7845224")
 
     //村庄建筑更新
-    implementation rfg.deobf("curse.maven:village-names-259230:5886882")
+    compileOnly rfg.deobf("curse.maven:village-names-259230:5886882")
+    testImplementation rfg.deobf("curse.maven:village-names-259230:5886882")
 
     //海洋更新
-    implementation rfg.deobf("curse.maven:Oceanic Expanse-840576:7009970")
+    compileOnly rfg.deobf("curse.maven:Oceanic Expanse-840576:7009970")
 
     //流浪商人联动
-    implementation rfg.deobf("curse.maven:Wandering Traders Backport-1257940:7743810")
+    compileOnly rfg.deobf("curse.maven:Wandering Traders Backport-1257940:7743810")
 
     //燐/Hesperus
-    implementation rfg.deobf("curse.maven:Hesperus-620262:4724647")
+    compileOnly rfg.deobf("curse.maven:Hesperus-620262:4724647")
 
     //Nyx
     compileOnly rfg.deobf("curse.maven:Nyx-349214:3161738")
@@ -96,18 +101,21 @@ dependencies {
     runtimeOnly rfg.deobf('curse.maven:cooking-for-blockheads-231484:2862651')
 //    runtimeOnly rfg.deobf('curse.maven:delightful-cuisine-for-woodheads-805622:6997581')
     runtimeOnly rfg.deobf('curse.maven:lemonskin-1337144:7763338')
+    compileOnly rfg.deobf('curse.maven:lemonskin-1337144:7763338')
     runtimeOnly rfg.deobf('curse.maven:harvest-festival-legacy-342649:8191153')
 
-    //季节
-    compileOnly rfg.deobf('curse.maven:Serene Seasons-291874:2799213')
+    compileOnly rfg.deobf('curse.maven:serene-seasons-291874:2799213')
+    compileOnly rfg.deobf('curse.maven:immersive-engineering-231951:2974106')
+    testImplementation rfg.deobf('curse.maven:tinkers-construct-74072:2902483')
+    testImplementation rfg.deobf('curse.maven:mantle-74924:2713386')
 
     //Quark
-    implementation rfg.deobf('curse.maven:Quark-243121:2924091')
-    implementation rfg.deobf('curse.maven:AutoRegLib-250363:2746011')
+    compileOnly rfg.deobf('curse.maven:Quark-243121:2924091')
+    compileOnly rfg.deobf('curse.maven:AutoRegLib-250363:2746011')
 
     //苍白花园
-    implementation rfg.deobf('curse.maven:Pale Bloom-1375465:7169494')
-    implementation rfg.deobf('software.bernie.geckolib:forge-1.12.2-geckolib:3.0.21')
+    compileOnly rfg.deobf('curse.maven:Pale Bloom-1375465:7169494')
+    compileOnly rfg.deobf('software.bernie.geckolib:forge-1.12.2-geckolib:3.0.21')
 
     //EditableEdibles(纯纯的抽象模组)
 //    implementation rfg.deobf('curse.maven:EditableEdibles-1052472:6808042')

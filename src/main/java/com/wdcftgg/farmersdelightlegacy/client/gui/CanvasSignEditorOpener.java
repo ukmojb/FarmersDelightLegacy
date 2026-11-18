@@ -13,13 +13,19 @@ import net.minecraftforge.fml.relauncher.Side;
 public final class CanvasSignEditorOpener {
 
     private static BlockPos pendingPos;
+    private static boolean pendingFront;
     private static int remainingTicks;
 
     private CanvasSignEditorOpener() {
     }
 
     public static void openWhenReady(BlockPos pos) {
+        openWhenReady(pos, true);
+    }
+
+    public static void openWhenReady(BlockPos pos, boolean front) {
         pendingPos = pos;
+        pendingFront = front;
         remainingTicks = 40;
         tryOpenPendingEditor();
     }
@@ -40,7 +46,7 @@ public final class CanvasSignEditorOpener {
 
         TileEntity tileEntity = minecraft.world.getTileEntity(pendingPos);
         if (tileEntity instanceof TileEntityCanvasSign) {
-            minecraft.displayGuiScreen(new GuiEditCanvasSign((TileEntityCanvasSign) tileEntity));
+            minecraft.displayGuiScreen(new GuiEditCanvasSign((TileEntityCanvasSign) tileEntity, pendingFront));
             pendingPos = null;
             remainingTicks = 0;
             return;

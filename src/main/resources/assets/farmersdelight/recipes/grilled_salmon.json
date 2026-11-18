@@ -2,8 +2,8 @@
   "type": "minecraft:crafting_shapeless",
   "ingredients": [
     {
-      "item": "minecraft:cooked_fish",
-      "data": 1
+      "type": "forge:ore_dict",
+      "ore": "foodCookedSalmon"
     },
     {
       "type": "forge:ore_dict",
@@ -23,5 +23,16 @@
   ],
   "result": {
     "item": "farmersdelight:grilled_salmon"
-  }
+  },
+  "conditions": [
+    {
+      "type": "farmersdelight:ingredients_available",
+      "ores": [
+        "cropSweetBerry"
+      ],
+      "items": [
+        "farmersdelight:grilled_salmon"
+      ]
+    }
+  ]
 }

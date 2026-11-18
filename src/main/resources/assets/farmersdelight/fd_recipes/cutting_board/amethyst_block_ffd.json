@@ -1,0 +1,20 @@
+{
+  "conditions": {
+    "items": [
+      "farmers_future_delight:amethyst_block",
+      "farmers_future_delight:amethyst_shard"
+    ]
+  },
+  "ingredients": [
+    {
+      "item": "farmers_future_delight:amethyst_block"
+    }
+  ],
+  "tool": "ore:toolPickaxe",
+  "result": [
+    {
+      "item": "farmers_future_delight:amethyst_shard",
+      "count": 4
+    }
+  ]
+}

@@ -1,0 +1,21 @@
+{
+  "conditions": {
+    "items": [
+      "sakura:plank_bamboo"
+    ]
+  },
+  "ingredients": [
+    "ore:fdFurniturebamboo"
+  ],
+  "tool": [
+    "ore:toolAxe",
+    { "action": "axe_dig" }
+  ],
+  "result": [
+    {
+      "item": "sakura:plank_bamboo",
+      "count": 1,
+      "chance": 0.75
+    }
+  ]
+}

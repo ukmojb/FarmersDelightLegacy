@@ -1,0 +1,24 @@
+{
+  "conditions": {
+    "items": [
+      "sakura:plank_sakura"
+    ],
+    "items_absent": [
+      "suikecherry:cherry_planks"
+    ]
+  },
+  "ingredients": [
+    "ore:fdFurniturecherry"
+  ],
+  "tool": [
+    "ore:toolAxe",
+    { "action": "axe_dig" }
+  ],
+  "result": [
+    {
+      "item": "sakura:plank_sakura",
+      "count": 1,
+      "chance": 0.75
+    }
+  ]
+}

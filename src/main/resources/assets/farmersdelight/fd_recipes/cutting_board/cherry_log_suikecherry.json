@@ -1,0 +1,24 @@
+{
+  "conditions": {
+    "items": [
+      "suikecherry:cherry_log",
+      "suikecherry:cherry_stripped_log"
+    ]
+  },
+  "ingredients": [
+    {
+      "item": "suikecherry:cherry_log"
+    }
+  ],
+  "tool": "ore:toolAxe",
+  "result": [
+    {
+      "item": "suikecherry:cherry_stripped_log",
+      "count": 1
+    },
+    {
+      "item": "farmersdelight:tree_bark",
+      "count": 1
+    }
+  ]
+}

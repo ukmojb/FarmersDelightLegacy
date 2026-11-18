@@ -2,7 +2,7 @@
   "parent": "farmersdelight:main/place_feast",
   "display": {
     "icon": {
-      "item": "farmersdelight:honey_glazed_ham"
+      "item": "farmersdelight:roast_chicken"
     },
     "title": {
       "translate": "farmersdelight.advancement.master_chef"
@@ -103,7 +103,18 @@
       "trigger": "minecraft:consume_item",
       "conditions": {
         "item": {
-          "item": "farmersdelight:noodle_soup"
+          "type": "farmersdelight:optional_food",
+          "requires": {
+            "ores": [
+              "mayBeKelp"
+            ],
+            "items": [
+              "farmersdelight:noodle_soup"
+            ]
+          },
+          "item": {
+            "item": "farmersdelight:noodle_soup"
+          }
         }
       }
     },
@@ -183,7 +194,18 @@
       "trigger": "minecraft:consume_item",
       "conditions": {
         "item": {
-          "item": "farmersdelight:grilled_salmon"
+          "type": "farmersdelight:optional_food",
+          "requires": {
+            "ores": [
+              "cropSweetBerry"
+            ],
+            "items": [
+              "farmersdelight:grilled_salmon"
+            ]
+          },
+          "item": {
+            "item": "farmersdelight:grilled_salmon"
+          }
         }
       }
     },
@@ -199,7 +221,18 @@
       "trigger": "minecraft:consume_item",
       "conditions": {
         "item": {
-          "item": "farmersdelight:stuffed_pumpkin"
+          "type": "farmersdelight:optional_food",
+          "requires": {
+            "ores": [
+              "listAllberry"
+            ],
+            "items": [
+              "farmersdelight:stuffed_pumpkin"
+            ]
+          },
+          "item": {
+            "item": "farmersdelight:stuffed_pumpkin"
+          }
         }
       }
     },
@@ -207,7 +240,19 @@
       "trigger": "minecraft:consume_item",
       "conditions": {
         "item": {
-          "item": "farmersdelight:honey_glazed_ham"
+          "type": "farmersdelight:optional_food",
+          "requires": {
+            "ores": [
+              "foodHoney",
+              "listAllberry"
+            ],
+            "items": [
+              "farmersdelight:honey_glazed_ham"
+            ]
+          },
+          "item": {
+            "item": "farmersdelight:honey_glazed_ham"
+          }
         }
       }
     },
@@ -216,6 +261,34 @@
       "conditions": {
         "item": {
           "item": "farmersdelight:shepherds_pie"
+        }
+      }
+    },
+    "onion_soup": {
+      "trigger": "minecraft:consume_item",
+      "conditions": {
+        "item": {
+          "item": "farmersdelight:onion_soup"
+        }
+      }
+    },
+    "gleaming_salad": {
+      "trigger": "minecraft:consume_item",
+      "conditions": {
+        "item": {
+          "type": "farmersdelight:optional_food",
+          "requires": {
+            "ores": [
+              "cropGlowBerry",
+              "foodHoney"
+            ],
+            "items": [
+              "farmersdelight:gleaming_salad"
+            ]
+          },
+          "item": {
+            "item": "farmersdelight:gleaming_salad"
+          }
         }
       }
     }

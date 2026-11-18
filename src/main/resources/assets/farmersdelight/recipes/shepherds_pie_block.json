@@ -1,15 +1,39 @@
 {
   "type": "minecraft:crafting_shapeless",
   "ingredients": [
-    { "item": "minecraft:baked_potato" },
-    { "type": "forge:ore_dict", "ore": "listAllmilk" },
-    { "item": "minecraft:baked_potato" },
-    { "item": "minecraft:cooked_mutton" },
-    { "item": "minecraft:cooked_mutton" },
-    { "item": "minecraft:cooked_mutton" },
-    { "type": "forge:ore_dict", "ore": "cropOnion" },
-    { "item": "minecraft:bowl" },
-    { "type": "forge:ore_dict", "ore": "cropOnion" }
+    {
+      "item": "minecraft:baked_potato"
+    },
+    {
+      "type": "forge:ore_dict",
+      "ore": "listAllmilk"
+    },
+    {
+      "item": "minecraft:baked_potato"
+    },
+    {
+      "type": "forge:ore_dict",
+      "ore": "listAllmuttoncooked"
+    },
+    {
+      "type": "forge:ore_dict",
+      "ore": "listAllmuttoncooked"
+    },
+    {
+      "type": "forge:ore_dict",
+      "ore": "listAllmuttoncooked"
+    },
+    {
+      "type": "forge:ore_dict",
+      "ore": "cropOnion"
+    },
+    {
+      "item": "minecraft:bowl"
+    },
+    {
+      "type": "forge:ore_dict",
+      "ore": "cropOnion"
+    }
   ],
   "result": {
     "item": "farmersdelight:shepherds_pie_block"

@@ -244,9 +244,7 @@ item.farmersdelight.vegetable_noodles.name=Grøntsagsnudler
 item.farmersdelight.vegetable_soup.name=Grøntsagssuppe
 item.farmersdelight.wheat_dough.name=Hvededej
 itemGroup.farmersdelight=Landmandsglæde
-
 item.farmersdelight.pumpkin_pie_slice.name=Stykke graeskartaerte
-
 farmersdelight.advancement.craft_knife.desc=Lav en kniv for at fjerne ekstra gods fra planter og dyr
 farmersdelight.advancement.craft_knife=Jagt og Saml
 farmersdelight.advancement.eat_comfort_food.desc=Varme skålmåltider vil holde dig til at helbrede støt, uanset hvor sulten du er!
@@ -304,3 +302,15 @@ farmersdelight.subtitles.cutting_board.remove_item=Item removed from board
 farmersdelight.subtitles.cutting_board.carve_tool=Tool carved on board
 farmersdelight.subtitles.food.take_portion=Portion served
 farmersdelight.subtitles.food.slice=Food sliced
+tile.farmersdelight.wooden_basket.name=Kurv
+subtitles.farmersdelight.block.cooking_pot.boil=Kogegryden koger
+subtitles.farmersdelight.block.cutting_board.knife_cut=Knivskæringer
+subtitles.farmersdelight.block.stove.crackle=Komfuret knitrer
+subtitles.farmersdelight.block.skillet.sizzle=Panden syder
+subtitles.farmersdelight.block.skillet.add_food=Skillet hvæser
+subtitles.farmersdelight.block.cabinet.open=Skabet åbner
+subtitles.farmersdelight.block.cabinet.close=Skabet lukker
+subtitles.farmersdelight.block.tomatoes.pick_tomatoes=Tomater popper
+subtitles.farmersdelight.entity.rotten_tomato.throw=Rådne tomatfluer
+subtitles.farmersdelight.entity.rotten_tomato.hit=Rådden tomat sprøjter
+entity.rotten_tomato.name=Rådne Tomater

@@ -1,0 +1,24 @@
+{
+  "conditions": {
+    "items": [
+      "futuremc:jungle_wood",
+      "futuremc:stripped_jungle_wood"
+    ]
+  },
+  "ingredients": [
+    {
+      "item": "futuremc:jungle_wood"
+    }
+  ],
+  "tool": "ore:toolAxe",
+  "result": [
+    {
+      "item": "futuremc:stripped_jungle_wood",
+      "count": 1
+    },
+    {
+      "item": "farmersdelight:tree_bark",
+      "count": 1
+    }
+  ]
+}

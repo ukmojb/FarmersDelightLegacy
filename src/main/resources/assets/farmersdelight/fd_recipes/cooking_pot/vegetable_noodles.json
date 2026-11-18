@@ -1,12 +1,12 @@
 {
   "ingredients": [
-    "minecraft:carrot",
-    "minecraft:brown_mushroom",
+    "ore:cropCarrot",
+    "ore:listAllmushroom",
     "ore:foodPasta",
-    "ore:cropCabbage",
-    "ore:listAllveggie"
+    "ore:foodLeafyGreen",
+    "ore:fdCookingVegetable"
   ],
-  "experience": 1.0,
+  "experience": 1,
   "result": {
     "item": "farmersdelight:vegetable_noodles",
     "count": 1

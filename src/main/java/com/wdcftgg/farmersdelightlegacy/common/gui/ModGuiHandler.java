@@ -10,6 +10,7 @@ import com.wdcftgg.farmersdelightlegacy.common.tile.TileEntityCookingPot;
 import net.minecraft.client.gui.inventory.GuiChest;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.tileentity.TileEntityLockableLoot;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.common.network.IGuiHandler;
@@ -23,6 +24,13 @@ public final class ModGuiHandler implements IGuiHandler {
     @Override
     public Object getServerGuiElement(int id, EntityPlayer player, World world, int x, int y, int z) {
         TileEntity tileEntity = world.getTileEntity(new BlockPos(x, y, z));
+        if (tileEntity instanceof TileEntityLockableLoot) {
+            TileEntityLockableLoot storage = (TileEntityLockableLoot) tileEntity;
+            if (player.isSpectator() && storage.getLootTable() != null
+                    || storage.isLocked() && !player.canOpen(storage.getLockCode()) && !player.isSpectator()) {
+                return null;
+            }
+        }
         if (id == COOKING_POT_GUI_ID && tileEntity instanceof TileEntityCookingPot) {
             return new ContainerCookingPot(player.inventory, (TileEntityCookingPot) tileEntity);
         }

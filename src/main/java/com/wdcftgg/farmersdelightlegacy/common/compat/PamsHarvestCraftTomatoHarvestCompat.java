@@ -1,9 +1,7 @@
 package com.wdcftgg.farmersdelightlegacy.common.compat;
 
 import com.wdcftgg.farmersdelightlegacy.FarmersDelightLegacy;
-import com.wdcftgg.farmersdelightlegacy.common.block.BlockBuddingTomato;
 import com.wdcftgg.farmersdelightlegacy.common.block.BlockTomatoVine;
-import com.wdcftgg.farmersdelightlegacy.common.registry.ModBlocks;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.player.EntityPlayer;
@@ -36,20 +34,6 @@ public final class PamsHarvestCraftTomatoHarvestCompat {
                 return;
             }
             BlockTomatoVine.harvestMatureTomatoes(event.getWorld(), event.getPos(), state, player);
-            player.swingArm(event.getHand());
-            event.setCanceled(true);
-            event.setCancellationResult(EnumActionResult.SUCCESS);
-            return;
-        }
-
-        if (block instanceof BlockBuddingTomato) {
-            BlockBuddingTomato buddingTomatoBlock = (BlockBuddingTomato) block;
-            if (state.getValue(BlockTomatoVine.AGE) < buddingTomatoBlock.getMaxAge()) {
-                return;
-            }
-            BlockTomatoVine tomatoBlock = (BlockTomatoVine) ModBlocks.TOMATOES;
-            IBlockState tomatoState = tomatoBlock.withAge(tomatoBlock.getMaxAge()).withProperty(BlockTomatoVine.ROPELOGGED, false);
-            BlockTomatoVine.harvestMatureTomatoes(event.getWorld(), event.getPos(), tomatoState, player);
             player.swingArm(event.getHand());
             event.setCanceled(true);
             event.setCancellationResult(EnumActionResult.SUCCESS);

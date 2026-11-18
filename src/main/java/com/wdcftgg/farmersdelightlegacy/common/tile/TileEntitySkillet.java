@@ -1,6 +1,8 @@
 package com.wdcftgg.farmersdelightlegacy.common.tile;
 
 import com.wdcftgg.farmersdelightlegacy.common.block.BlockSkillet;
+import com.wdcftgg.farmersdelightlegacy.common.compat.FluidloggingCompat;
+import com.wdcftgg.farmersdelightlegacy.common.registry.ModSounds;
 import com.wdcftgg.farmersdelightlegacy.common.recipe.CampfireCookingRecipe;
 import com.wdcftgg.farmersdelightlegacy.common.recipe.manager.CampfireCookingRecipeManager;
 import com.wdcftgg.farmersdelightlegacy.common.util.HeatSourceHelper;
@@ -19,8 +21,11 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ITickable;
 import net.minecraft.util.NonNullList;
+import net.minecraft.util.SoundCategory;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextComponentTranslation;
+import net.minecraft.world.World;
 
 public class TileEntitySkillet extends TileEntity implements IInventory, ITickable {
 
@@ -37,6 +42,17 @@ public class TileEntitySkillet extends TileEntity implements IInventory, ITickab
         }
 
         updateSupportState();
+
+        if (FluidloggingCompat.containsWater(world, pos)) {
+            ItemStack stored = getStoredStack();
+            if (!stored.isEmpty()) {
+                EntityItem drop = new EntityItem(world, pos.getX() + 0.5, pos.getY() + 0.3, pos.getZ() + 0.5, stored.copy());
+                if (world.spawnEntity(drop)) {
+                    removeItem();
+                }
+            }
+            return;
+        }
 
         if (isHeated()) {
             ItemStack stored = getStoredStack();
@@ -90,25 +106,35 @@ public class TileEntitySkillet extends TileEntity implements IInventory, ITickab
             return addedStack;
         }
 
-        this.cookingTimeTotal = BlockSkillet.getSkilletCookingTime(recipe.getCookingTime(), fireAspectLevel);
-        ItemStack stored = this.itemStacks.get(0);
-        if (!stored.isEmpty() && !ItemStack.areItemsEqual(stored, addedStack)) {
+        if (FluidloggingCompat.containsWater(world, pos)) {
+            player.sendStatusMessage(new TextComponentTranslation("farmersdelight.block.skillet.underwater"), true);
             return addedStack;
         }
 
-        ItemStack remainder = addedStack.copy();
-        if (stored.isEmpty()) {
-            ItemStack placed = remainder.splitStack(1);
-            this.itemStacks.set(0, placed);
-            this.cookingTime = 0;
-            markDirty();
-            return remainder;
+        this.cookingTimeTotal = BlockSkillet.getSkilletCookingTime(recipe.getCookingTime(), fireAspectLevel);
+        ItemStack stored = this.itemStacks.get(0);
+        boolean wasEmpty = stored.isEmpty();
+        if (!wasEmpty && (!ItemStack.areItemsEqual(stored, addedStack)
+                || !ItemStack.areItemStackTagsEqual(stored, addedStack))) {
+            return addedStack;
         }
 
-        if (stored.getCount() < stored.getMaxStackSize()) {
-            stored.grow(1);
-            remainder.shrink(1);
-            markDirty();
+        int capacity = Math.min(addedStack.getMaxStackSize(), getInventoryStackLimit());
+        int inserted = Math.min(addedStack.getCount(), capacity - stored.getCount());
+        if (inserted <= 0) {
+            return addedStack;
+        }
+        ItemStack remainder = addedStack.copy();
+        if (wasEmpty) {
+            this.itemStacks.set(0, remainder.splitStack(inserted));
+        } else {
+            stored.grow(inserted);
+            remainder.shrink(inserted);
+        }
+        this.cookingTime = 0;
+        markDirty();
+        if (wasEmpty && isHeated()) {
+            world.playSound(null, pos, ModSounds.SKILLET_ADD_FOOD, SoundCategory.BLOCKS, 0.8F, 1.0F);
         }
         return remainder;
     }
@@ -242,7 +268,7 @@ public class TileEntitySkillet extends TileEntity implements IInventory, ITickab
 
     @Override
     public boolean isItemValidForSlot(int index, ItemStack stack) {
-        return CampfireCookingRecipeManager.findRecipe(stack) != null;
+        return !FluidloggingCompat.containsWater(world, pos) && CampfireCookingRecipeManager.findRecipe(stack) != null;
     }
 
     @Override
@@ -311,6 +337,12 @@ public class TileEntitySkillet extends TileEntity implements IInventory, ITickab
     @Override
     public ITextComponent getDisplayName() {
         return new TextComponentTranslation(this.getName());
+    }
+
+    @Override
+    public boolean shouldRefresh(World world, BlockPos pos,
+                                 IBlockState oldState, IBlockState newState) {
+        return oldState.getBlock() != newState.getBlock();
     }
 
     @Override

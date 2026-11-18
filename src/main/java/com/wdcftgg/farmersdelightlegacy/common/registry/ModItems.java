@@ -18,6 +18,12 @@ public final class ModItems {
     private static final int SHORT_DURATION = 1200;
     private static final int MEDIUM_DURATION = 3600;
     private static final int LONG_DURATION = 6000;
+    private static final Set<String> FAST_FOODS = new HashSet<>(Arrays.asList(
+            "cabbage_leaf", "minced_beef", "beef_patty", "chicken_cuts", "cooked_chicken_cuts",
+            "bacon", "cooked_bacon", "cod_slice", "cooked_cod_slice", "salmon_slice", "cooked_salmon_slice",
+            "mutton_chops", "cooked_mutton_chops", "sweet_berry_cookie", "honey_cookie", "cake_slice",
+            "apple_pie_slice", "sweet_berry_cheesecake_slice", "chocolate_pie_slice", "pumpkin_pie_slice", "kelp_roll_slice"
+    ));
 
     private static final String[] ITEM_TEXTURE_NAMES = new String[]{
             "apple_cider", "apple_pie", "apple_pie_slice", "bacon", "bacon_and_eggs", "bacon_sandwich", "baked_cod_stew",
@@ -63,6 +69,7 @@ public final class ModItems {
     ));
 
     private static final Set<String> STACK_TO_16 = new HashSet<>(Arrays.asList(
+            "onion_soup", "gleaming_salad",
             "apple_cider", "melon_juice", "milk_bottle", "hot_cocoa",
             "glow_berry_custard", "fruit_salad", "mixed_salad", "nether_salad",
             "cooked_rice", "bone_broth", "beef_stew", "chicken_soup", "vegetable_soup", "fish_stew",
@@ -74,6 +81,7 @@ public final class ModItems {
     ));
 
     private static final Set<String> BOWL_FOOD_NAMES = new HashSet<>(Arrays.asList(
+            "onion_soup", "gleaming_salad",
             "fruit_salad", "mixed_salad", "nether_salad",
             "cooked_rice", "bone_broth", "beef_stew", "chicken_soup", "vegetable_soup", "fish_stew",
             "fried_rice", "pumpkin_soup", "baked_cod_stew", "noodle_soup",
@@ -99,7 +107,11 @@ public final class ModItems {
             return;
         }
 
+        BackportContent.lockRegistrationSettings();
         TOMATO = registerFood("tomato", 1, 0.3F);
+        Item debugPumpkinPie = register("debug_pumpkin_pie", new ItemDebugBlock(ModBlocks.pumpkinPie));
+        debugPumpkinPie.setCreativeTab(null);
+        event.getRegistry().register(debugPumpkinPie);
         TOMATO_SEEDS = register("tomato_seeds", new ItemSeeds(ModBlocks.BUDDING_TOMATOES, Blocks.FARMLAND));
         register("cabbage_seeds", new ItemSeeds(ModBlocks.CABBAGES, Blocks.FARMLAND));
         ONION = register("onion", new ItemPlantableFood(2, 0.4F, ModBlocks.ONIONS, Blocks.FARMLAND, ModBlocks.RICH_SOIL_FARMLAND));
@@ -130,7 +142,7 @@ public final class ModItems {
         registerFood("smoked_ham", 10, 0.8F);
         registerFood("sweet_berry_cookie", 2, 0.1F);
         registerFood("honey_cookie", 2, 0.1F);
-        registerFood("melon_popsicle", 3, 0.2F, true, null, 0, 0, 0.0F);
+        register("melon_popsicle", new ItemPopsicle());
         registerFood("cake_slice", 2, 0.1F, false, "minecraft:speed", 400, 0, 1.0F);
         registerFood("apple_pie_slice", 3, 0.3F, false, "minecraft:speed", BRIEF_DURATION, 0, 1.0F);
         registerFood("sweet_berry_cheesecake_slice", 3, 0.3F, false, "minecraft:speed", BRIEF_DURATION, 0, 1.0F);
@@ -138,6 +150,8 @@ public final class ModItems {
         registerFood("pumpkin_pie_slice", 3, 0.3F, false, "minecraft:speed", BRIEF_DURATION, 0, 1.0F);
         registerFood("fruit_salad", 6, 0.6F, false, "minecraft:regeneration", 100, 0, 1.0F);
         registerFood("glow_berry_custard", 7, 0.6F, true, "minecraft:glowing", 100, 0, 1.0F);
+        registerFood("onion_soup", 12, 0.8F, false, "farmersdelight:nourishment", MEDIUM_DURATION, 0, 1.0F);
+        registerFood("gleaming_salad", 14, 0.75F, false, "farmersdelight:nourishment", LONG_DURATION, 0, 1.0F);
         registerFood("mixed_salad", 6, 0.6F, false, "minecraft:regeneration", 100, 0, 1.0F);
         registerFood("nether_salad", 5, 0.4F, false, "minecraft:nausea", 240, 0, 0.3F);
         registerFood("barbecue_stick", 8, 0.9F);
@@ -151,18 +165,18 @@ public final class ModItems {
         registerFood("cabbage_rolls", 5, 0.5F);
         registerFood("salmon_roll", 7, 0.6F);
         registerFood("cod_roll", 7, 0.6F);
-        registerFood("kelp_roll", 12, 0.6F);
+        registerFood("kelp_roll", 12, 0.5F);
         registerFood("kelp_roll_slice", 6, 0.5F);
-        registerFood("cooked_rice", 6, 0.4F, false, "farmersdelight:comfort", BRIEF_DURATION, 0, 1.0F);
-        registerFood("bone_broth", 8, 0.7F, false, "farmersdelight:comfort", SHORT_DURATION, 0, 1.0F);
-        registerFood("beef_stew", 12, 0.8F, false, "farmersdelight:comfort", MEDIUM_DURATION, 0, 1.0F);
-        registerFood("vegetable_soup", 12, 0.8F, false, "farmersdelight:comfort", MEDIUM_DURATION, 0, 1.0F);
-        registerFood("fish_stew", 12, 0.8F, false, "farmersdelight:comfort", MEDIUM_DURATION, 0, 1.0F);
-        registerFood("chicken_soup", 14, 0.75F, false, "farmersdelight:comfort", LONG_DURATION, 0, 1.0F);
-        registerFood("fried_rice", 14, 0.75F, false, "farmersdelight:comfort", LONG_DURATION, 0, 1.0F);
-        registerFood("pumpkin_soup", 14, 0.75F, false, "farmersdelight:comfort", LONG_DURATION, 0, 1.0F);
-        registerFood("baked_cod_stew", 14, 0.75F, false, "farmersdelight:comfort", LONG_DURATION, 0, 1.0F);
-        registerFood("noodle_soup", 14, 0.75F, false, "farmersdelight:comfort", LONG_DURATION, 0, 1.0F);
+        registerFood("cooked_rice", 6, 0.4F, false, "farmersdelight:nourishment", BRIEF_DURATION, 0, 1.0F);
+        registerFood("bone_broth", 8, 0.7F, false, "farmersdelight:nourishment", SHORT_DURATION, 0, 1.0F);
+        registerFood("beef_stew", 12, 0.8F, false, "farmersdelight:nourishment", MEDIUM_DURATION, 0, 1.0F);
+        registerFood("vegetable_soup", 12, 0.8F, false, "farmersdelight:nourishment", MEDIUM_DURATION, 0, 1.0F);
+        registerFood("fish_stew", 12, 0.8F, false, "farmersdelight:nourishment", MEDIUM_DURATION, 0, 1.0F);
+        registerFood("chicken_soup", 12, 0.8F, false, "farmersdelight:nourishment", MEDIUM_DURATION, 0, 1.0F);
+        registerFood("fried_rice", 12, 0.8F, false, "farmersdelight:nourishment", MEDIUM_DURATION, 0, 1.0F);
+        registerFood("pumpkin_soup", 14, 0.75F, false, "farmersdelight:nourishment", LONG_DURATION, 0, 1.0F);
+        registerFood("baked_cod_stew", 14, 0.75F, false, "farmersdelight:nourishment", LONG_DURATION, 0, 1.0F);
+        registerFood("noodle_soup", 14, 0.75F, false, "farmersdelight:nourishment", LONG_DURATION, 0, 1.0F);
         registerFood("bacon_and_eggs", 10, 0.6F, false, "farmersdelight:nourishment", SHORT_DURATION, 0, 1.0F);
         registerFood("ratatouille", 10, 0.6F, false, "farmersdelight:nourishment", SHORT_DURATION, 0, 1.0F);
         registerFood("steak_and_potatoes", 12, 0.8F, false, "farmersdelight:nourishment", MEDIUM_DURATION, 0, 1.0F);
@@ -188,11 +202,11 @@ public final class ModItems {
         register("dog_food", new ItemDogFood(4, 0.2F));
         register("horse_feed", new ItemHorseFeed());
 
-        registerKnife("flint_knife", Item.ToolMaterial.WOOD, 1.5D);
+        register("flint_knife", new ItemFlintKnife());
         registerKnife("iron_knife", Item.ToolMaterial.IRON, 2.5D);
         registerKnife("golden_knife", Item.ToolMaterial.GOLD, 0.5D);
         registerKnife("diamond_knife", Item.ToolMaterial.DIAMOND, 3.5D);
-        registerKnife("netherite_knife", Item.ToolMaterial.DIAMOND, 4.5D);
+        register("netherite_knife", new ItemNetheriteKnife());
 
         Set<String> blockNames = new LinkedHashSet<>(ModBlocks.BLOCKS.keySet());
         Set<String> existingNames = new LinkedHashSet<>(ITEMS.keySet());
@@ -245,6 +259,11 @@ public final class ModItems {
         if (alwaysEdible) {
             item.setAlwaysEdible();
         }
+        if (FAST_FOODS.contains(path)) {
+            item.setUseDuration(16);
+        } else if ("kelp_roll".equals(path)) {
+            item.setUseDuration(48);
+        }
         return register(path, item);
     }
 
@@ -264,22 +283,21 @@ public final class ModItems {
             return new ItemRice(cropBlock);
         }
 
-        Item compatItem = instantiateCompatItem("com.wdcftgg.farmersdelightlegacy.common.compat.fluidlogged.ItemFluidloggedRice", cropBlock);
-        return compatItem != null ? compatItem : new ItemRice(cropBlock);
+        return FluidloggedItems.createRice(cropBlock);
     }
 
-    private static Item instantiateCompatItem(String className, Block cropBlock) {
-        try {
-            return (Item) Class.forName(className).getDeclaredConstructor(Block.class).newInstance(cropBlock);
-        } catch (ReflectiveOperationException | LinkageError exception) {
-            FarmersDelightLegacy.LOGGER.warn("Failed to load optional compatibility item: {}; falling back to the default implementation.", className, exception);
-            return null;
+    private static final class FluidloggedItems {
+        private static Item createRice(Block cropBlock) {
+            return new com.wdcftgg.farmersdelightlegacy.common.compat.fluidlogged.ItemFluidloggedRice(cropBlock);
         }
     }
 
     private static Item register(String path, Item item) {
         item.setRegistryName(new ResourceLocation(FarmersDelightLegacy.MOD_ID, path));
         item.setTranslationKey(FarmersDelightLegacy.MOD_ID + "." + path);
+        if (!BackportContent.isEnabled(path)) {
+            return item;
+        }
         item.setCreativeTab(ModCreativeTab.TAB);
         if (STACK_TO_16.contains(path)) {
             item.setMaxStackSize(16);

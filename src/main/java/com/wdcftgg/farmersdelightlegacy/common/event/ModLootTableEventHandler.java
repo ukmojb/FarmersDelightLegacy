@@ -8,6 +8,8 @@ import net.minecraft.item.Item;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.storage.loot.*;
 import net.minecraft.world.storage.loot.conditions.LootCondition;
+import net.minecraft.world.storage.loot.conditions.KilledByPlayer;
+import net.minecraft.world.storage.loot.conditions.RandomChanceWithLooting;
 import net.minecraft.world.storage.loot.functions.*;
 import net.minecraftforge.event.LootTableLoadEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -15,15 +17,28 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 
 @Mod.EventBusSubscriber(modid = FarmersDelightLegacy.MOD_ID)
 public final class ModLootTableEventHandler {
     private static final LootCondition[] NO_CONDITIONS = new LootCondition[0];
     private static final LootFunction[] NO_FUNCTIONS = new LootFunction[0];
+    private static final Set<ResourceLocation> ONION_DROP_TABLES = new HashSet<>(Arrays.asList(
+            LootTableList.ENTITIES_ZOMBIE, LootTableList.ENTITIES_ZOMBIE_VILLAGER, LootTableList.ENTITIES_HUSK,
+            LootTableList.ENTITIES_EVOCATION_ILLAGER, LootTableList.ENTITIES_VINDICATION_ILLAGER,
+            new ResourceLocation("farmers_future_delight", "entities/pillager")));
     private ModLootTableEventHandler() {
     }
     @SubscribeEvent
     public static void onLootTableLoad(LootTableLoadEvent event) {
+        if (ONION_DROP_TABLES.contains(event.getName())) {
+            event.getTable().addPool(new LootPool(new LootEntry[]{new LootEntryItem(ModItems.ONION, 1, 0,
+                    NO_FUNCTIONS, NO_CONDITIONS, "farmersdelight:onion")},
+                    new LootCondition[]{new KilledByPlayer(false), new RandomChanceWithLooting(0.02F, 0.01F)},
+                    fixedRolls(1), fixedRolls(0), "farmersdelight:player_kill_onion"));
+        }
         if (!Configuration.generateFDChestLoot) {
             return;
         }
@@ -38,7 +53,75 @@ public final class ModLootTableEventHandler {
             addDesertPyramidLoot(event);
         } else if (LootTableList.CHESTS_VILLAGE_BLACKSMITH.equals(tableName)) {
             addVillageBlacksmithLoot(event);
+        } else if ("farmers_future_delight".equals(tableName.getNamespace())) {
+            addModernStructureLoot(event, tableName.getPath());
+        } else if (new ResourceLocation("oe", "chests/shipwreck_supply").equals(tableName)) {
+            addShipwreckLoot(event);
         }
+    }
+
+    private static void addModernStructureLoot(LootTableLoadEvent event, String path) {
+        switch (path) {
+            case "chests/bastion_hoglin_stable":
+                addPool(event, "fd_bastion_tools", fixedRolls(1),
+                        entry("diamond_knife", 1, damage(0.15F, 0.8F), randomEnchantment()),
+                        entry("golden_knife", 2, randomEnchantment()), empty(2));
+                addPool(event, "fd_bastion_meat", rangedRolls(1, 2),
+                        countEntry("ham", 4, 2, 5), countEntry("smoked_ham", 2, 2, 5), empty(2));
+                break;
+            case "chests/bastion_treasure":
+                addPool(event, "fd_bastion_treasure", fixedRolls(1),
+                        new LootEntryItem(ModItems.get("diamond_knife"), 1, 0,
+                                new LootFunction[]{damage(0.8F, 1F), randomEnchantment()}, NO_CONDITIONS,
+                                "farmersdelight:enchanted_diamond_knife_loot"),
+                        entry("diamond_knife", 1), empty(6));
+                break;
+            case "chests/pillager_outpost":
+                addPool(event, "fd_outpost_crops", rangedRolls(1, 2),
+                        countEntry("onion", 5, 4, 12), countEntry("onion_crate", 2, 1, 3), empty(2));
+                break;
+            case "chests/ruined_portal":
+                addPool(event, "fd_portal_knife", fixedRolls(1), entry("golden_knife", 1, randomEnchantment()), empty(3));
+                break;
+            case "chests/shipwreck_supply":
+                addShipwreckLoot(event);
+                break;
+            case "chests/village/village_butcher":
+                addVillageButcherLoot(event);
+                break;
+            case "chests/village/village_desert_house":
+                addVillageCropLoot(event, "tomato_seeds", "rice");
+                break;
+            case "chests/village/village_plains_house":
+                addVillageCropLoot(event, "onion", "tomato_seeds");
+                break;
+            case "chests/village/village_savanna_house":
+                addVillageCropLoot(event, "tomato_seeds", "cabbage_seeds");
+                break;
+            case "chests/village/village_snowy_house":
+                addVillageCropLoot(event, "onion", "cabbage_seeds");
+                break;
+            case "chests/village/village_taiga_house":
+                addVillageCropLoot(event, "cabbage_seeds", "rice");
+                break;
+            default:
+                break;
+        }
+    }
+
+    private static LootFunction randomEnchantment() {
+        return new EnchantRandomly(NO_CONDITIONS, java.util.Collections.emptyList());
+    }
+
+    private static void addShipwreckLoot(LootTableLoadEvent event) {
+        addPool(event, "fd_shipwreck_crops", rangedRolls(1, 2),
+                countEntry("tomato_seeds", 6, 2, 4), countEntry("cabbage_seeds", 6, 2, 4),
+                countEntry("onion", 6, 2, 4), countEntry("rice", 6, 2, 4));
+        addPool(event, "fd_shipwreck_rope", rangedRolls(1, 3), countEntry("rope", 2, 4, 12), empty(1));
+    }
+
+    private static void addVillageCropLoot(LootTableLoadEvent event, String first, String second) {
+        addPool(event, "fd_village_crops", rangedRolls(1, 3), countEntry(first, 1, 1, 3), countEntry(second, 1, 1, 3));
     }
     private static void addAbandonedMineshaftLoot(LootTableLoadEvent event) {
         addPool(event, "fd_abandoned_mineshaft_tools", fixedRolls(1),
@@ -75,10 +158,19 @@ public final class ModLootTableEventHandler {
                 countEntry("tomato_seeds", 4, 2, 4),
                 countEntry("rice", 4, 2, 4),
                 countEntry("onion", 3, 2, 4),
-                entry("golden_knife", 1, new EnchantRandomly(NO_CONDITIONS, null)),
+                entry("golden_knife", 1, randomEnchantment()),
                 empty(4));
     }
     private static void addVillageBlacksmithLoot(LootTableLoadEvent event) {
+        addVillageButcherLoot(event);
+        addPool(event, "fd_village_crops", rangedRolls(1, 3),
+                countEntry("onion", 2, 1, 3),
+                countEntry("tomato_seeds", 2, 1, 3),
+                countEntry("cabbage_seeds", 2, 1, 3),
+                countEntry("rice", 2, 1, 3));
+    }
+
+    private static void addVillageButcherLoot(LootTableLoadEvent event) {
         addPool(event, "fd_village_tools", fixedRolls(1),
                 entry("flint_knife", 1),
                 entry("iron_knife", 1),
@@ -89,11 +181,6 @@ public final class ModLootTableEventHandler {
                 countEntry("bacon", 3, 2, 6),
                 countEntry("mutton_chops", 3, 2, 6),
                 empty(1));
-        addPool(event, "fd_village_crops", rangedRolls(1, 3),
-                countEntry("onion", 2, 1, 3),
-                countEntry("tomato_seeds", 2, 1, 3),
-                countEntry("cabbage_seeds", 2, 1, 3),
-                countEntry("rice", 2, 1, 3));
     }
     private static void addPool(LootTableLoadEvent event, String name, RandomValueRange rolls, LootEntry... entries) {
         List<LootEntry> validEntries = new ArrayList<>();

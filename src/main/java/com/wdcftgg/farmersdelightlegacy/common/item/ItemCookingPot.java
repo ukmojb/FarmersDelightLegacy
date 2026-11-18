@@ -18,6 +18,8 @@ import java.util.List;
 
 public class ItemCookingPot extends ItemBlock {
 
+    public static final String MEAL_TOOLTIP_PREFIX = TextFormatting.BLUE + "     ";
+
     public ItemCookingPot(Block block) {
         super(block);
         this.setMaxStackSize(1);
@@ -61,7 +63,8 @@ public class ItemCookingPot extends ItemBlock {
                     .getFormattedText());
         }
 
-        tooltip.add(TextFormatting.BLUE + meal.getDisplayName());
+        tooltip.add(MEAL_TOOLTIP_PREFIX + meal.getDisplayName());
+        tooltip.add("");
 
         ItemStack container = inferContainer(stack, meal);
         if (!container.isEmpty()) {
@@ -80,12 +83,7 @@ public class ItemCookingPot extends ItemBlock {
         TileEntity tileEntity = world.getTileEntity(pos);
         if (tileEntity instanceof TileEntityCookingPot) {
             TileEntityCookingPot pot = (TileEntityCookingPot) tileEntity;
-            ItemStack meal = TileEntityCookingPot.getMealFromItem(stack);
-            if (!meal.isEmpty()) {
-                ItemStack container = TileEntityCookingPot.getContainerFromItem(stack);
-                boolean useDefault = TileEntityCookingPot.useDefaultContainerFromItem(stack);
-                pot.applyStoredMealFromStack(meal, container, useDefault);
-            }
+            pot.readFromItem(stack);
         }
         return true;
     }

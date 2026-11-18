@@ -28,5 +28,16 @@
     "recipes": [
       "farmersdelight:kelp_roll"
     ]
-  }
+  },
+  "conditions": [
+    {
+      "type": "farmersdelight:ingredients_available",
+      "ores": [
+        "mayBeKelp"
+      ],
+      "items": [
+        "farmersdelight:kelp_roll"
+      ]
+    }
+  ]
 }

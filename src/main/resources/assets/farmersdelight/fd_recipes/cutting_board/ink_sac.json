@@ -1,15 +1,22 @@
 {
   "ingredients": [
-    "minecraft:ink_sac"
+    {
+      "item": "minecraft:dye",
+      "data": 0
+    }
   ],
   "tool": {
     "tag": "forge:tools/knives"
   },
   "result": [
     {
-      "item": "minecraft:dye",
-      "count": 2,
-      "data": 0
+      "item": "farmers_future_delight:black_dye",
+      "count": 2
     }
-  ]
+  ],
+  "conditions": {
+    "items": [
+      "farmers_future_delight:black_dye"
+    ]
+  }
 }

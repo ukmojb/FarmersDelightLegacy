@@ -1,6 +1,9 @@
 {
   "ingredients": [
-    "minecraft:blue_orchid"
+    {
+      "item": "minecraft:red_flower",
+      "data": 1
+    }
   ],
   "tool": {
     "tag": "forge:tools/knives"

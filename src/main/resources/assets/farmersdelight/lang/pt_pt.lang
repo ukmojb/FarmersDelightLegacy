@@ -168,9 +168,7 @@ item.farmersdelight.vegetable_noodles.name=Noodles de vegetais
 item.farmersdelight.vegetable_soup.name=Sopa de vegetais
 item.farmersdelight.wheat_dough.name=Massa de trigo
 itemGroup.farmersdelight=Farmer's Delight
-
 item.farmersdelight.pumpkin_pie_slice.name=Fatia de tarte de abobora
-
 farmersdelight.advancement.craft_knife.desc=Constrói uma Faca para obteres mais recursos de plantas e animais
 farmersdelight.advancement.craft_knife=Caçador-coletor
 farmersdelight.advancement.drink_hot_cocoa.desc=Anula um efeito negativo ao beber um Chocolate quente
@@ -220,3 +218,8 @@ farmersdelight.subtitles.cutting_board.remove_item=Item removed from board
 farmersdelight.subtitles.cutting_board.carve_tool=Tool carved on board
 farmersdelight.subtitles.food.take_portion=Portion served
 farmersdelight.subtitles.food.slice=Food sliced
+tile.farmersdelight.wooden_basket.name=Cesto
+subtitles.farmersdelight.block.cooking_pot.boil=Panela a ferver
+subtitles.farmersdelight.block.cutting_board.knife_cut=Faca a cortar
+subtitles.farmersdelight.block.stove.crackle=Fogão a crepitar
+subtitles.farmersdelight.block.tomatoes.pick_tomatoes=Tomates a saltar

@@ -18,33 +18,54 @@ public final class ZenCuttingBoardRecipes {
 
     @ZenMethod
     public static boolean addRecipe(String key, IIngredient[] inputIngredients, IItemStack[] resultStacks) {
-        return registerRecipe(key, CraftTweakerCompatHelper.toStrictIngredientTokens(inputIngredients), DEFAULT_TOOL_TOKENS, resultStacks, null);
+        return addRecipeAdvanced(key, inputIngredients, null, resultStacks, null);
     }
 
     @ZenMethod
     public static boolean addRecipeWithTool(String key, IIngredient[] inputIngredients, IIngredient[] toolIngredients,
                                             IItemStack[] resultStacks) {
-        String[] toolTokens = CraftTweakerCompatHelper.toStrictIngredientTokens(toolIngredients);
-        if (toolTokens == null || toolTokens.length == 0) {
+        if (toolIngredients == null || toolIngredients.length == 0) {
+            crafttweaker.CraftTweakerAPI.logError("Cutting recipe requires a tool: " + key);
             return false;
         }
-        return registerRecipe(key, CraftTweakerCompatHelper.toStrictIngredientTokens(inputIngredients), toolTokens, resultStacks, null);
+        return addRecipeAdvanced(key, inputIngredients, toolIngredients, resultStacks, null);
     }
 
     @ZenMethod
     public static boolean addRecipeWithoutTool(String key, IIngredient[] inputIngredients, IItemStack[] resultStacks) {
-        return registerRecipe(key, CraftTweakerCompatHelper.toStrictIngredientTokens(inputIngredients), new String[0], resultStacks, null);
+        return addRecipeAdvanced(key, inputIngredients, new IIngredient[0], resultStacks, null);
     }
 
     @ZenMethod
     public static boolean addRecipeAdvanced(String key, IIngredient[] inputIngredients, IIngredient[] toolIngredients,
                                             IItemStack[] resultStacks, float[] resultChances) {
-        String[] inputTokens = CraftTweakerCompatHelper.toStrictIngredientTokens(inputIngredients);
-        String[] toolTokens = CraftTweakerCompatHelper.toStrictIngredientTokens(toolIngredients);
-        if (toolIngredients == null) {
-            toolTokens = DEFAULT_TOOL_TOKENS;
+        return addRecipeAdvanced(key, inputIngredients, toolIngredients, resultStacks, resultChances, "");
+    }
+
+    @ZenMethod
+    public static boolean addRecipeAdvanced(String key, IIngredient[] inputs, IIngredient[] tools,
+                                            IItemStack[] outputs, float[] chances, String sound) {
+        return addRecipeAdvanced(key, inputs, tools, outputs, chances, sound, "");
+    }
+
+    @ZenMethod
+    public static boolean addRecipeAdvanced(String key, IIngredient[] inputs, IIngredient[] tools,
+                                            IItemStack[] outputs, float[] chances, String sound, String group) {
+        net.minecraft.util.SoundEvent event = RecipeScript.sound(sound);
+        if (sound != null && !sound.isEmpty() && event == null) {
+            return false;
         }
-        return registerRecipe(key, inputTokens, toolTokens, resultStacks, resultChances);
+        if (outputs == null) {
+            crafttweaker.CraftTweakerAPI.logError("Cutting recipe outputs must not be null: " + key);
+            return false;
+        }
+        net.minecraft.item.ItemStack[] stacks = new net.minecraft.item.ItemStack[outputs.length];
+        for (int index = 0; index < outputs.length; index++) {
+            stacks[index] = CraftTweakerCompatHelper.stackOf(outputs[index]);
+        }
+        return CuttingBoardRecipeManager.registerScriptRecipe(key,
+                CraftTweakerCompatHelper.toCuttingIngredients(inputs, false),
+                CraftTweakerCompatHelper.toCuttingIngredients(tools, true), stacks, chances, event, group);
     }
 
     @ZenMethod
@@ -72,38 +93,66 @@ public final class ZenCuttingBoardRecipes {
         return CuttingBoardRecipeManager.registerScriptRecipe(key, inputTokens, resolvedToolTokens, resultTokens, resultCounts, resultChances);
     }
 
-    private static boolean registerRecipe(String key, String[] inputTokens, String[] toolTokens,
-                                          IItemStack[] resultStacks, float[] resultChances) {
-        if (resultStacks == null || resultStacks.length == 0) {
-            return false;
-        }
-        String[] resultTokens = new String[resultStacks.length];
-        int[] resultCounts = new int[resultStacks.length];
-        for (int index = 0; index < resultStacks.length; index++) {
-            IItemStack resultStack = resultStacks[index];
-            String itemId = CraftTweakerCompatHelper.itemTokenOf(resultStack);
-            net.minecraft.item.ItemStack nativeResult = CraftTweakerCompatHelper.stackOf(resultStack);
-            if (itemId == null || nativeResult.isEmpty()) {
-                return false;
-            }
-            resultTokens[index] = itemId;
-            resultCounts[index] = Math.max(1, nativeResult.getCount());
-        }
-
-        if (inputTokens == null || inputTokens.length == 0) {
-            return false;
-        }
-        return CuttingBoardRecipeManager.registerScriptRecipe(key, inputTokens, toolTokens, resultTokens, resultCounts, resultChances);
+    @ZenMethod
+    public static boolean removeRecipe(String key) {
+        return CuttingBoardRecipeManager.removeRecipe(key);
     }
 
     @ZenMethod
-    public static boolean removeRecipe(String key) {
-        return CuttingBoardRecipeManager.unregisterScriptRecipe(key);
+    public static int removeRecipe(IItemStack[] outputs) {
+        if (outputs == null || outputs.length == 0 || java.util.Arrays.asList(outputs).contains(null)) {
+            crafttweaker.CraftTweakerAPI.logError("Cutting recipe removal requires a nonempty output list");
+            return 0;
+        }
+        IItemStack[] expected = outputs.clone();
+        return CuttingBoardRecipeManager.removeRecipes(recipe -> {
+            java.util.List<net.minecraft.item.ItemStack> actual = recipe.getResultStacks();
+            if (actual.size() != expected.length) {
+                return false;
+            }
+            for (int index = 0; index < expected.length; index++) {
+                if (!expected[index].matches(crafttweaker.api.minecraft.CraftTweakerMC.getIItemStack(actual.get(index)))) {
+                    return false;
+                }
+            }
+            return true;
+        });
+    }
+
+    @ZenMethod
+    public static int removeAll() {
+        return CuttingBoardRecipeManager.removeRecipes(recipe -> true);
+    }
+
+    @ZenMethod
+    public static ZenCuttingRecipe[] getRecipes() {
+        return CuttingBoardRecipeManager.getRecipes().stream().map(ZenCuttingRecipe::new).toArray(ZenCuttingRecipe[]::new);
+    }
+
+    @ZenMethod
+    public static ZenCuttingRecipe getRecipe(String id) {
+        for (CuttingBoardRecipeManager.CuttingBoardRecipeView recipe : CuttingBoardRecipeManager.getRecipes()) {
+            if (recipe.getRecipeId().equals(id)) {
+                return new ZenCuttingRecipe(recipe);
+            }
+        }
+        crafttweaker.CraftTweakerAPI.logError("Unknown cutting recipe: " + id);
+        return null;
+    }
+
+    @ZenMethod
+    public static String[] dumpRecipes() {
+        return java.util.Arrays.stream(getRecipes()).map(ZenCuttingRecipe::toCommandString).toArray(String[]::new);
     }
 
     @ZenMethod
     public static int removeRecipesByOutput(IItemStack outputStack) {
-        return CuttingBoardRecipeManager.removeRecipesByOutput(CraftTweakerCompatHelper.stackOf(outputStack));
+        if (outputStack == null) {
+            crafttweaker.CraftTweakerAPI.logError("Cutting recipe removal requires an output");
+            return 0;
+        }
+        return CuttingBoardRecipeManager.removeRecipes(recipe -> recipe.getResultStacks().stream()
+                .anyMatch(stack -> outputStack.matches(crafttweaker.api.minecraft.CraftTweakerMC.getIItemStack(stack))));
     }
 
     @ZenMethod

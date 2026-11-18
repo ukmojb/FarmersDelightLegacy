@@ -1,12 +1,12 @@
 package com.wdcftgg.farmersdelightlegacy.common.registry;
 
 import com.wdcftgg.farmersdelightlegacy.api.knife.IKnifeItem;
+import com.wdcftgg.farmersdelightlegacy.common.compat.BackportIngredients;
 import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.common.registry.ForgeRegistries;
 import net.minecraftforge.oredict.OreDictionary;
 
@@ -30,6 +30,7 @@ public final class ModOreDictionary {
 
         registerFromModItems();
         registerVanillaFallbacks();
+        ItemCategories.registerAll();
 
         registered = true;
     }
@@ -46,6 +47,8 @@ public final class ModOreDictionary {
         registerTrapdoorOreGroups();
         registerCherryPlankOreGroup();
         registerCampfireOreGroup();
+        BackportIngredients.registerAll();
+        ItemCategories.registerCompat();
 
         compatRegistered = true;
     }
@@ -56,7 +59,6 @@ public final class ModOreDictionary {
         registerOre("cropTomato", "tomato");
         registerOre("cropOnion", "onion");
         registerOre("cropRice", "rice");
-        registerOre("cropRice", "rice_panicle");
 
         registerOre("foodDough", "wheat_dough");
         registerOre("foodPasta", "raw_pasta");
@@ -79,12 +81,10 @@ public final class ModOreDictionary {
         registerOre("cabbageRoolIngredients", "chicken_cuts");
         registerOre("cabbageRoolIngredients", "mutton_chops");
 
-        registerOre("dogPrey", "salmon_slice");
         registerOre("dogPrey", "bacon");
 
         registerOre("cooked_eggs", "fried_egg");
 
-        registerOre("listAllveggie", "cabbage");
         registerOre("listAllveggie", "tomato");
         registerOre("listAllveggie", "onion");
 
@@ -132,6 +132,7 @@ public final class ModOreDictionary {
             boolean registeredVariant = registerOptionalOre(oreName, "futuremc", woodName + "_trapdoor");
             registeredVariant = registerOptionalOre(oreName, "quark", woodName + "_trapdoor") || registeredVariant;
             registeredVariant = registerOptionalOre(oreName, "nb", woodName + "_trapdoor") || registeredVariant;
+            registeredVariant = registerOptionalOre(oreName, "farmers_future_delight", woodName + "_trapdoor") || registeredVariant;
             if ("oak".equals(woodName) || !registeredVariant) {
                 OreDictionary.registerOre(oreName, new ItemStack(Item.getItemFromBlock(Blocks.TRAPDOOR)));
             }
@@ -162,7 +163,6 @@ public final class ModOreDictionary {
     }
 
     private static void registerVanillaFallbacks() {
-        // 1.12.2 needs manual fallback ore registrations for cutting board tool matching.
         registerToolOre("toolAxe", Items.WOODEN_AXE);
         registerToolOre("toolAxe", Items.STONE_AXE);
         registerToolOre("toolAxe", Items.IRON_AXE);
@@ -182,15 +182,16 @@ public final class ModOreDictionary {
         registerToolOre("toolShovel", Items.DIAMOND_SHOVEL);
 
         registerToolOre("toolShears", Items.SHEARS);
-
-        if (!Loader.isModLoaded("futuremc")) {
-            registerOreStack("cropSweetBerry", new ItemStack(Items.APPLE));
-        }
-
-        // In 1.12, dye-like items are distinguished by metadata.
+        registerToolOre("toolHoe", Items.WOODEN_HOE);
+        registerToolOre("toolHoe", Items.STONE_HOE);
+        registerToolOre("toolHoe", Items.IRON_HOE);
+        registerToolOre("toolHoe", Items.GOLDEN_HOE);
+        registerToolOre("toolHoe", Items.DIAMOND_HOE);
         registerOreStack("dyeWhite", new ItemStack(Items.DYE, 1, 15));
         registerOreStack("dyeBrown", new ItemStack(Items.DYE, 1, 3));
         registerOreStack("dyeBlack", new ItemStack(Items.DYE, 1, 0));
+        registerOreStack("foodBread", new ItemStack(Items.BREAD));
+        registerOreStack("cropBeetroot", new ItemStack(Items.BEETROOT));
 
         OreDictionary.registerOre("listAllbeefraw", new ItemStack(Items.BEEF));
         OreDictionary.registerOre("rawOrMincedBeef", new ItemStack(Items.BEEF));
@@ -209,11 +210,8 @@ public final class ModOreDictionary {
         OreDictionary.registerOre("potatoOrBaked", new ItemStack(Items.BAKED_POTATO));
         OreDictionary.registerOre("dumplingFilling", new ItemStack(Items.BEEF));
         OreDictionary.registerOre("dumplingFilling", new ItemStack(Items.CHICKEN));
-        OreDictionary.registerOre("dumplingFilling", new ItemStack(Items.MUTTON));
         OreDictionary.registerOre("dumplingFilling", new ItemStack(Items.PORKCHOP));
-        OreDictionary.registerOre("dumplingFilling", new ItemStack(Items.RABBIT));
         OreDictionary.registerOre("dumplingFilling", new ItemStack(Item.getItemFromBlock(Blocks.BROWN_MUSHROOM)));
-        OreDictionary.registerOre("dumplingFilling", new ItemStack(Item.getItemFromBlock(Blocks.RED_MUSHROOM)));
 
         OreDictionary.registerOre("listAllEgg", new ItemStack(Items.EGG));
         OreDictionary.registerOre("listAllmilk", new ItemStack(Items.MILK_BUCKET));
@@ -240,12 +238,6 @@ public final class ModOreDictionary {
         OreDictionary.registerOre("dogPrey", new ItemStack(Items.CHICKEN));
         OreDictionary.registerOre("dogPrey", new ItemStack(Items.MUTTON));
         OreDictionary.registerOre("dogPrey", new ItemStack(Items.RABBIT));
-
-        if (Loader.isModLoaded("oe")) {
-            OreDictionary.registerOre("mayBeKelp", Item.getByNameOrId("oe:dried_kelp"));
-        } else {
-            OreDictionary.registerOre("mayBeKelp", new ItemStack(Items.REEDS));
-        }
 
         OreDictionary.registerOre("listAllmushroom", new ItemStack(Item.getItemFromBlock(Blocks.BROWN_MUSHROOM)));
         OreDictionary.registerOre("listAllmushroom", new ItemStack(Item.getItemFromBlock(Blocks.RED_MUSHROOM)));
@@ -307,16 +299,17 @@ public final class ModOreDictionary {
         tagMap.put("forge:berries", "listAllberry");
         tagMap.put("forge:vegetables", "listAllveggie");
         tagMap.put("forge:eggs", "listAllEgg");
-        tagMap.put("forge:cooked_eggs", "listAllEgg");
+        tagMap.put("forge:cooked_eggs", "cooked_eggs");
         tagMap.put("forge:milk", "listAllmilk");
         tagMap.put("forge:dough", "foodDough");
         tagMap.put("forge:pasta", "foodPasta");
         tagMap.put("forge:bones", "bone");
-        tagMap.put("forge:salad_ingredients", "listAllveggie");
-        tagMap.put("farmersdelight:cabbage_roll_ingredients", "listAllveggie");
+        tagMap.put("forge:salad_ingredients", "foodLeafyGreen");
+        tagMap.put("farmersdelight:cabbage_roll_ingredients", "fdCabbageRollIngredients");
         tagMap.put("farmersdelight:wolf_prey", "listAllmeatraw");
         tagMap.put("farmersdelight:canvas_signs", "fdCanvasSigns");
         tagMap.put("farmersdelight:hanging_canvas_signs", "fdHangingCanvasSigns");
+        tagMap.putAll(ItemCategories.tagMappings());
         return Collections.unmodifiableMap(tagMap);
     }
 }

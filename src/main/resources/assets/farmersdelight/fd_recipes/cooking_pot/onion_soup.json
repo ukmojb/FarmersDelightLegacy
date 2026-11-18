@@ -1,0 +1,13 @@
+{
+  "ingredients": [
+    "ore:cropOnion",
+    "ore:cropOnion",
+    "ore:foodBread",
+    "ore:listAllmilk"
+  ],
+  "experience": 1,
+  "result": {
+    "item": "farmersdelight:onion_soup",
+    "count": 1
+  }
+}

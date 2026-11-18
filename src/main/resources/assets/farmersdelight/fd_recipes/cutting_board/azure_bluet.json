@@ -1,6 +1,9 @@
 {
   "ingredients": [
-    "minecraft:azure_bluet"
+    {
+      "item": "minecraft:red_flower",
+      "data": 3
+    }
   ],
   "tool": {
     "tag": "forge:tools/knives"

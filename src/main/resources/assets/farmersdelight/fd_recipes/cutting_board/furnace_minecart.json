@@ -1,0 +1,19 @@
+{
+  "conditions": {},
+  "ingredients": [
+    {
+      "item": "minecraft:furnace_minecart"
+    }
+  ],
+  "tool": "ore:toolHoe",
+  "result": [
+    {
+      "item": "minecraft:minecart",
+      "count": 1
+    },
+    {
+      "item": "minecraft:furnace",
+      "count": 1
+    }
+  ]
+}

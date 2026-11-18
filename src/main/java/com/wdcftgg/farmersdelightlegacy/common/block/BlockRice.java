@@ -1,5 +1,6 @@
 package com.wdcftgg.farmersdelightlegacy.common.block;
 
+import com.wdcftgg.farmersdelightlegacy.common.compat.FluidloggingCompat;
 import com.wdcftgg.farmersdelightlegacy.common.registry.ModBlocks;
 import com.wdcftgg.farmersdelightlegacy.common.registry.ModItems;
 import net.minecraft.block.*;
@@ -11,7 +12,6 @@ import net.minecraft.block.state.BlockStateContainer;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.Item;
-import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
@@ -88,13 +88,13 @@ public class BlockRice extends BlockBush implements IGrowable {
 
     @Override
     public boolean canPlaceBlockAt(World worldIn, BlockPos pos) {
-        return super.canPlaceBlockAt(worldIn, pos) && this.hasNearbyWater(worldIn, pos.down());
+        return super.canPlaceBlockAt(worldIn, pos) && FluidloggingCompat.hasAdjacentWater(worldIn, pos.down());
     }
 
     @Override
     public boolean canBlockStay(World worldIn, BlockPos pos, IBlockState state) {
         IBlockState soilState = worldIn.getBlockState(pos.down());
-        return this.canSustainBush(soilState) && this.hasNearbyWater(worldIn, pos.down());
+        return this.canSustainBush(soilState) && FluidloggingCompat.hasAdjacentWater(worldIn, pos.down());
     }
 
     @Override
@@ -103,8 +103,7 @@ public class BlockRice extends BlockBush implements IGrowable {
             return;
         }
 
-        if (!this.canBlockStay(worldIn, pos, state)) {
-            worldIn.destroyBlock(pos, true);
+        if (removeIfUnsupported(worldIn, pos, state)) {
             return;
         }
 
@@ -129,16 +128,24 @@ public class BlockRice extends BlockBush implements IGrowable {
 
     @Override
     public void neighborChanged(IBlockState state, World worldIn, BlockPos pos, Block blockIn, BlockPos fromPos) {
-        if (!this.canBlockStay(worldIn, pos, state)) {
-            worldIn.destroyBlock(pos, true);
-            return;
+        if (!removeIfUnsupported(worldIn, pos, state)) {
+            this.updateSupportingState(worldIn, pos);
         }
-        this.updateSupportingState(worldIn, pos);
     }
 
     @Override
     public Item getItemDropped(IBlockState state, Random rand, int fortune) {
         return ModItems.ITEMS.get("rice");
+    }
+
+    protected final boolean removeIfUnsupported(World world, BlockPos pos, IBlockState state) {
+        if (canBlockStay(world, pos, state)) {
+            return false;
+        }
+        world.playEvent(2001, pos, Block.getStateId(state));
+        dropBlockAsItem(world, pos, state, 0);
+        FluidloggingCompat.removeBlock(world, pos);
+        return true;
     }
 
     @Override
@@ -179,7 +186,7 @@ public class BlockRice extends BlockBush implements IGrowable {
 
         int remainingGrowth = ageGrowth - this.getMaxAge() - 1;
         if (this.tryGrowPanicles(worldIn, pos, remainingGrowth)) {
-            worldIn.setBlockState(pos, state.withProperty(AGE, this.getMaxAge()), 2);
+            worldIn.setBlockState(pos, worldIn.getBlockState(pos).withProperty(AGE, this.getMaxAge()), 2);
         }
     }
 
@@ -223,14 +230,5 @@ public class BlockRice extends BlockBush implements IGrowable {
         if (current.getValue(SUPPORTING) != supporting) {
             worldIn.setBlockState(pos, current.withProperty(SUPPORTING, supporting), 2);
         }
-    }
-
-    private boolean hasNearbyWater(World worldIn, BlockPos soilPos) {
-        for (EnumFacing facing : EnumFacing.Plane.HORIZONTAL) {
-            if (worldIn.getBlockState(soilPos.offset(facing)).getMaterial() == Material.WATER) {
-                return true;
-            }
-        }
-        return false;
     }
 }

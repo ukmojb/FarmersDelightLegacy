@@ -1,7 +1,7 @@
 {
   "ingredients": [
     "ore:bone",
-    "ore:listAllmushroom"
+    "ore:fdBoneBrothIngredients"
   ],
   "experience": 0.35,
   "result": {

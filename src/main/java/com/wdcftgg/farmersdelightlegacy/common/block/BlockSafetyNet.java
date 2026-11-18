@@ -1,9 +1,11 @@
 package com.wdcftgg.farmersdelightlegacy.common.block;
 
+import com.wdcftgg.farmersdelightlegacy.common.compat.FluidloggingCompat;
 import net.minecraft.block.Block;
 import net.minecraft.block.SoundType;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.BlockFaceShape;
+import net.minecraft.block.state.BlockStateContainer;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
@@ -23,6 +25,16 @@ public class BlockSafetyNet extends Block {
         this.setHardness(0.2F);
         this.setResistance(0.2F);
         this.setSoundType(SoundType.CLOTH);
+    }
+
+    @Override
+    protected BlockStateContainer createBlockState() {
+        return FluidloggingCompat.createBlockState(this);
+    }
+
+    @Override
+    public int getMetaFromState(IBlockState state) {
+        return 0;
     }
 
     @Override

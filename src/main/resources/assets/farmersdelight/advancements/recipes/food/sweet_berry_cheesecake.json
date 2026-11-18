@@ -28,5 +28,16 @@
     "recipes": [
       "farmersdelight:sweet_berry_cheesecake"
     ]
-  }
+  },
+  "conditions": [
+    {
+      "type": "farmersdelight:ingredients_available",
+      "ores": [
+        "cropSweetBerry"
+      ],
+      "items": [
+        "farmersdelight:sweet_berry_cheesecake"
+      ]
+    }
+  ]
 }

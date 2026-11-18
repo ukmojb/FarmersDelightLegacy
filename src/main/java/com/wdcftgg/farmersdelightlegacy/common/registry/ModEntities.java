@@ -2,6 +2,7 @@ package com.wdcftgg.farmersdelightlegacy.common.registry;
 
 import com.wdcftgg.farmersdelightlegacy.FarmersDelightLegacy;
 import com.wdcftgg.farmersdelightlegacy.common.entity.EntityRottenTomato;
+import com.wdcftgg.farmersdelightlegacy.common.entity.EntityFireproofItem;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fml.common.registry.EntityRegistry;
 
@@ -21,6 +22,8 @@ public final class ModEntities {
                 64,
                 10,
                 true);
+        EntityRegistry.registerModEntity(new ResourceLocation(FarmersDelightLegacy.MOD_ID, "fireproof_item"),
+                EntityFireproofItem.class, "fireproof_item", 2, FarmersDelightLegacy.INSTANCE, 64, 20, true);
     }
 }
 

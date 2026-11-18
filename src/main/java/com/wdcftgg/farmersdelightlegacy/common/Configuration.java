@@ -1,11 +1,14 @@
 package com.wdcftgg.farmersdelightlegacy.common;
 
 import com.wdcftgg.farmersdelightlegacy.FarmersDelightLegacy;
+import com.wdcftgg.farmersdelightlegacy.common.registry.ModBlocks;
+import com.wdcftgg.farmersdelightlegacy.common.registry.BackportContent;
 import com.wdcftgg.farmersdelightlegacy.common.compat.WanderingTradersBackportCompat;
 import net.minecraft.block.Block;
 import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
 import net.minecraft.item.Item;
+import net.minecraft.item.ItemFood;
 import net.minecraft.item.ItemSoup;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
@@ -24,6 +27,28 @@ import java.util.*;
 
 public final class Configuration {
 
+    private static final String[] DEFAULT_HORSE_FEED_USERS = {
+            "minecraft:horse", "minecraft:skeleton_horse", "minecraft:zombie_horse",
+            "minecraft:donkey", "minecraft:mule", "minecraft:llama", "farmers_future_delight:trader_llama"
+    };
+    private static final String[] DEFAULT_DOG_FOOD_USERS = {"minecraft:wolf"};
+    private static final String[] DEFAULT_HORSE_FEED_TEMPTED = {"minecraft:horse", "minecraft:donkey", "minecraft:mule"};
+    private static final String[] DEFAULT_PLANTED_FROM_BELOW = {
+            "farmers_future_delight:cave_vines", "farmers_future_delight:cave_vines_plant"
+    };
+    private static final String[] DEFAULT_UNAFFECTED_BY_RICH_SOIL = {
+            "minecraft:grass", "minecraft:tallgrass", "minecraft:double_plant@0", "minecraft:double_plant@1",
+            "minecraft:double_plant@4", "minecraft:double_plant@5",
+            "farmersdelight:sandy_shrub", "farmersdelight:brown_mushroom_colony", "farmersdelight:red_mushroom_colony",
+            "farmersdelight:wild_cabbages", "farmersdelight:wild_onions", "farmersdelight:wild_tomatoes",
+            "farmersdelight:wild_carrots", "farmersdelight:wild_potatoes", "farmersdelight:wild_beetroots", "farmersdelight:wild_rice",
+            "farmers_future_delight:moss_block", "farmers_future_delight:crimson_nylium", "farmers_future_delight:warped_nylium",
+            "farmers_future_delight:twisting_vines", "farmers_future_delight:twisting_vines_plant",
+            "farmers_future_delight:big_dripleaf", "farmers_future_delight:big_dripleaf_waterlogged", "farmers_future_delight:big_dripleaf_stem",
+            "suikecherry:pink_petals"
+    };
+    private static final String[] DEFAULT_COLONY_GROWABLE_ON = {"farmersdelight:rich_soil"};
+
     private static final int[] defaultWildCropDimensions = new int[]{0};
     private static final String[] emptyWildCropBiomes = new String[0];
     private static final String[] wildCropGenerationCategoryPaths = new String[]{
@@ -40,17 +65,24 @@ public final class Configuration {
     public static boolean enableRopeReeling = true;
     public static String[] canvasSignDarkBackgroundList = new String[]{"gray", "purple", "blue", "brown", "green", "red", "black"};
     public static boolean toolAxeUsesItemAxeCheck = false;
+    public static String[] horseFeedUsers = DEFAULT_HORSE_FEED_USERS.clone();
+    public static String[] horseFeedTempted = DEFAULT_HORSE_FEED_TEMPTED.clone();
+    public static String[] dogFoodUsers = DEFAULT_DOG_FOOD_USERS.clone();
 
     public static final String CATEGORY_FARMING = "farming";
     public static String defaultTomatoVineRope = "farmersdelight:rope";
     public static boolean enableTomatoVineClimbingTaggedRopes = true;
+    public static boolean enableTomatoRopePermanence = true;
+    public static String[] plantedFromBelow = DEFAULT_PLANTED_FROM_BELOW.clone();
+    public static String[] unaffectedByRichSoil = DEFAULT_UNAFFECTED_BY_RICH_SOIL.clone();
+    public static String[] mushroomColonyGrowableOn = DEFAULT_COLONY_GROWABLE_ON.clone();
 
     public static final String CATEGORY_RECIPE_BOOK = "recipe_book";
     public static boolean enableRecipeBookCookingPot = true;
 
     public static final String CATEGORY_OVERRIDES = "overrides";
     public static boolean vanillaSoupExtraEffects = true;
-    public static boolean rabbitStewJumpBoost = true;
+    public static boolean enableRabbitStewBuff = true;
     public static boolean dispenserUsesToolsOnCuttingBoard = true;
     public static boolean enableCanvasSignEditing = true;
     public static boolean enablePumpkinPieSneakToPlace = false;
@@ -93,6 +125,9 @@ public final class Configuration {
     private static final String[] DEFAULT_SOUP_ITEMS = new String[]{"minecraft:mushroom_stew", "minecraft:beetroot_soup", "minecraft:rabbit_stew"};
     private static final String[] ROPE_ORE_NAMES = new String[]{"fdRopes", "rope", "blockRope"};
     private static final Set<Item> STACK_SIZE_OVERRIDDEN_SOUPS = new HashSet<>();
+    private static ItemFood overriddenRabbitStew;
+    private static int originalRabbitNutrition;
+    private static float originalRabbitSaturation;
     private static net.minecraftforge.common.config.Configuration config;
     private static File configDirectory;
     private static boolean wildCropBiomeDefaultInitializationReady;
@@ -124,6 +159,7 @@ public final class Configuration {
         }
 
         config.load();
+        BackportContent.load(config);
         if (config.hasChanged()) {
             config.save();
         }
@@ -135,6 +171,7 @@ public final class Configuration {
         }
 
         config.load();
+        BackportContent.load(config);
 
         enableVanillaCropCrates = config.getBoolean("enableVanillaCropCrates", CATEGORY_SETTINGS, true,
                 "Farmer's Delight adds crates (3x3) for vanilla crops, similar to Quark and Thermal Cultivation. Should they be craftable?");
@@ -152,20 +189,35 @@ public final class Configuration {
                 "Dye colors that make Canvas Sign text render white by default. Valid values: white, orange, magenta, light_blue, yellow, lime, pink, gray, light_gray, cyan, purple, blue, brown, green, red, black.");
         toolAxeUsesItemAxeCheck = config.getBoolean("toolAxeUsesItemAxeCheck", CATEGORY_SETTINGS, true,
                 "When a Cutting Board recipe tool is ore:toolAxe, match the held tool with instanceof ItemAxe instead of the OreDictionary list.");
+        horseFeedUsers = config.getStringList("horseFeedUsers", CATEGORY_SETTINGS, DEFAULT_HORSE_FEED_USERS,
+                "接受马饲料的实体注册 ID；马类实体必须已驯服。");
+        horseFeedTempted = config.getStringList("horseFeedTempted", CATEGORY_SETTINGS, DEFAULT_HORSE_FEED_TEMPTED,
+                "手持马饲料时跟随玩家的实体注册 ID；实体必须使用地面寻路。");
+        dogFoodUsers = config.getStringList("dogFoodUsers", CATEGORY_SETTINGS, DEFAULT_DOG_FOOD_USERS,
+                "接受狗粮的实体注册 ID；可驯服实体必须已驯服。");
         defaultTomatoVineRope = config.getString("defaultTomatoVineRope", CATEGORY_FARMING, "farmersdelight:rope",
                 "Which rope should Tomato Vines leave behind when mined by hand?");
         enableTomatoVineClimbingTaggedRopes = config.getBoolean("enableTomatoVineClimbingTaggedRopes", CATEGORY_FARMING, true,
                 "Should tomato vines be able to climb ropes registered through 1.12.2 OreDictionary entries fdRopes, rope or blockRope?");
+        enableTomatoRopePermanence = config.getBoolean("enableTomatoRopePermanence", CATEGORY_FARMING, true,
+                "破坏或替换绳上番茄时保留绳索。关闭后允许命令和区域编辑直接替换；玩家采挖仍保留绳索。");
+        plantedFromBelow = config.getStringList("plantedFromBelow", CATEGORY_FARMING, DEFAULT_PLANTED_FROM_BELOW,
+                "从上方方块底面生长的植物，沃土仅从下方促生此类植物。填写方块注册 ID，可用 @元数据 限定状态。");
+        unaffectedByRichSoil = config.getStringList("unaffectedByRichSoil", CATEGORY_FARMING, DEFAULT_UNAFFECTED_BY_RICH_SOIL,
+                "不接受沃土骨粉促生的方块注册 ID，可用 @元数据 限定状态。");
+        mushroomColonyGrowableOn = config.getStringList("mushroomColonyGrowableOn", CATEGORY_FARMING, DEFAULT_COLONY_GROWABLE_ON,
+                "允许蘑菇群落自然生长的地面方块注册 ID，可用 @元数据 限定状态。");
 
         enableRecipeBookCookingPot = config.getBoolean("enableRecipeBookCookingPot", CATEGORY_RECIPE_BOOK, true,
                 "Should the Cooking Pot have a Recipe Book available on its interface? (Kept for upstream parity; 1.12.2 GUI has no recipe book widget.)");
 
         vanillaSoupExtraEffects = config.getBoolean("vanillaSoupExtraEffects", CATEGORY_OVERRIDES, true,
                 "Should soups and stews from vanilla Minecraft grant additional effects, like meals from this mod?");
-        rabbitStewJumpBoost = config.getBoolean("rabbitStewJumpBoost", CATEGORY_OVERRIDES, true,
-                "Should Rabbit Stew grant users the jumping prowess of a rabbit when eaten?");
+        enableRabbitStewBuff = config.getBoolean("enableRabbitStewBuff", CATEGORY_OVERRIDES, true,
+                "启用后，兔肉煲恢复 14 点饥饿值、21 点饱和度，并提供 5 分钟滋养。");
+        config.getCategory(CATEGORY_OVERRIDES).remove("rabbitStewJumpBoost");
         dispenserUsesToolsOnCuttingBoard = config.getBoolean("dispenserUsesToolsOnCuttingBoard", CATEGORY_OVERRIDES, true,
-                "Should the Dispenser be able to operate a Cutting Board in front of it? (Kept for upstream parity; dispenser cutting is not present in this 1.12.2 port.)");
+                "Should the Dispenser be able to operate a Cutting Board in front of it?");
         enableCanvasSignEditing = config.getBoolean("enableCanvasSignEditing", CATEGORY_OVERRIDES, true,
                 "If enabled, right-clicking a Canvas Sign opens its text editor.");
         enablePumpkinPieSneakToPlace = config.getBoolean("enablePumpkinPieSneakToPlace", CATEGORY_OVERRIDES, false,
@@ -215,9 +267,38 @@ public final class Configuration {
         foodEffectTooltip = config.getBoolean("foodEffectTooltip", CATEGORY_CLIENT, true,
                 "Should meal and drink tooltips display which effects they provide?");
 
+        configureGuiProperties();
         if (config.hasChanged()) {
             config.save();
         }
+    }
+
+    private static void configureGuiProperties() {
+        for (String name : config.getCategoryNames()) {
+            ConfigCategory category = config.getCategory(name);
+            category.setLanguageKey("farmersdelight.configuration.category." + name);
+            for (Property property : category.values()) {
+                property.setLanguageKey("farmersdelight.configuration." + property.getName());
+            }
+        }
+        config.getCategory(CATEGORY_RECIPE_BOOK).setShowInGui(false);
+        config.getCategory(CATEGORY_SETTINGS).get("enableVanillaCropCrates").setRequiresMcRestart(true);
+        config.getCategory(CATEGORY_WORLD).setRequiresWorldRestart(true);
+        config.getCategory(CATEGORY_WORLD).get("genVillageCompostHeaps").setRequiresMcRestart(true);
+        for (String path : wildCropGenerationCategoryPaths) {
+            config.getCategory(CATEGORY_WORLD + "." + path).get("biomesInitialized").setShowInGui(false);
+        }
+    }
+
+    public static List<ConfigCategory> getConfigCategories() {
+        List<ConfigCategory> categories = new ArrayList<>();
+        for (String name : config.getCategoryNames()) {
+            ConfigCategory category = config.getCategory(name);
+            if (!category.isChild() && category.showInGui()) {
+                categories.add(category);
+            }
+        }
+        return categories;
     }
 
     private static int getWorldChance(String categoryPath, int defaultValue) {
@@ -243,6 +324,7 @@ public final class Configuration {
             String[] biomeFallbackValues = shouldInitializeBiomes ? defaultBiomes : emptyWildCropBiomes;
             biomeProperty = config.get(category, "biomes", biomeFallbackValues,
                     "Biome registry ids used by this wild crop generator. When biomesInitialized is false, this list is regenerated from the built-in BiomeDictionary and temperature rules after biome registration is complete.");
+            biomeProperty.setDefaultValues(defaultBiomes);
         }
         Property biomesAreWhitelistProperty = config.get(category, "biomesAreWhitelist", true,
                 "If true, biomes is a whitelist. If false, biomes is a blacklist.");
@@ -374,6 +456,23 @@ public final class Configuration {
 
     public static void applyRuntimeOverrides() {
         applyStackSizeOverrides();
+        applyRabbitStewBuff();
+    }
+
+    private static void applyRabbitStewBuff() {
+        if (enableRabbitStewBuff) {
+            if (overriddenRabbitStew == null) {
+                overriddenRabbitStew = (ItemFood) Items.RABBIT_STEW;
+                originalRabbitNutrition = overriddenRabbitStew.healAmount;
+                originalRabbitSaturation = overriddenRabbitStew.saturationModifier;
+            }
+            overriddenRabbitStew.healAmount = 14;
+            overriddenRabbitStew.saturationModifier = 0.75F;
+        } else if (overriddenRabbitStew != null) {
+            overriddenRabbitStew.healAmount = originalRabbitNutrition;
+            overriddenRabbitStew.saturationModifier = originalRabbitSaturation;
+            overriddenRabbitStew = null;
+        }
     }
 
     private static void applyStackSizeOverrides() {
@@ -419,19 +518,22 @@ public final class Configuration {
     }
 
     public static Block getDefaultTomatoVineRopeBlock() {
+        if ("farmersdelight:rope".equals(defaultTomatoVineRope)) {
+            return ModBlocks.ROPE;
+        }
         Block block = getBlock(defaultTomatoVineRope);
         if (block != null && block != Blocks.AIR) {
             return block;
         }
-        return getBlock("farmersdelight:rope");
+        FarmersDelightLegacy.LOGGER.warn("番茄返还绳索配置 {} 未注册有效方块，使用 farmersdelight:rope", defaultTomatoVineRope);
+        return ModBlocks.ROPE;
     }
 
     public static boolean isTomatoVineClimbableRope(Block block) {
         if (block == null || block == Blocks.AIR) {
             return false;
         }
-        Block defaultRopeBlock = getDefaultTomatoVineRopeBlock();
-        if (block == defaultRopeBlock) {
+        if (block == ModBlocks.ROPE) {
             return true;
         }
         return enableTomatoVineClimbingTaggedRopes && hasRopeOreDictionaryEntry(block);
@@ -535,6 +637,9 @@ public final class Configuration {
         public static void onConfigChanged(ConfigChangedEvent.OnConfigChangedEvent event) {
             if (!FarmersDelightLegacy.MOD_ID.equals(event.getModID())) {
                 return;
+            }
+            if (config != null) {
+                config.save();
             }
             syncAfterBiomeRegistration();
             applyRuntimeOverrides();

@@ -1,13 +1,15 @@
 {
   "ingredients": [
-    "minecraft:melon"
+    {
+      "item": "minecraft:melon_block"
+    }
   ],
   "tool": {
     "tag": "forge:tools/knives"
   },
   "result": [
     {
-      "item": "minecraft:melon_slice",
+      "item": "minecraft:melon",
       "count": 9
     }
   ]

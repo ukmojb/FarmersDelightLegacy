@@ -1,8 +1,8 @@
 package com.wdcftgg.farmersdelightlegacy.common.item;
 
 import com.wdcftgg.farmersdelightlegacy.common.Configuration;
+import com.wdcftgg.farmersdelightlegacy.common.registry.ModEffects;
 import net.minecraft.client.util.ITooltipFlag;
-import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemFood;
 import net.minecraft.item.ItemStack;
@@ -27,6 +27,7 @@ public class ItemFoodTooltip extends ItemFood {
     protected final float saturationAmount;
     protected final List<FoodEffectEntry> foodEffects;
     protected final String[] extraTooltipKeys;
+    private int useDuration = 32;
 
     public ItemFoodTooltip(int amount, float saturation, boolean isWolfFood) {
         this(amount, saturation, isWolfFood, null, 0, 0, 0.0F);
@@ -47,9 +48,17 @@ public class ItemFoodTooltip extends ItemFood {
         this.extraTooltipKeys = extraTooltipKeys == null ? new String[0] : extraTooltipKeys;
     }
 
+    public ItemFoodTooltip setUseDuration(int ticks) {
+        if (ticks <= 0) {
+            throw new IllegalArgumentException("Food use duration must be positive");
+        }
+        this.useDuration = ticks;
+        return this;
+    }
+
     @Override
-    public ItemStack onItemUseFinish(ItemStack stack, World worldIn, EntityLivingBase entityLiving) {
-        return super.onItemUseFinish(stack, worldIn, entityLiving);
+    public int getMaxItemUseDuration(ItemStack stack) {
+        return useDuration;
     }
 
     @Override
@@ -70,12 +79,6 @@ public class ItemFoodTooltip extends ItemFood {
         if (!Configuration.foodEffectTooltip) {
             return;
         }
-
-//        tooltip.add(TextFormatting.GRAY + new TextComponentTranslation("farmersdelight.tooltip.food.hunger",
-//                String.valueOf(this.foodAmount)).getFormattedText());
-//        float restoredSaturation = this.saturationAmount * this.foodAmount * 2.0F;
-//        tooltip.add(TextFormatting.GRAY + new TextComponentTranslation("farmersdelight.tooltip.food.saturation",
-//                String.format(Locale.ROOT, "%.1f", restoredSaturation)).getFormattedText());
 
         for (FoodEffectEntry effectEntry : this.foodEffects) {
             effectEntry.addTooltip(tooltip);
@@ -131,7 +134,8 @@ public class ItemFoodTooltip extends ItemFood {
 
             Potion potion = ForgeRegistries.POTIONS.getValue(this.effectId);
             if (potion != null) {
-                player.addPotionEffect(new PotionEffect(potion, this.duration, this.amplifier));
+                player.addPotionEffect(new PotionEffect(potion, this.duration, this.amplifier, false,
+                        potion != ModEffects.NOURISHMENT));
             }
         }
 

@@ -1,5 +1,6 @@
 package com.wdcftgg.farmersdelightlegacy.common.block;
 
+import com.wdcftgg.farmersdelightlegacy.common.compat.FluidloggingCompat;
 import com.wdcftgg.farmersdelightlegacy.FarmersDelightLegacy;
 import com.wdcftgg.farmersdelightlegacy.common.gui.ModGuiHandler;
 import com.wdcftgg.farmersdelightlegacy.common.registry.ModSounds;
@@ -7,7 +8,6 @@ import com.wdcftgg.farmersdelightlegacy.common.tile.TileEntityCookingPot;
 import net.minecraft.block.BlockContainer;
 import net.minecraft.block.BlockHorizontal;
 import net.minecraft.block.material.Material;
-import net.minecraft.block.properties.IProperty;
 import net.minecraft.block.properties.PropertyBool;
 import net.minecraft.block.properties.PropertyDirection;
 import net.minecraft.block.state.BlockFaceShape;
@@ -22,6 +22,7 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.*;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 
@@ -76,14 +77,17 @@ public class BlockCookingPot extends BlockContainer {
     @Override
     public void breakBlock(World worldIn, BlockPos pos, IBlockState state) {
         boolean suppressPotDrop = CREATIVE_EMPTY_BREAKS.remove(pos.toLong());
+        TileEntity tile = worldIn.getTileEntity(pos);
+        if (!worldIn.isRemote && tile instanceof TileEntityCookingPot) {
+            ((TileEntityCookingPot) tile).dropExperience(pos.getX() + 0.5D, pos.getY() + 0.5D, pos.getZ() + 0.5D);
+        }
         if (!worldIn.isRemote && worldIn.getGameRules().getBoolean("doTileDrops")) {
             TileEntity tileEntity = worldIn.getTileEntity(pos);
             if (tileEntity instanceof TileEntityCookingPot) {
                 TileEntityCookingPot cookingPot = (TileEntityCookingPot) tileEntity;
                 if (!suppressPotDrop) {
                     ItemStack potDrop = new ItemStack(Item.getItemFromBlock(this));
-                    ItemStack meal = cookingPot.getStoredMealStack();
-                    TileEntityCookingPot.writeMealToItem(potDrop, meal, cookingPot.getContainer(), cookingPot.isUsingDefaultMealContainer());
+                    cookingPot.writeToItem(potDrop);
                     InventoryHelper.spawnItemStack(worldIn, pos.getX(), pos.getY(), pos.getZ(), potDrop);
                 }
 
@@ -98,6 +102,16 @@ public class BlockCookingPot extends BlockContainer {
     }
 
     @Override
+    public ItemStack getPickBlock(IBlockState state, RayTraceResult target, World world, BlockPos pos, EntityPlayer player) {
+        ItemStack stack = new ItemStack(Item.getItemFromBlock(this));
+        TileEntity tile = world.getTileEntity(pos);
+        if (tile instanceof TileEntityCookingPot) {
+            ((TileEntityCookingPot) tile).writeToItem(stack);
+        }
+        return stack;
+    }
+
+    @Override
     public int quantityDropped(Random random) {
         return 0;
     }
@@ -105,6 +119,11 @@ public class BlockCookingPot extends BlockContainer {
     @Override
     public EnumBlockRenderType getRenderType(IBlockState state) {
         return EnumBlockRenderType.MODEL;
+    }
+
+    @Override
+    public BlockRenderLayer getRenderLayer() {
+        return BlockRenderLayer.CUTOUT;
     }
 
     @Override
@@ -178,7 +197,7 @@ public class BlockCookingPot extends BlockContainer {
 
     @Override
     protected BlockStateContainer createBlockState() {
-        return new BlockStateContainer(this, new IProperty[]{FACING, SUPPORT});
+        return FluidloggingCompat.createBlockState(this, FACING, SUPPORT);
     }
 
     @Override

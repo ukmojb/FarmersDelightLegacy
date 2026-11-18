@@ -4,15 +4,10 @@
     {
       "type": "forge:not",
       "value": {
-        "type": "forge:mod_loaded",
-        "modid": "campfire"
-      }
-    },
-    {
-      "type": "forge:not",
-      "value": {
-        "type": "forge:mod_loaded",
-        "modid": "futuremc"
+        "type": "farmersdelight:ingredients_available",
+        "ores": [
+          "campfire"
+        ]
       }
     }
   ],

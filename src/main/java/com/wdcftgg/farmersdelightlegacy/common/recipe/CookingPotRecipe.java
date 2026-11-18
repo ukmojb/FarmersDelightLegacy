@@ -12,6 +12,7 @@ import java.util.Objects;
 public class CookingPotRecipe {
 
     private final String recipeId;
+    private final String group;
     private final List<IngredientEntry> ingredients;
     private final ItemStack resultStack;
     private final ItemStack outputContainer;
@@ -21,7 +22,13 @@ public class CookingPotRecipe {
 
     public CookingPotRecipe(String recipeId, List<IngredientEntry> ingredients, ItemStack resultStack, ItemStack outputContainer,
                             int cookTime, float experience, boolean hasContainerDefinition) {
+        this(recipeId, ingredients, resultStack, outputContainer, cookTime, experience, hasContainerDefinition, "");
+    }
+
+    public CookingPotRecipe(String recipeId, List<IngredientEntry> ingredients, ItemStack resultStack, ItemStack outputContainer,
+                            int cookTime, float experience, boolean hasContainerDefinition, String group) {
         this.recipeId = Objects.requireNonNull(recipeId);
+        this.group = Objects.requireNonNull(group);
         this.ingredients = new ArrayList<>(ingredients);
         this.resultStack = resultStack.copy();
         this.outputContainer = outputContainer.copy();
@@ -38,8 +45,16 @@ public class CookingPotRecipe {
         return this.recipeId;
     }
 
+    public String getGroup() {
+        return group;
+    }
+
     public ItemStack getResultStack() {
         return this.resultStack.copy();
+    }
+
+    public ItemStack assemble(List<ItemStack> inputStacks) {
+        return getResultStack();
     }
 
     public ItemStack getOutputContainer() {
@@ -58,6 +73,37 @@ public class CookingPotRecipe {
         return this.hasContainerDefinition;
     }
 
+    public IngredientEntry[] matchIngredients(List<ItemStack> stacks) {
+        int occupied = 0;
+        for (ItemStack stack : stacks) {
+            if (!stack.isEmpty()) {
+                occupied++;
+            }
+        }
+        if (occupied != ingredients.size()) {
+            return null;
+        }
+        IngredientEntry[] matched = new IngredientEntry[stacks.size()];
+        return matchIngredient(stacks, matched, 0) ? matched : null;
+    }
+
+    private boolean matchIngredient(List<ItemStack> stacks, IngredientEntry[] matched, int index) {
+        if (index == ingredients.size()) {
+            return true;
+        }
+        IngredientEntry ingredient = ingredients.get(index);
+        for (int slot = 0; slot < stacks.size(); slot++) {
+            if (matched[slot] == null && ingredient.matches(stacks.get(slot))) {
+                matched[slot] = ingredient.resolve(stacks.get(slot));
+                if (matchIngredient(stacks, matched, index + 1)) {
+                    return true;
+                }
+                matched[slot] = null;
+            }
+        }
+        return false;
+    }
+
     public static final class IngredientEntry {
 
         private final Item item;
@@ -66,6 +112,7 @@ public class CookingPotRecipe {
         private final IngredientStackMatcher stackMatcher;
         private final IngredientRemainderProvider remainderProvider;
         private final List<ItemStack> displayStacks;
+        private final List<IngredientEntry> alternatives;
 
         private IngredientEntry(Item item, String oreDictName, int metadata) {
             this(item, oreDictName, metadata, null, null, null);
@@ -73,12 +120,19 @@ public class CookingPotRecipe {
 
         private IngredientEntry(Item item, String oreDictName, int metadata, IngredientStackMatcher stackMatcher,
                                 IngredientRemainderProvider remainderProvider, List<ItemStack> displayStacks) {
+            this(item, oreDictName, metadata, stackMatcher, remainderProvider, displayStacks, Collections.emptyList());
+        }
+
+        private IngredientEntry(Item item, String oreDictName, int metadata, IngredientStackMatcher stackMatcher,
+                                IngredientRemainderProvider remainderProvider, List<ItemStack> displayStacks,
+                                List<IngredientEntry> alternatives) {
             this.item = item;
             this.oreDictName = oreDictName;
             this.metadata = metadata;
             this.stackMatcher = stackMatcher;
             this.remainderProvider = remainderProvider;
             this.displayStacks = copyDisplayStacks(displayStacks);
+            this.alternatives = Collections.unmodifiableList(new ArrayList<>(alternatives));
         }
 
         public static IngredientEntry forItem(Item item) {
@@ -91,6 +145,17 @@ public class CookingPotRecipe {
 
         public static IngredientEntry forOreDict(String oreDictName) {
             return new IngredientEntry(null, Objects.requireNonNull(oreDictName), OreDictionary.WILDCARD_VALUE);
+        }
+
+        public static IngredientEntry forAlternatives(List<IngredientEntry> alternatives) {
+            if (alternatives == null || alternatives.isEmpty() || alternatives.contains(null)) {
+                throw new IllegalArgumentException("Ingredient alternatives must contain at least one valid entry");
+            }
+            return new IngredientEntry(null, null, OreDictionary.WILDCARD_VALUE, null, null, null, alternatives);
+        }
+
+        public List<IngredientEntry> getAlternatives() {
+            return alternatives;
         }
 
         public static IngredientEntry forCustom(IngredientStackMatcher stackMatcher,
@@ -112,8 +177,34 @@ public class CookingPotRecipe {
             return this.metadata;
         }
 
+        public IngredientStackMatcher getStackMatcher() {
+            return this.stackMatcher;
+        }
+
         public List<ItemStack> getDisplayStacks() {
+            if (!alternatives.isEmpty()) {
+                List<ItemStack> stacks = new ArrayList<>();
+                for (IngredientEntry alternative : alternatives) {
+                    if (alternative.item != null) {
+                        stacks.add(new ItemStack(alternative.item, 1, alternative.metadata));
+                    } else if (alternative.oreDictName != null) {
+                        stacks.addAll(OreDictionary.getOres(alternative.oreDictName));
+                    } else {
+                        stacks.addAll(alternative.getDisplayStacks());
+                    }
+                }
+                return copyDisplayStacks(stacks);
+            }
             return copyDisplayStacks(this.displayStacks);
+        }
+
+        private IngredientEntry resolve(ItemStack stack) {
+            for (IngredientEntry alternative : alternatives) {
+                if (alternative.matches(stack)) {
+                    return alternative.resolve(stack);
+                }
+            }
+            return this;
         }
 
         public boolean hasCustomRemainderProvider() {
@@ -131,6 +222,9 @@ public class CookingPotRecipe {
         public boolean matches(ItemStack stack) {
             if (stack.isEmpty()) {
                 return false;
+            }
+            if (!alternatives.isEmpty()) {
+                return alternatives.stream().anyMatch(alternative -> alternative.matches(stack));
             }
             if (this.stackMatcher != null) {
                 return this.stackMatcher.matches(stack);

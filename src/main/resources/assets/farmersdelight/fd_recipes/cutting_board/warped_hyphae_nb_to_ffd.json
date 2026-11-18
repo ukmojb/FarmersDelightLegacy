@@ -1,0 +1,24 @@
+{
+  "conditions": {
+    "items": [
+      "nb:warped_hyphae",
+      "farmers_future_delight:stripped_warped_hyphae"
+    ]
+  },
+  "ingredients": [
+    {
+      "item": "nb:warped_hyphae"
+    }
+  ],
+  "tool": "ore:toolAxe",
+  "result": [
+    {
+      "item": "farmers_future_delight:stripped_warped_hyphae",
+      "count": 1
+    },
+    {
+      "item": "farmersdelight:tree_bark",
+      "count": 1
+    }
+  ]
+}

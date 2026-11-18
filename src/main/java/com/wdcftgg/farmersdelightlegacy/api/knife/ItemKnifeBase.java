@@ -3,6 +3,7 @@ package com.wdcftgg.farmersdelightlegacy.api.knife;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
+import com.wdcftgg.farmersdelightlegacy.common.registry.BlockCategories;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockBush;
 import net.minecraft.block.BlockCrops;
@@ -24,50 +25,34 @@ import net.minecraft.world.World;
 
 import java.util.Set;
 
-/**
- * Base item class for Farmer's Delight-compatible knives.
- *
- * <p>Subclasses automatically implement {@link IKnifeItem}, receive the same harvest speed,
- * durability, enchantment, and attack attribute behavior as the built-in knives, and are recognized
- * by Farmer's Delight Legacy knife systems and JEI displays.</p>
- */
 public class ItemKnifeBase extends ItemSword implements IKnifeItem {
 
     private static final float webSpeed = 15.0F;
-    private static final float knifeSpeed = 8.0F;
     private static final Set<Enchantment> allowedEnchantments = Sets.newHashSet(
             Enchantments.SHARPNESS,
             Enchantments.SMITE,
             Enchantments.BANE_OF_ARTHROPODS,
             Enchantments.KNOCKBACK,
             Enchantments.FIRE_ASPECT,
-            Enchantments.LOOTING
+            Enchantments.LOOTING,
+            Enchantments.EFFICIENCY,
+            Enchantments.FORTUNE,
+            Enchantments.SILK_TOUCH
     );
-    private static final Set<Enchantment> deniedEnchantments = Sets.newHashSet(Enchantments.FORTUNE);
+    private static final Set<Enchantment> deniedEnchantments = Sets.newHashSet(Enchantments.SWEEPING);
     private final double attackDamage;
     private final double attackSpeed;
+    private final float miningSpeed;
 
-    /**
-     * Creates a knife item with the same default attack speed as Farmer's Delight Legacy knives.
-     *
-     * @param material the vanilla tool material used for durability, repair, and enchantability
-     * @param attackDamage the main-hand attack damage shown and applied by the knife
-     */
     public ItemKnifeBase(Item.ToolMaterial material, double attackDamage) {
         this(material, attackDamage, -2.0D);
     }
 
-    /**
-     * Creates a knife item with custom attack damage and attack speed.
-     *
-     * @param material the vanilla tool material used for durability, repair, and enchantability
-     * @param attackDamage the main-hand attack damage shown and applied by the knife
-     * @param attackSpeed the main-hand attack speed modifier shown and applied by the knife
-     */
     public ItemKnifeBase(Item.ToolMaterial material, double attackDamage, double attackSpeed) {
         super(material);
         this.attackDamage = attackDamage;
         this.attackSpeed = attackSpeed;
+        this.miningSpeed = material.getEfficiency();
     }
 
     @Override
@@ -83,7 +68,8 @@ public class ItemKnifeBase extends ItemSword implements IKnifeItem {
             return webSpeed;
         }
 
-        if (block instanceof BlockCrops
+        if (BlockCategories.contains("fdMineableKnife", state)
+                || block instanceof BlockCrops
                 || block instanceof BlockBush
                 || block == Blocks.MELON_BLOCK
                 || block == Blocks.PUMPKIN
@@ -94,11 +80,16 @@ public class ItemKnifeBase extends ItemSword implements IKnifeItem {
                 || material == Material.GOURD
                 || material == Material.CACTUS
                 || material == Material.CLOTH
+                || material == Material.CAKE
                 || material == Material.CARPET) {
-            return knifeSpeed;
+            return getKnifeMiningSpeed();
         }
 
         return super.getDestroySpeed(stack, state);
+    }
+
+    protected float getKnifeMiningSpeed() {
+        return miningSpeed;
     }
 
     @Override

@@ -28,5 +28,13 @@
     "recipes": [
       "farmersdelight:hanging_canvas_sign"
     ]
-  }
+  },
+  "conditions": [
+    {
+      "type": "farmersdelight:ingredients_available",
+      "ores": [
+        "fdIronChain"
+      ]
+    }
+  ]
 }

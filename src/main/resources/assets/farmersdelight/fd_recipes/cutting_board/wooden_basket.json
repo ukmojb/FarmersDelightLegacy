@@ -1,0 +1,24 @@
+{
+  "ingredients": [
+    "farmersdelight:wooden_basket"
+  ],
+  "tool": [
+    {
+      "type": "farmersdelight:item_ability",
+      "action": "axe_dig"
+    },
+    {
+      "tag": "minecraft:axes"
+    }
+  ],
+  "result": [
+    {
+      "item": "farmersdelight:canvas",
+      "count": 1
+    },
+    {
+      "item": "minecraft:stick",
+      "count": 1
+    }
+  ]
+}

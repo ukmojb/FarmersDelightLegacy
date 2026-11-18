@@ -1,15 +1,22 @@
 {
   "ingredients": [
-    "minecraft:cornflower"
+    "ore:fdCornflower"
   ],
   "tool": {
     "tag": "forge:tools/knives"
   },
   "result": [
     {
-      "item": "minecraft:dye",
-      "count": 2,
-      "data": 4
+      "item": "farmers_future_delight:blue_dye",
+      "count": 2
     }
-  ]
+  ],
+  "conditions": {
+    "ores": [
+      "fdCornflower"
+    ],
+    "items": [
+      "farmers_future_delight:blue_dye"
+    ]
+  }
 }

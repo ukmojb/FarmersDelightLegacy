@@ -1,14 +1,14 @@
 {
   "ingredients": [
-    "farmersdelight:rice",
+    "ore:cropRice",
     "ore:cropOnion",
     "minecraft:brown_mushroom",
-    "minecraft:potato",
-    "ore:cropSweetBerry",
-    "ore:listAllveggie"
+    "ore:cropPotato",
+    "ore:listAllberry",
+    "ore:fdCookingVegetable"
   ],
   "cookingtime": 400,
-  "experience": 2.0,
+  "experience": 2,
   "result": {
     "item": "farmersdelight:stuffed_pumpkin_block",
     "count": 1
@@ -16,5 +16,13 @@
   "container": {
     "item": "minecraft:pumpkin",
     "count": 1
+  },
+  "conditions": {
+    "ores": [
+      "listAllberry"
+    ],
+    "items": [
+      "farmersdelight:stuffed_pumpkin_block"
+    ]
   }
 }

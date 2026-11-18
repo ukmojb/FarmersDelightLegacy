@@ -5,17 +5,21 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.wdcftgg.farmersdelightlegacy.FarmersDelightLegacy;
 import com.wdcftgg.farmersdelightlegacy.common.recipe.CookingPotRecipe;
+import com.wdcftgg.farmersdelightlegacy.common.recipe.condition.IngredientsAvailableCondition;
 import com.wdcftgg.farmersdelightlegacy.common.util.RecipeResourceScanner;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fml.common.registry.ForgeRegistries;
+import net.minecraftforge.common.crafting.CraftingHelper;
+import net.minecraftforge.common.crafting.JsonContext;
 import net.minecraftforge.oredict.OreDictionary;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Predicate;
 
 public final class CookingPotRecipeManager {
 
@@ -23,6 +27,7 @@ public final class CookingPotRecipeManager {
 
     private static final List<CookingPotRecipe> RECIPES = new ArrayList<>();
     private static final Map<String, CookingPotRecipe> SCRIPT_RECIPES = new LinkedHashMap<>();
+    private static final List<Predicate<CookingPotRecipe>> REMOVED_BUILT_IN_RECIPES = new ArrayList<>();
     private static boolean loaded;
 
     private CookingPotRecipeManager() {
@@ -31,7 +36,7 @@ public final class CookingPotRecipeManager {
     public static CookingPotRecipe findRecipe(List<ItemStack> inputStacks) {
         ensureLoaded();
         for (CookingPotRecipe recipe : getAllRecipes()) {
-            if (matches(recipe, inputStacks)) {
+            if (recipe.matchIngredients(inputStacks) != null) {
                 return recipe;
             }
         }
@@ -41,6 +46,19 @@ public final class CookingPotRecipeManager {
     public static List<CookingPotRecipe> getRecipes() {
         ensureLoaded();
         return getAllRecipes();
+    }
+
+    public static boolean registerRecipe(CookingPotRecipe recipe) {
+        if (recipe == null || recipe.getRecipeId().isEmpty() || recipe.getIngredients().isEmpty()
+                || recipe.getIngredients().size() > 6 || recipe.getIngredients().contains(null)
+                || recipe.getResultStack().isEmpty()) {
+            FarmersDelightLegacy.LOGGER.error("Invalid cooking recipe: expected an ID, 1 to 6 ingredients and a nonempty display output");
+            return false;
+        }
+        synchronized (SCRIPT_RECIPES) {
+            SCRIPT_RECIPES.put(recipe.getRecipeId(), recipe);
+        }
+        return true;
     }
 
     public static boolean registerScriptRecipe(String key, String[] ingredientPaths, ItemStack resultStack, ItemStack outputContainer,
@@ -71,31 +89,27 @@ public final class CookingPotRecipeManager {
             ingredients.add(CookingPotRecipe.IngredientEntry.forItem(parsedItemToken.item, parsedItemToken.metadata));
         }
 
-        if (ingredients.isEmpty()) {
-            return false;
-        }
-
-        CookingPotRecipe recipe = new CookingPotRecipe(key, ingredients, resultStack, outputContainer,
-                Math.max(1, cookTime), Math.max(0.0F, experience), hasContainerDefinition);
-        synchronized (SCRIPT_RECIPES) {
-            SCRIPT_RECIPES.put(key, recipe);
-        }
-        return true;
+        return registerScriptRecipe(key, ingredients, resultStack, outputContainer, cookTime, experience, hasContainerDefinition);
     }
 
     public static boolean registerScriptRecipe(String key, List<CookingPotRecipe.IngredientEntry> ingredients,
                                                ItemStack resultStack, ItemStack outputContainer,
                                                int cookTime, float experience, boolean hasContainerDefinition) {
-        if (key == null || key.isEmpty() || ingredients == null || ingredients.isEmpty() || resultStack.isEmpty()) {
+        return registerScriptRecipe(key, ingredients, resultStack, outputContainer, cookTime, experience, hasContainerDefinition, "");
+    }
+
+    public static boolean registerScriptRecipe(String key, List<CookingPotRecipe.IngredientEntry> ingredients,
+                                               ItemStack resultStack, ItemStack outputContainer,
+                                               int cookTime, float experience, boolean hasContainerDefinition, String group) {
+        if (key == null || key.isEmpty() || ingredients == null || ingredients.isEmpty()
+                || ingredients.size() > 6 || ingredients.contains(null) || resultStack.isEmpty() || group == null) {
+            FarmersDelightLegacy.LOGGER.error("Invalid cooking recipe {}: expected 1 to 6 ingredients and a nonempty output", key);
             return false;
         }
 
         CookingPotRecipe recipe = new CookingPotRecipe(key, ingredients, resultStack, outputContainer,
-                Math.max(1, cookTime), Math.max(0.0F, experience), hasContainerDefinition);
-        synchronized (SCRIPT_RECIPES) {
-            SCRIPT_RECIPES.put(key, recipe);
-        }
-        return true;
+                Math.max(1, cookTime), Math.max(0.0F, experience), hasContainerDefinition, group);
+        return registerRecipe(recipe);
     }
 
     public static int removeRecipesByOutput(ItemStack outputStack) {
@@ -103,7 +117,8 @@ public final class CookingPotRecipeManager {
         if (outputStack.isEmpty()) {
             return 0;
         }
-
+        ItemStack removedOutput = outputStack.copy();
+        REMOVED_BUILT_IN_RECIPES.add(recipe -> matchesOutput(recipe, removedOutput));
         int removedCount = 0;
         synchronized (SCRIPT_RECIPES) {
             java.util.Iterator<Map.Entry<String, CookingPotRecipe>> iterator = SCRIPT_RECIPES.entrySet().iterator();
@@ -135,35 +150,32 @@ public final class CookingPotRecipeManager {
         }
     }
 
-    private static boolean matches(CookingPotRecipe recipe, List<ItemStack> inputStacks) {
-        List<CookingPotRecipe.IngredientEntry> expected = new ArrayList<>(recipe.getIngredients());
+    public static boolean removeRecipe(String key) {
+        ensureLoaded();
+        REMOVED_BUILT_IN_RECIPES.add(recipe -> recipe.getRecipeId().equals(key));
+        boolean removed = unregisterScriptRecipe(key);
+        return RECIPES.removeIf(recipe -> recipe.getRecipeId().equals(key)) || removed;
+    }
 
-        for (ItemStack inputStack : inputStacks) {
-            if (inputStack.isEmpty()) {
-                continue;
-            }
-
-            int matchedIndex = -1;
-            for (int index = 0; index < expected.size(); index++) {
-                if (expected.get(index).matches(inputStack)) {
-                    matchedIndex = index;
-                    break;
-                }
-            }
-            if (matchedIndex < 0) {
-                return false;
-            }
-            expected.remove(matchedIndex);
+    public static int removeRecipes(java.util.function.Predicate<CookingPotRecipe> predicate) {
+        ensureLoaded();
+        REMOVED_BUILT_IN_RECIPES.add(predicate);
+        int before = RECIPES.size() + SCRIPT_RECIPES.size();
+        RECIPES.removeIf(predicate);
+        synchronized (SCRIPT_RECIPES) {
+            SCRIPT_RECIPES.values().removeIf(predicate);
         }
-
-        return expected.isEmpty();
+        return before - RECIPES.size() - SCRIPT_RECIPES.size();
     }
 
     private static void ensureLoaded() {
         if (loaded) {
             return;
         }
+        reloadBuiltInRecipes();
+    }
 
+    public static void reloadBuiltInRecipes() {
         RECIPES.clear();
         loadJsonRecipes();
         loaded = true;
@@ -172,6 +184,10 @@ public final class CookingPotRecipeManager {
     private static void loadJsonRecipes() {
         for (RecipeResourceScanner.RecipeJsonResource recipeResource : RecipeResourceScanner.scan("cooking_pot")) {
             JsonObject recipeJson = recipeResource.getJsonObject();
+            if (recipeJson.has("conditions")
+                    && !IngredientsAvailableCondition.matches(recipeJson.getAsJsonObject("conditions"))) {
+                continue;
+            }
             String sourceModId = recipeResource.getModId();
             JsonArray ingredientsJson = recipeJson.getAsJsonArray("ingredients");
             JsonObject resultJson = recipeJson.getAsJsonObject("result");
@@ -179,23 +195,18 @@ public final class CookingPotRecipeManager {
                 continue;
             }
 
-            List<String> ingredients = new ArrayList<>();
+            List<CookingPotRecipe.IngredientEntry> ingredients = new ArrayList<>();
             for (JsonElement ingredientElement : ingredientsJson) {
-                if (ingredientElement.isJsonPrimitive()) {
-                    ingredients.add(ingredientElement.getAsString());
-                    continue;
+                CookingPotRecipe.IngredientEntry ingredient = readIngredient(ingredientElement, sourceModId);
+                if (ingredient == null) {
+                    FarmersDelightLegacy.LOGGER.error("Invalid cooking ingredient in {}: {}", recipeResource.getRecipeId(), ingredientElement);
+                    ingredients.clear();
+                    break;
                 }
-                if (!ingredientElement.isJsonObject()) {
-                    continue;
-                }
-
-                JsonObject ingredientObject = ingredientElement.getAsJsonObject();
-                if (ingredientObject.has("item")) {
-                    ingredients.add(composeItemToken(
-                            ingredientObject.get("item").getAsString(),
-                            readMetadata(ingredientObject),
-                            ingredientObject.has("data")));
-                }
+                ingredients.add(ingredient);
+            }
+            if (ingredients.isEmpty() || ingredients.size() > 6) {
+                continue;
             }
 
             String resultItem = resultJson.has("item") ? resultJson.get("item").getAsString() : "";
@@ -213,50 +224,69 @@ public final class CookingPotRecipeManager {
                 if (!containerItemPath.isEmpty()) {
                     outputContainer = stackOf(containerItemPath, containerCount, readMetadata(containerJson),
                             containerJson.has("data"), sourceModId);
+                    if (!outputContainer.isEmpty() && containerJson.has("nbt")) {
+                        outputContainer = CraftingHelper.getItemStack(containerJson, new JsonContext(sourceModId));
+                    }
                 }
             }
             if (!resultItem.isEmpty()) {
-                addRecipe(ingredients.toArray(new String[0]),
-                        stackOf(resultItem, Math.max(1, resultCount), resultMetadata, hasResultMetadata, sourceModId),
+                ItemStack result = stackOf(resultItem, Math.max(1, resultCount), resultMetadata, hasResultMetadata, sourceModId);
+                if (!result.isEmpty() && resultJson.has("nbt")) {
+                    result = CraftingHelper.getItemStack(resultJson, new JsonContext(sourceModId));
+                }
+                addRecipe(ingredients,
+                        result,
                         outputContainer,
-                        cookTime, experience, hasContainerDefinition, recipeResource.getRecipeId(), sourceModId);
+                        cookTime, experience, hasContainerDefinition, recipeResource.getRecipeId(),
+                        recipeJson.has("group") ? recipeJson.get("group").getAsString() : "");
             }
         }
     }
 
-    private static void addRecipe(String[] ingredientPaths, ItemStack resultStack, ItemStack outputContainer,
-                                  int cookTime, float experience, boolean hasContainerDefinition, String recipeId, String defaultNamespace) {
+    private static void addRecipe(List<CookingPotRecipe.IngredientEntry> ingredients, ItemStack resultStack, ItemStack outputContainer,
+                                  int cookTime, float experience, boolean hasContainerDefinition, String recipeId, String group) {
         if (resultStack.isEmpty()) {
             return;
         }
 
-        List<CookingPotRecipe.IngredientEntry> ingredients = new ArrayList<>();
-        for (String ingredientPath : ingredientPaths) {
-            if (ingredientPath == null || ingredientPath.isEmpty()) {
-                return;
-            }
-
-            if (ingredientPath.startsWith("ore:")) {
-                String oreDictName = ingredientPath.substring(4);
-                if (oreDictName.isEmpty()) {
-                    return;
-                }
-                ingredients.add(CookingPotRecipe.IngredientEntry.forOreDict(oreDictName));
-                continue;
-            }
-
-            Item ingredientItem = itemOf(ingredientPath, defaultNamespace);
-            if (ingredientItem == null && parseItemToken(ingredientPath, defaultNamespace) == null) {
-                return;
-            }
-
-            ParsedItemToken parsedItemToken = parseItemToken(ingredientPath, defaultNamespace);
-            if (parsedItemToken == null || parsedItemToken.item == null) {
-                return;
-            }
-            ingredients.add(CookingPotRecipe.IngredientEntry.forItem(parsedItemToken.item, parsedItemToken.metadata));
+        CookingPotRecipe recipe = new CookingPotRecipe(recipeId, ingredients, resultStack, outputContainer, cookTime, experience, hasContainerDefinition, group);
+        if (REMOVED_BUILT_IN_RECIPES.stream().noneMatch(predicate -> predicate.test(recipe))) {
+            RECIPES.add(recipe);
         }
-        RECIPES.add(new CookingPotRecipe(recipeId, ingredients, resultStack, outputContainer, cookTime, experience, hasContainerDefinition));
+    }
+
+    private static CookingPotRecipe.IngredientEntry readIngredient(JsonElement json, String namespace) {
+        if (json.isJsonArray()) {
+            List<CookingPotRecipe.IngredientEntry> alternatives = new ArrayList<>();
+            for (JsonElement entry : json.getAsJsonArray()) {
+                CookingPotRecipe.IngredientEntry ingredient = readIngredient(entry, namespace);
+                if (ingredient == null) {
+                    return null;
+                }
+                alternatives.add(ingredient);
+            }
+            return alternatives.isEmpty() ? null : CookingPotRecipe.IngredientEntry.forAlternatives(alternatives);
+        }
+        String token;
+        if (json.isJsonPrimitive() && json.getAsJsonPrimitive().isString()) {
+            token = json.getAsString();
+        } else if (json.isJsonObject()) {
+            JsonObject object = json.getAsJsonObject();
+            if (object.has("ore")) {
+                token = "ore:" + object.get("ore").getAsString();
+            } else if (object.has("item")) {
+                token = composeItemToken(object.get("item").getAsString(), readMetadata(object), object.has("data"));
+            } else {
+                return null;
+            }
+        } else {
+            return null;
+        }
+        if (token.startsWith("ore:")) {
+            return token.length() > 4 ? CookingPotRecipe.IngredientEntry.forOreDict(token.substring(4)) : null;
+        }
+        ParsedItemToken parsed = parseItemToken(token, namespace);
+        return parsed == null ? null : CookingPotRecipe.IngredientEntry.forItem(parsed.item, parsed.metadata);
     }
 
     private static boolean matchesOutput(CookingPotRecipe recipe, ItemStack outputStack) {
@@ -323,7 +353,8 @@ public final class CookingPotRecipeManager {
             } else {
                 try {
                     metadata = Math.max(0, Integer.parseInt(metadataToken));
-                } catch (NumberFormatException ignored) {
+                } catch (NumberFormatException exception) {
+                    FarmersDelightLegacy.LOGGER.error("Invalid cooking ingredient metadata: {}", token, exception);
                     return null;
                 }
             }
@@ -341,7 +372,11 @@ public final class CookingPotRecipeManager {
         synchronized (SCRIPT_RECIPES) {
             result.addAll(SCRIPT_RECIPES.values());
         }
-        result.addAll(RECIPES);
+        for (CookingPotRecipe recipe : RECIPES) {
+            if (!SCRIPT_RECIPES.containsKey(recipe.getRecipeId())) {
+                result.add(recipe);
+            }
+        }
         return result;
     }
 
