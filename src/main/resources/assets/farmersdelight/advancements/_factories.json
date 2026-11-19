@@ -1,0 +1,5 @@
+{
+  "conditions": {
+    "ingredients_available": "com.wdcftgg.farmersdelightlegacy.common.recipe.condition.IngredientsAvailableCondition"
+  }
+}

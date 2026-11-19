@@ -2,9 +2,7 @@ package com.wdcftgg.farmersdelightlegacy.common.network;
 
 import com.wdcftgg.farmersdelightlegacy.client.particle.ParticleStar;
 import io.netty.buffer.ByteBuf;
-import net.minecraft.client.Minecraft;
 import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.world.World;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
@@ -52,17 +50,7 @@ public final class PacketStarParticles implements IMessage {
     public static final class Handler implements IMessageHandler<PacketStarParticles, IMessage> {
         @Override
         public IMessage onMessage(PacketStarParticles message, MessageContext context) {
-            Minecraft.getMinecraft().addScheduledTask(() -> {
-                World world = Minecraft.getMinecraft().world;
-                if (world != null) {
-                    for (int i = 0; i < 5; i++) {
-                        ParticleStar.spawn(world,
-                                message.x + (world.rand.nextDouble() * 2.0D - 1.0D) * message.width,
-                                message.y + world.rand.nextDouble() * message.height + 0.5D,
-                                message.z + (world.rand.nextDouble() * 2.0D - 1.0D) * message.width);
-                    }
-                }
-            });
+            ParticleStar.scheduleBurst(message.x, message.y, message.z, message.width, message.height);
             return null;
         }
     }

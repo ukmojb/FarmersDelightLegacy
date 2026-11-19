@@ -41,6 +41,21 @@ public final class ParticleStar extends Particle {
         Minecraft.getMinecraft().effectRenderer.addEffect(new ParticleStar(world, x, y, z));
     }
 
+    public static void scheduleBurst(double x, double y, double z, float width, float height) {
+        Minecraft client = Minecraft.getMinecraft();
+        client.addScheduledTask(() -> {
+            World world = client.world;
+            if (world == null) {
+                return;
+            }
+            for (int i = 0; i < 5; i++) {
+                spawn(world, x + (world.rand.nextDouble() * 2.0D - 1.0D) * width,
+                        y + world.rand.nextDouble() * height + 0.5D,
+                        z + (world.rand.nextDouble() * 2.0D - 1.0D) * width);
+            }
+        });
+    }
+
     @Override
     public void renderParticle(BufferBuilder buffer, Entity viewer, float partialTicks,
                                float rotationX, float rotationZ, float rotationYZ, float rotationXY, float rotationXZ) {
